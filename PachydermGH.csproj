@@ -49,6 +49,7 @@
     </Reference>
     <Reference Include="GH_IO">
       <HintPath>..\..\..\..\..\Program Files\Common Files\McNeel\Rhinoceros\5.0\Plug-ins\Grasshopper (b45a29b1-4343-4035-989e-044e8580d9cf)\0.9.75.0\GH_IO.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Grasshopper">
       <HintPath>..\..\..\..\..\Program Files\Common Files\McNeel\Rhinoceros\5.0\Plug-ins\Grasshopper (b45a29b1-4343-4035-989e-044e8580d9cf)\0.9.75.0\Grasshopper.dll</HintPath>
@@ -57,6 +58,10 @@
     <Reference Include="Hare, Version=0.0.0.5, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Resources\Hare.dll</HintPath>
+    </Reference>
+    <Reference Include="MathNet.Numerics, Version=3.7.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\MathNet.Numerics.3.7.0\lib\net40\MathNet.Numerics.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="NAudio, Version=1.5.4.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -121,6 +126,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Resources\CLF_Read.dll" />
   </ItemGroup>
   <ItemGroup>
@@ -157,10 +163,16 @@
   -->
   <PropertyGroup>
     <PostBuildEvent>Copy "$(TargetPath)" "$(TargetDir)$(ProjectName).gha"
-Erase "$(TargetPath)"
-move /Y "$(TargetDir)$(ProjectName).gha" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\$(ProjectName).gha"
-move /Y "$(TargetDir)Pachyderm_Acoustic.dll" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\Pachyderm_Acoustic.dll"
-move /Y "$(TargetDir)Hare.dll" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\Hare.dll"</PostBuildEvent>
+Copy "$(SolutionDir)Resources\libfftw3-3.dll" "$(TargetDir)"
+
+copy /Y "$(TargetDir)$(ProjectName).gha" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\$(ProjectName).gha"
+copy /Y "$(TargetDir)Pachyderm_Acoustic.dll" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\Pachyderm_Acoustic.dll"
+copy /Y "$(TargetDir)Hare.dll" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\Hare.dll"
+copy /Y "$(TargetDir)NAudio.dll" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\NAudio.dll"
+copy /Y "$(TargetDir)ZedGraph.dll" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\ZedGraph.dll"
+copy /Y "$(TargetDir)fftwlib3-3.dll" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\fftwlib3-3.dll"
+copy /Y "$(TargetDir)CLF_Read.dll" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\CLF_Read.dll"
+copy /Y "$(TargetDir)MathNet.Numerics.dll" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\MathNet.Numerics.dll"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug32|AnyCPU' ">
     <StartArguments>
