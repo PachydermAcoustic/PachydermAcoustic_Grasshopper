@@ -70,8 +70,8 @@ namespace MyProject1
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Pachyderm_Acoustic.Environment.Polygon_Scene S = null;
-            DA.GetData<Pachyderm_Acoustic.Environment.Polygon_Scene>(0, ref S);
+            Pachyderm_Acoustic.Environment.Scene S = null;
+            DA.GetData<Pachyderm_Acoustic.Environment.Scene>(0, ref S);
             List<Pachyderm_Acoustic.Environment.Source> Src = new List<Pachyderm_Acoustic.Environment.Source>();
             DA.GetDataList<Pachyderm_Acoustic.Environment.Source>(1, Src);
             List<Vector3d> Dir = new List<Vector3d>();

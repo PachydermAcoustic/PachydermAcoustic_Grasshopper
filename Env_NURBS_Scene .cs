@@ -23,13 +23,13 @@ using Rhino.Geometry;
 
 namespace PachydermGH
 {
-    public class PolygonScene_Component : GH_Component
+    public class NURBSScene_Component : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
         /// </summary>
-        public PolygonScene_Component()
-            : base("Polygon Scene", "Poly Scene",
+        public NURBSScene_Component()
+            : base("NURBS Scene", "NURBS Scene",
                 "Constructs a scene with the existing geometry in the model and/or geometry from grasshopper definitions",
                 "Acoustics", "Scenes")
         {
@@ -91,7 +91,7 @@ namespace PachydermGH
                 }
             }
 
-            Pachyderm_Acoustic.Environment.Polygon_Scene PS = new Pachyderm_Acoustic.Environment.Polygon_Scene(RC_List, GG, GL, 20, 50, 1031.25, 0, false, true);
+            Pachyderm_Acoustic.Environment.RhCommon_Scene PS = new Pachyderm_Acoustic.Environment.RhCommon_Scene(RC_List, 20, 50, 1031.25, 0, false, true); //(RC_List, GG, GL, 20, 50, 1031.25, 0, false, true);
             PS.partition(VG);
 
             if (RC_List.Count != 0)
@@ -118,7 +118,7 @@ namespace PachydermGH
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("{d70814c5-95a6-41ef-acec-c602dcf6fb55}"); }
+            get { return new Guid("6EFF62BE-CE5E-45E0-93A7-AC9291B2E370"); }
         }
     }
 }

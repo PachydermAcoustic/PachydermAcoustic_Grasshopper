@@ -95,6 +95,7 @@
     <Compile Include="Aud_Objects.cs" />
     <Compile Include="Aud_Signal2List.cs" />
     <Compile Include="Aud_Spectrum2List.cs" />
+    <Compile Include="Env_NURBS_Scene .cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
