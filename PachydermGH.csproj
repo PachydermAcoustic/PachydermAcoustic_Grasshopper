@@ -91,6 +91,7 @@
     <Compile Include="Ana_SPL.cs" />
     <Compile Include="Aud_Signal2Chunks.cs" />
     <Compile Include="Aud_Fourier_Transform.cs" />
+    <Compile Include="Aud_OctFilter.cs" />
     <Compile Include="Aud_WaveFile_in.cs" />
     <Compile Include="Aud_Objects.cs" />
     <Compile Include="Aud_Signal2List.cs" />
