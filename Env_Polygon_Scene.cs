@@ -49,7 +49,7 @@ namespace PachydermGH
             pManager[2].Optional = true;
 
             Grasshopper.Kernel.Parameters.Param_Integer param = (pManager[3] as Grasshopper.Kernel.Parameters.Param_Integer);
-            if (param != null) param.SetPersistentData(15);
+            if (param != null) param.SetPersistentData(7);
         }
 
         /// <summary>
@@ -94,7 +94,11 @@ namespace PachydermGH
             Pachyderm_Acoustic.Environment.Polygon_Scene PS = new Pachyderm_Acoustic.Environment.Polygon_Scene(RC_List, GG, GL, 20, 50, 1031.25, 0, false, true);
             PS.partition(VG);
 
-            if (RC_List.Count != 0)
+            if (PS.hasnulllayers)
+            {
+                throw new Exception("Set materials to layer using the Materials tab in Pachyderm ror Rhino.");
+            }
+            else
             {
                 DA.SetData(0, PS);
             }
