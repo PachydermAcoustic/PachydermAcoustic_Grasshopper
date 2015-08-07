@@ -65,7 +65,7 @@ namespace PachydermGH
             List<double> SWL = new List<double>();
             DA.GetDataList<double>(1, SWL);
             bool pres = false;
-            DA.GetData<bool>(0, ref pres);
+            DA.GetData<bool>(2, ref pres);
 
             List<double> G = new List<double>();
             for (int i = 0; i < ETC.ChannelCount; i++)
