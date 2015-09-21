@@ -91,10 +91,17 @@ namespace PachydermGH
                 }
             }
 
+            if (RC_List.Count == 0 && GG.Count == 0) throw new Exception("Scene could jnot be constructed because there is no geometry...");
+            if (GG.Count != GL.Count) throw new Exception("Number of Grasshopper Objects(GG) and number of Rhino Layer(GL) indices must match (one layer per object)");
+
             Pachyderm_Acoustic.Environment.RhCommon_Scene PS = new Pachyderm_Acoustic.Environment.RhCommon_Scene(RC_List, 20, 50, 1031.25, 0, false, true); //(RC_List, GG, GL, 20, 50, 1031.25, 0, false, true);
             PS.partition(VG);
 
-            if (RC_List.Count != 0)
+            if (PS.hasnulllayers)
+            {
+                throw new Exception("Set materials to layer using the Materials tab in Pachyderm ror Rhino.");
+            }
+            else
             {
                 DA.SetData(0, PS);
             }

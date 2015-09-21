@@ -91,6 +91,9 @@ namespace PachydermGH
                 }
             }
 
+            if (RC_List.Count == 0 && GG.Count == 0) throw new Exception("Scene could jnot be constructed because there is no geometry...");
+            if (GG.Count != GL.Count) throw new Exception("Number of Grasshopper Objects(GG) and number of Rhino Layer(GL) indices must match (one layer per object)");
+
             Pachyderm_Acoustic.Environment.Polygon_Scene PS = new Pachyderm_Acoustic.Environment.Polygon_Scene(RC_List, GG, GL, 20, 50, 1031.25, 0, false, true);
             PS.partition(VG);
 

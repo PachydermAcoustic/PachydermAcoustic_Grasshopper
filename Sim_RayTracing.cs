@@ -62,7 +62,7 @@ namespace MyProject1
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Ray Tracing Data", "RT", "The pachyderm ray tracing data object (a receiver object)", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Ray Tracing Data", "Tr", "The pachyderm ray tracing data object (a receiver object)", GH_ParamAccess.list);
         }
 
         /// <summary>

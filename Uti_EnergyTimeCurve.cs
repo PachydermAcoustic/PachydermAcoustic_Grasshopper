@@ -43,7 +43,7 @@ namespace PachydermGH
         {
             pManager.AddGenericParameter("Direct Sound", "D", "Plug the Direct Sound in here.", GH_ParamAccess.item);
             pManager.AddGenericParameter("Image Source", "IS", "Plug the Image Source in here.", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Ray Tracing", "RT", "Plug the Receiver from Ray Tracing in here.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Ray Tracing", "Tr", "Plug the Receiver from Ray Tracing in here.", GH_ParamAccess.item);
             pManager.AddIntervalParameter("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", GH_ParamAccess.item);
 
             pManager[1].Optional = true;
