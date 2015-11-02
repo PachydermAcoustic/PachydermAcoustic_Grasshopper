@@ -17,11 +17,6 @@
 //'Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Grasshopper;
 
 namespace PachydermGH
 {

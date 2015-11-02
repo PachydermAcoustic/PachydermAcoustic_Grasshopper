@@ -19,9 +19,8 @@
 using System;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
-using Rhino.Geometry;
 
-namespace MyProject1
+namespace PachydermGH
 {
     public class Direct_Sound : GH_Component
     {

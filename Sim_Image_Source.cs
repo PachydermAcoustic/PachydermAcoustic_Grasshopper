@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 
-namespace MyProject1
+namespace PachydermGH
 {
     public class Image_Source : GH_Component
     {
