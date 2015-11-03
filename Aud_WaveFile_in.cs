@@ -48,8 +48,6 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            //pManager.AddIntegerParameter("Sampling Frequency", "Freq", "the number of samples per second in the wave file", GH_ParamAccess.item);
-            //pManager.AddIntegerParameter("Number of Channels", "Channels", "The number of channels in the file", GH_ParamAccess.item);
             pManager.AddGenericParameter("Signal Buffer", "Signal", "The signal held in the wave file", GH_ParamAccess.item);
         }
 

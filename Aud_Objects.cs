@@ -25,7 +25,7 @@ namespace PachydermGH
         int SamplingFrequency;
 
         public Audio_Signal()
-        { 
+        {
         }
 
         public Audio_Signal(float[] Aud_in, int Fs)
