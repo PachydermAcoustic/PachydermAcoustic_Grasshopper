@@ -31,7 +31,7 @@ namespace PachydermGH
         /// </summary>
         public SPLETC()
             : base("Sound Pressure Level", "SPL",
-                "Computes Sound Pressure Level from Enerty Time Curve",
+                "Computes Sound Pressure Level from Energy Time Curve",
                 "Acoustics", "Analysis")
         {
         }

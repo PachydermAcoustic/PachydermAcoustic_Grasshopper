@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 
@@ -43,7 +42,7 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddMeshParameter("Mesh", "M", "Mesh to colour vertices of", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Mesh", "M", "Mesh to colour vertices of. If Pach_Map_Receiver is used, a map mesh will be extracted from the receiver.", GH_ParamAccess.item);
             pManager.AddColourParameter("Colours", "C", "Colours to assign to vertices", GH_ParamAccess.list);
         }
 
@@ -61,7 +60,16 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            m = new Mesh();
             DA.GetData<Mesh>(0, ref m);
+            if (m.Faces.Count == 0)
+            {
+                Pachyderm_Acoustic.Mapping.PachMapReceiver map = new Pachyderm_Acoustic.Mapping.PachMapReceiver();
+                DA.GetData(0, ref map);
+                m = map.Map_Mesh;
+                if (m.Vertices.Count != 0) this.ClearRuntimeMessages();
+            }
+
             List<System.Drawing.Color> C = new List<System.Drawing.Color>();
             try
             {
@@ -73,12 +81,29 @@ namespace PachydermGH
                 DA.GetDataList<double[]>(1, Cd);
             }
 
-            if (m.Vertices.Count != C.Count) throw new Exception("Count of colours must equal count if vertices");
-
-            for (int i = 0; i < m.Vertices.Count; i++)
+            if (m.Vertices.Count == C.Count)
             {
-                m.VertexColors.SetColor(i, C[i]);
+                for (int i = 0; i < m.Vertices.Count; i++)
+                {
+                    m.VertexColors.SetColor(i, C[i]);
+                }
             }
+            else if (m.Faces.Count == C.Count)
+            {
+                Mesh m_faces = new Mesh();
+                for (int i = 0; i < m.Faces.Count; i++)
+                {
+                    Mesh face = new Mesh();
+                    Point3f a, b, c, d;
+                    m.Faces.GetFaceVertices(i, out a, out b, out c, out d);
+                    m_faces.Vertices.AddVertices(new Point3f[4] { a, b, c, d });
+                    m_faces.Faces.AddFace(i * 4 + 0, i * 4 + 1, i * 4 + 2, i * 4 + 3);
+                    for(int j = 0; j < 4; j++) m_faces.VertexColors.Add(C[i]);
+                }
+                m = m_faces;
+            }
+            else throw new Exception("Count of colours must equal to count of vertices");
+
             DA.SetData(0, m); 
         }
 

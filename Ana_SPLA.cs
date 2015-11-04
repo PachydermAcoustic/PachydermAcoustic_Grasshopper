@@ -17,19 +17,22 @@
 //'Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
 
 using System;
+using System.Collections.Generic;
+
 using Grasshopper.Kernel;
+using Rhino.Geometry;
 
 namespace PachydermGH
 {
-    public class Atmospheric_Properties : GH_Component
+    public class SPLAETC : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the MyComponent1 class.
+        /// Initializes a new instance of the MyComponent2 class.
         /// </summary>
-        public Atmospheric_Properties()
-            : base("Medium Properties", "MP",
-                "Acoustically significant properties of the vibrating medium.",
-                "Acoustics", "General")
+        public SPLAETC()
+            : base("A-weighted Sound Pressure Level", "SPL-A",
+                "Computes Sound Pressure Level (A) from Energy Time Curve",
+                "Acoustics", "Analysis")
         {
         }
 
@@ -38,9 +41,7 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddNumberParameter("Atmospheric Pressure", "AP", "Pressure of the medium. Default of 101.325 kPa (air)", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Temperature", "TC", "Temperature of the medium. Default of 20 degrees C (air)", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Relative Humidity", "H", "Humidity of the medium in percent. Default of 50% (air)", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Energy Time Curve", "ETC", "Energy Time Curve", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -48,7 +49,7 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Properties", "P", "Medium properties, including attenuation, sound speed, etc.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Sound Pressure Level(A)", "SPLA", "A-weighted Sound Pressure Level", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -57,13 +58,22 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            double Pa=0, Tc=0, Hr=0;
-            if (!DA.GetData<double>(0, ref Pa)) Pa = 1013.25;
-            if (!DA.GetData<double>(1, ref Tc)) Tc = 20;
-            if (!DA.GetData<double>(2, ref Hr)) Hr = 50;
+            Audio_Signal ETC = null;
+            DA.GetData<Audio_Signal>(0, ref ETC);
 
-            Pachyderm_Acoustic.Environment.Medium_Properties MP = new Pachyderm_Acoustic.Environment.Uniform_Medium(0, Pa/100, Tc+273.15, Hr, false);
-            DA.SetData(0, MP);
+            double SW = 0;
+            if (ETC.ChannelCount != 8) throw new Exception("For A-Weighted Sound Pressure Level, full spectrum data is needed. Please supply data for octaves 0 through 7.");
+
+            double[] AFactors = new double[8] { Math.Pow(10, (-26.2 / 10)), Math.Pow(10, (-16.1 / 10)), Math.Pow(10, (-8.6 / 10)), Math.Pow(10, (-3.2 / 10)), 1, Math.Pow(10, (1.2 / 10)), Math.Pow(10, (1 / 10)), Math.Pow(10, (-1.1 / 10)) };
+
+            for (int f = 0; f < ETC.ChannelCount; f++)
+            {
+                double s = 0;
+                for (int i = 0; i < ETC.Count; i++) s += ETC[f][i];
+                SW += s * AFactors[f];
+            }
+
+            DA.SetData(0, Pachyderm_Acoustic.Utilities.AcousticalMath.SPL_Intensity(SW));
         }
 
         /// <summary>
@@ -84,7 +94,7 @@ namespace PachydermGH
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("{2da451b8-b49d-44b6-af05-acbba45f365d}"); }
+            get { return new Guid("{C33A1F42-9EEC-4D7F-AB99-13C5CF0812B2}"); }
         }
     }
 }

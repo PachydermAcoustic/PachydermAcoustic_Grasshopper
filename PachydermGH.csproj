@@ -84,6 +84,7 @@
   <ItemGroup>
     <Compile Include="Ana_CenterTime.cs" />
     <Compile Include="Ana_EDT.cs" />
+    <Compile Include="Ana_SPLA.cs" />
     <Compile Include="Ana_Strength.cs" />
     <Compile Include="Ana_ITDG.cs" />
     <Compile Include="Ana_Deutlich.cs" />

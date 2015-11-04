@@ -48,6 +48,7 @@ namespace PachydermGH
 
             pManager[1].Optional = true;
             pManager[2].Optional = true;
+            pManager[3].Optional = true;
         }
 
         /// <summary>
@@ -70,7 +71,7 @@ namespace PachydermGH
             DA.GetData<Pachyderm_Acoustic.ImageSourceData>(1, ref IS);
             Pachyderm_Acoustic.Environment.Receiver_Bank Rec = null;
             DA.GetData<Pachyderm_Acoustic.Environment.Receiver_Bank>(2, ref Rec);
-            Interval Oct = new Interval();
+            Interval Oct = new Interval(0, 7);
             DA.GetData<Interval>(3, ref Oct);
 
             List<Audio_Signal> AS = new List<Audio_Signal>();
@@ -83,7 +84,7 @@ namespace PachydermGH
                     double[] ETC = Pachyderm_Acoustic.Utilities.AcousticalMath.ETCurve(D, IS, Rec, Rec.CutOffTime, Rec.SampleRate, o, r, false);
                     float[] ETCf = new float[ETC.Length];
                     for (int i = 0; i < ETC.Length; i++) ETCf[i] = (float)ETC[i];
-                    S[o] = ETCf;
+                    S[(int)(o - Oct.T0)] = ETCf;
                 }
                 AS.Add(new Audio_Signal(S, Rec.SampleRate));
             }
