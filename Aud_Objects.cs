@@ -17,6 +17,7 @@
 //'Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
 
 using System;
+using Grasshopper.Kernel.Types;
 
 namespace PachydermGH
 {
@@ -74,7 +75,14 @@ namespace PachydermGH
 
         public override Grasshopper.Kernel.Types.IGH_Goo Duplicate()
         {
-            throw new NotImplementedException();
+            //Audio_Signal ASdup = new Audio_Signal();
+            float[][] dup = new float[Value.Length][];
+            for (int i = 0; i < Value.Length; i++)
+            {
+                dup[i] = new float[Value[i].Length];
+                for (int j = 0; j < Value[i].Length; j++) dup[i][j] = Value[i][j];
+            }
+            return new Audio_Signal(dup, SampleFrequency);
         }
 
         public override bool IsValid
@@ -98,6 +106,20 @@ namespace PachydermGH
         public override bool CastFrom(object source)
         {
             return base.CastFrom(source);
+        }
+
+        public static Audio_Signal operator +(Audio_Signal AS1, Audio_Signal AS2)
+        {
+            if (AS1.Count != AS2.Count && AS1.ChannelCount != AS2.ChannelCount) throw new Exception("Audio Signals do not have the same number of channels or samples...");
+            Audio_Signal AS_new = AS1.Duplicate() as Audio_Signal;
+            for (int c = 0; c < AS1.ChannelCount; c++)
+            {
+                for(int s = 0; s < AS1.Count; s++)
+                {
+                    AS_new[c][s] += AS2[c][s];
+                }
+            }
+            return AS_new;
         }
 
         public override bool CastTo<Q>(ref Q target)
@@ -189,8 +211,8 @@ namespace PachydermGH
                 //else
                 //{
                     return base.CastTo<Q>(ref target);
-                //}
-            }
+            //}
+        }
 
         public int Length
         {

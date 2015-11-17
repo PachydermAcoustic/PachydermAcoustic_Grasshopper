@@ -18,7 +18,7 @@
 
 using System;
 using System.Collections.Generic;
-
+using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 
@@ -41,9 +41,9 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Direct Sound", "D", "Plug the Direct Sound in here.", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Image Source", "IS", "Plug the Image Source in here.", GH_ParamAccess.item);
-            pManager.AddGenericParameter("Ray Tracing", "Tr", "Plug the Receiver from Ray Tracing in here.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Direct Sound", "D", "Plug the Direct Sound in here.", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Image Source", "IS", "Plug the Image Source in here.", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Ray Tracing", "Tr", "Plug the Receiver from Ray Tracing in here.", GH_ParamAccess.list);
             pManager.AddIntervalParameter("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", GH_ParamAccess.item);
 
             pManager[1].Optional = true;
@@ -59,36 +59,67 @@ namespace PachydermGH
             pManager.AddGenericParameter("Energy-Time Curve", "ETC", "The energy-time-curve result of the simulation...", GH_ParamAccess.item);
         }
 
+        public override bool AppendMenuItems(ToolStripDropDown menu)
+        {
+            Menu_AppendItem(menu, "Sum all ETCs.", Combine_Click, true, Combine);
+            return base.AppendMenuItems(menu);
+        }
+
+        bool Combine = true;
+
+        private void Combine_Click(Object sender, EventArgs e)
+        {
+            Combine = !Combine;
+            ExpireSolution(true);
+        }
+
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Pachyderm_Acoustic.Direct_Sound D = null;
-            DA.GetData<Pachyderm_Acoustic.Direct_Sound>(0, ref D);
-            Pachyderm_Acoustic.ImageSourceData IS = null;
-            DA.GetData<Pachyderm_Acoustic.ImageSourceData>(1, ref IS);
-            Pachyderm_Acoustic.Environment.Receiver_Bank Rec = null;
-            DA.GetData<Pachyderm_Acoustic.Environment.Receiver_Bank>(2, ref Rec);
+            List<Pachyderm_Acoustic.Direct_Sound> D = new List<Pachyderm_Acoustic.Direct_Sound>();
+            DA.GetDataList<Pachyderm_Acoustic.Direct_Sound>(0, D);
+            List<Pachyderm_Acoustic.ImageSourceData> IS = new List<Pachyderm_Acoustic.ImageSourceData>();
+            DA.GetDataList<Pachyderm_Acoustic.ImageSourceData>(1, IS);
+            List<Pachyderm_Acoustic.Environment.Receiver_Bank> Rec = new List<Pachyderm_Acoustic.Environment.Receiver_Bank>();
+            DA.GetDataList<Pachyderm_Acoustic.Environment.Receiver_Bank>(2, Rec);
             Interval Oct = new Interval(0, 7);
             DA.GetData<Interval>(3, ref Oct);
 
-            List<Audio_Signal> AS = new List<Audio_Signal>();
-            for (int r = 0; r < Rec.Rec_List.Length; r++)
+            int max = Math.Max(D.Count, Rec.Count);
+            if (D.Count == 0) for(int i = 0; i < max; i++) D.Add(null);
+            if (IS.Count == 0) for (int i = 0; i < max; i++) IS.Add(null);
+            if (Rec.Count == 0) for (int i = 0; i < max; i++) Rec.Add(null);
+
+            List<Audio_Signal> AS_final = new List<Audio_Signal>();
+            for (int i = 0; i < max; i++)
             {
-                float[][] S = new float[(int)Math.Abs(Oct.T1 - Oct.T0 + 1)][];
-                    
-                for (int o = (int)Oct.T0; o <= Oct.T1; o++)
+                List<Audio_Signal> AS = new List<Audio_Signal>();
+                for (int r = 0; r < Rec[i].Rec_List.Length; r++)
                 {
-                    double[] ETC = Pachyderm_Acoustic.Utilities.AcousticalMath.ETCurve(D, IS, Rec, Rec.CutOffTime, Rec.SampleRate, o, r, false);
-                    float[] ETCf = new float[ETC.Length];
-                    for (int i = 0; i < ETC.Length; i++) ETCf[i] = (float)ETC[i];
-                    S[(int)(o - Oct.T0)] = ETCf;
+                    float[][] S = new float[(int)Math.Abs(Oct.T1 - Oct.T0 + 1)][];
+
+                    for (int o = (int)Oct.T0; o <= Oct.T1; o++)
+                    {
+                        double[] ETC = Pachyderm_Acoustic.Utilities.AcousticalMath.ETCurve(D[i], IS[i], Rec[i], Rec[i].CutOffTime, Rec[i].SampleRate, o, r, false);
+                        float[] ETCf = new float[ETC.Length];
+                        for (int j = 0; j < ETC.Length;j++) ETCf[i] = (float)ETC[j];
+                        S[(int)(o - Oct.T0)] = ETCf;
+                    }
+                    AS.Add(new Audio_Signal(S, Rec[0].SampleRate));
                 }
-                AS.Add(new Audio_Signal(S, Rec.SampleRate));
+                if (AS_final.Count == 0) AS_final.AddRange(AS);
+                else if (Combine)
+                {
+                    for (int r = 0; r < Rec[i].Rec_List.Length; r++)
+                    {
+                        AS_final[r] += AS[r];
+                    }
+                }
             }
-            DA.SetDataList(0, AS);
+            DA.SetDataList(0, AS_final);
         }
 
         /// <summary>

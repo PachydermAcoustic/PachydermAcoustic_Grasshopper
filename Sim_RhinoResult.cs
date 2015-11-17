@@ -87,38 +87,47 @@ namespace PachydermGH
         private void Hybrid_Click(Object sender, EventArgs e)
         {
             I = interface_selection.Pach_Hybrid_Method;
-            Params.Clear();
-            Grasshopper.Kernel.Parameters.Param_GenericObject D = new Grasshopper.Kernel.Parameters.Param_GenericObject();
-            D.Name = "Direct Sound Data";
-            D.NickName = "DS";
-            D.Description = "The pachyderm direct sound data";
-            D.Access = GH_ParamAccess.list;
-            Grasshopper.Kernel.Parameters.Param_GenericObject IS = new Grasshopper.Kernel.Parameters.Param_GenericObject();
-            IS.Name = "Image Source Data";
-            IS.NickName = "IS";
-            IS.Description = "The pachyderm image source data";
-            IS.Access = GH_ParamAccess.list;
-            Grasshopper.Kernel.Parameters.Param_GenericObject RT = new Grasshopper.Kernel.Parameters.Param_GenericObject();
-            RT.Name = "Ray Tracing Data";
-            RT.NickName = "RT";
-            RT.Description = "The pachyderm ray tracing data";
-            RT.Access = GH_ParamAccess.list;
-            Params.Output.Add(D);
-            Params.Output.Add(IS);
-            Params.Output.Add(RT);
+            //Params.Clear();
+            //Grasshopper.Kernel.Parameters.Param_GenericObject D = new Grasshopper.Kernel.Parameters.Param_GenericObject();
+            //D.Name = "Direct Sound Data";
+            //D.NickName = "DS";
+            //D.Description = "The pachyderm direct sound data";
+            //D.Access = GH_ParamAccess.list;
+            //Grasshopper.Kernel.Parameters.Param_GenericObject IS = new Grasshopper.Kernel.Parameters.Param_GenericObject();
+            //IS.Name = "Image Source Data";
+            //IS.NickName = "IS";
+            //IS.Description = "The pachyderm image source data";
+            //IS.Access = GH_ParamAccess.list;
+            //Grasshopper.Kernel.Parameters.Param_GenericObject RT = new Grasshopper.Kernel.Parameters.Param_GenericObject();
+            //RT.Name = "Ray Tracing Data";
+            //RT.NickName = "RT";
+            //RT.Description = "The pachyderm ray tracing data";
+            //RT.Access = GH_ParamAccess.list;
+
+            this.ClearData();
+            //Params.Output.Add(D);
+            //Params.Output.Add(IS);
+            //Params.Output.Add(RT);
+            //this.CollectData();
             ExpireSolution(true);
+            //this.ComputeData();
         }
 
         private void Mapping_Click(Object sender, EventArgs e)
         {
             I = interface_selection.Pach_Mapping_Method;
-            Params.Clear();
-            Grasshopper.Kernel.Parameters.Param_GenericObject RT = new Grasshopper.Kernel.Parameters.Param_GenericObject();
-            RT.Name = "Ray Tracing Data";
-            RT.NickName = "RT";
-            RT.Description = "The pachyderm ray tracing data";
-            RT.Access = GH_ParamAccess.list;
-            Params.Output.Add(RT);
+            //Params.Clear();
+            //Grasshopper.Kernel.Parameters.Param_GenericObject RT = new Grasshopper.Kernel.Parameters.Param_GenericObject();
+            //RT.Name = "Ray Tracing Data";
+            //RT.NickName = "RT";
+            //RT.Description = "The pachyderm ray tracing data";
+            //RT.Access = GH_ParamAccess.list;
+
+
+            this.ClearData();
+            //Params.Output.Add(RT);
+            //this.CreateAttributes();
+            //CollectData();
             ExpireSolution(true);
             //this.ComputeData();
         }
@@ -147,21 +156,26 @@ namespace PachydermGH
                 Hare.Geometry.Point[] SRC = new Hare.Geometry.Point[0];
                 Hare.Geometry.Point[] REC = new Hare.Geometry.Point[0];
                 Pachyderm_Acoustic.UI.Pach_Hybrid_Control.Instance.GetSims(ref SRC, ref REC, ref D, ref IS, ref RT);
-                DA.SetDataList(0, D);
-                DA.SetDataList(1, IS);
-                DA.SetDataList(2, RT);
+                if (RT.Length == 0) RT = new Pachyderm_Acoustic.Environment.Receiver_Bank[D.Length];
+                if (IS.Length == 0) IS = new Pachyderm_Acoustic.ImageSourceData[D.Length];
             }
             else if (I == interface_selection.Pach_Mapping_Method && Pachyderm_Acoustic.UI.Pach_Mapping_Control.Instance.Auralisation_Ready())
             {
                 Pachyderm_Acoustic.Mapping.PachMapReceiver[] PMR = new Pachyderm_Acoustic.Mapping.PachMapReceiver[0];
                 Pachyderm_Acoustic.UI.Pach_Mapping_Control.Instance.GetSims(ref PMR);
+                D = new Pachyderm_Acoustic.Direct_Sound[PMR.Length];
+                IS = new Pachyderm_Acoustic.ImageSourceData[PMR.Length];
                 RT = new Pachyderm_Acoustic.Environment.Receiver_Bank[PMR.Length];
                 for (int i = 0; i < PMR.Length; i++)
                 {
+                    D[i] = null;
+                    IS[i] = null;
                     RT[i] = PMR[i];
                 }
-                DA.SetDataList(0, RT);
             }
+            DA.SetDataList(0, null);
+            DA.SetDataList(1, null);
+            DA.SetDataList(2, RT);
             //else if(I == interface_selection.Pach_Numeric_TimeDomain && Pachyderm_Acoustic.UI.Pach_TD_Numeric_Control.HasData)
             //{
 
