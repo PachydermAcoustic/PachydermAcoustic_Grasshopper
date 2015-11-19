@@ -86,7 +86,7 @@ namespace PachydermGH
                 int W = 1;
                 do { W *= 2; } while (W < buffer.Count);
 
-                float[] SignalBuffer = buffer[0];
+                float[] SignalBuffer = buffer.toFloat(c);
 
                 //for (int i = 0; i < buffer.Count; i++) SignalBuffer[i] = buffer[i];
 

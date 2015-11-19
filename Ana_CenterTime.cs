@@ -62,7 +62,7 @@ namespace PachydermGH
             DA.GetData<int>(1, ref Cx);
 
             List<double> CT = new List<double>();
-            foreach (float[] f in ETC.Value)
+            foreach (double[] f in ETC.Value)
             {
                 double[] s = new double[f.Length];
                 int start = 0;

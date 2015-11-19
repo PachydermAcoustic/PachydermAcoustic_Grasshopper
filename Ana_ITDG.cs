@@ -62,7 +62,7 @@ namespace PachydermGH
             DA.GetData<Audio_Signal>(0, ref ETC);
 
             List<double> I = new List<double>();
-            foreach (float[] f in ETC.Value)
+            foreach (double[] f in ETC.Value)
             {
                 double[] s = new double[f.Length];
                 I.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.InitialTimeDelayGap(s));

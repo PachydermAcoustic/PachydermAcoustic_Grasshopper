@@ -21,7 +21,7 @@ using Grasshopper.Kernel.Types;
 
 namespace PachydermGH
 {
-    public class Audio_Signal:Grasshopper.Kernel.Types.GH_Goo<float[][]>
+    public class Audio_Signal:Grasshopper.Kernel.Types.GH_Goo<double[][]>
     {
         int SamplingFrequency;
 
@@ -32,21 +32,41 @@ namespace PachydermGH
         public Audio_Signal(float[] Aud_in, int Fs)
         {
             SamplingFrequency = Fs;
-            Value = new float[1][];
-            Value[0] = Aud_in;        
+            Value = new double[1][];
+            Value[0] = new double[Aud_in.Length];
+            for(int i = 0; i < Aud_in.Length; i++) Value[0][i] = (double)Aud_in[i];
+        }
+
+        public Audio_Signal(double[] Aud_in, int Fs)
+        {
+            SamplingFrequency = Fs;
+            Value = new double[1][];
+            Value[0] = Aud_in;
         }
 
         public Audio_Signal(float[][] Aud_in, int Fs)
         {
             SamplingFrequency = Fs;
+            base.Value = new double[Aud_in.Length][];
+            for (int i = 0; i < Aud_in.Length; i++) Value[i] = new double[Aud_in[i].Length];
+            for (int i = 0; i < Aud_in.Length; i++) for(int j = 0; j < Aud_in.Length; j++) base.Value[i][j] = (double)Aud_in[i][j];
+            //no jagged arrays allowed. Pad with zeros where necessary.
+            int length = 0;
+            foreach (float[] signal in Aud_in) if (signal.Length > length) length = signal.Length;
+            for (int i = 0; i < base.Value.Length; i++) if (this[i].Length < length) Array.Resize<double>(ref base.Value[i], length);
+        }
+
+        public Audio_Signal(double[][] Aud_in, int Fs)
+        {
+            SamplingFrequency = Fs;
             base.Value = Aud_in;
             //no jagged arrays allowed. Pad with zeros where necessary.
             int length = 0;
-            foreach (float[] signal in base.Value) if (signal.Length > length) length = signal.Length;
-            for (int i = 0; i < base.Value.Length; i++) if (this[i].Length < length) Array.Resize<float>(ref base.Value[i], length);
+            foreach (double[] signal in Aud_in) if (signal.Length > length) length = signal.Length;
+            for (int i = 0; i < base.Value.Length; i++) if (this[i].Length < length) Array.Resize<double>(ref base.Value[i], length);
         }
 
-        public float[] this[int channel]
+        public double[] this[int channel]
         {
             get
             {
@@ -56,6 +76,21 @@ namespace PachydermGH
             {
                 base.Value[channel] = value;
             }
+        }
+
+        public float[] toFloat(int c)
+        {
+            float[] ret = new float[Value[c].Length];
+            for (int i = 0; i < Value[c].Length; i++) ret[i] = (float)Value[c][i];
+            return ret;
+        }
+
+        public float[][] toFloat()
+        {
+            float[][] ret = new float[Value.Length][];
+            for (int i = 0; i < Value.Length; i++) ret[i] = new float[Value[i].Length];
+            for (int i = 0; i < Value.Length; i++) for (int j = 0; j < Value[i].Length; j++) ret[i][j] = (float)Value[i][j];
+            return ret;
         }
 
         public int SampleFrequency
@@ -76,10 +111,10 @@ namespace PachydermGH
         public override Grasshopper.Kernel.Types.IGH_Goo Duplicate()
         {
             //Audio_Signal ASdup = new Audio_Signal();
-            float[][] dup = new float[Value.Length][];
+            double[][] dup = new double[Value.Length][];
             for (int i = 0; i < Value.Length; i++)
             {
-                dup[i] = new float[Value[i].Length];
+                dup[i] = new double[Value[i].Length];
                 for (int j = 0; j < Value[i].Length; j++) dup[i][j] = Value[i][j];
             }
             return new Audio_Signal(dup, SampleFrequency);

@@ -99,14 +99,12 @@ namespace PachydermGH
                 List<Audio_Signal> AS = new List<Audio_Signal>();
                 for (int r = 0; r < Rec[i].Rec_List.Length; r++)
                 {
-                    float[][] S = new float[(int)Math.Abs(Oct.T1 - Oct.T0 + 1)][];
+                    double[][] S = new double[(int)Math.Abs(Oct.T1 - Oct.T0 + 1)][];
 
                     for (int o = (int)Oct.T0; o <= Oct.T1; o++)
                     {
                         double[] ETC = Pachyderm_Acoustic.Utilities.AcousticalMath.ETCurve(D[i], IS[i], Rec[i], Rec[i].CutOffTime, Rec[i].SampleRate, o, r, false);
-                        float[] ETCf = new float[ETC.Length];
-                        for (int j = 0; j < ETC.Length;j++) ETCf[i] = (float)ETC[j];
-                        S[(int)(o - Oct.T0)] = ETCf;
+                        S[(int)(o - Oct.T0)] = ETC;
                     }
                     AS.Add(new Audio_Signal(S, Rec[0].SampleRate));
                 }

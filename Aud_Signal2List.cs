@@ -72,9 +72,9 @@ namespace PachydermGH
             DA.GetData<Interval>(1, ref domain);
             DA.GetData<int>(2, ref chan);
 
-            float[] SignalBuffer = Buffer[chan];
+            double[] SignalBuffer = Buffer[chan];
 
-            List<float> signal = new List<float>();
+            List<double> signal = new List<double>();
             for (int i = (int)domain.Min; i < (int)domain.Max; i++) { signal.Add(SignalBuffer[i]); }
             //foreach (float s in SignalBuffer) signal.Add(s);
 

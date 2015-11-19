@@ -62,7 +62,7 @@ namespace PachydermGH
             DA.GetData<Audio_Signal>(0, ref ETC);
             
             List<double> EDT = new List<double>();
-            foreach (float[] f in ETC.Value)
+            foreach (double[] f in ETC.Value)
             {
                 double[] s = new double[f.Length];
                 for (int i = 0; i < f.Length; i++) s[i] += (double)f[i];
