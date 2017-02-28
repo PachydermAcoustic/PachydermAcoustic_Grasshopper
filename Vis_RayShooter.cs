@@ -91,11 +91,12 @@ namespace PachydermGH
                 
                 foreach (Vector3d vector in Dir)
                 {
-                    Point3d Startpt = Pt.Origin();
-                    Vector3d vct = new Vector3d(vector.X, vector.Y, vector.Z);
-                    vct.Unitize();
+                    Hare.Geometry.Point Startpt = Pt.Origin();
+                    Point3d RPT = new Point3d(Startpt.x, Startpt.y, Startpt.z);
+                    Hare.Geometry.Vector vct = new Hare.Geometry.Vector(vector.X, vector.Y, vector.Z);
+                    vct.Normalize();
                     Polyline poly = new Polyline();
-                    poly.Add(Startpt);
+                    poly.Add(RPT);
                     bool terminate = false;
 
                     for (int i = 0; i < bounces; i++)
@@ -103,16 +104,16 @@ namespace PachydermGH
                         double u, v;
                         int poly_id;
                         List<int> code;
-                        List<Point3d> X;
+                        List<Hare.Geometry.Point> X;
                         List<double> t;
 
-                        if (S.shoot(Startpt, vct, Rnd.Next(), out u, out v, out poly_id, out X, out t, out code)) 
+                        if (S.shoot(new Hare.Geometry.Ray(Startpt, vct, 0, Rnd.Next()), out u, out v, out poly_id, out X, out t, out code)) 
                         {
                             Startpt = X[0];
                             Hare.Geometry.Vector N = S.Normal(poly_id, u, v);
-                            Vector3d Local_N = new Vector3d(N.x, N.y, N.z);
-                            vct -= Local_N * Vector3d.Multiply(vct, Local_N) * 2;
-                            poly.Add(Startpt);
+                            //Vector3d Local_N = new Vector3d(N.x, N.y, N.z);
+                            vct -= N * Hare.Geometry.Hare_math.Dot(vct, N) * 2;
+                            poly.Add(Startpt.x, Startpt.y, Startpt.z);
                             foreach (Brep br in terminus)
                             {
                                 ComponentIndex c;
@@ -120,7 +121,7 @@ namespace PachydermGH
                                 double s, time;
                                 Vector3d Norm;
 
-                                terminate |= br.ClosestPoint(Startpt, out p, out c, out s, out time, 0.001, out Norm);
+                                terminate |= br.ClosestPoint(RPT, out p, out c, out s, out time, 0.001, out Norm);
                             }
                         }else{break;}
 
@@ -129,9 +130,9 @@ namespace PachydermGH
                     if (poly.Count > 0)
                     {
                         rays.Add(poly);
-                        Ends.Add(Startpt);
-                        double dist = poly.Length - (Pt.Origin() - Startpt).Length;
-                        times.Add(dist / S.Sound_speed(Pachyderm_Acoustic.Utilities.PachTools.RPttoHPt(Startpt)));
+                        Ends.Add(RPT);
+                        double dist = poly.Length - (Pt.Origin() - Startpt).Length();
+                        times.Add(dist / S.Sound_speed(Startpt));
                     }
                 }
 
@@ -149,9 +150,9 @@ namespace PachydermGH
         {
             get
             {
-                // You can add image files to your project resources and access them like this:
-                //return Resources.IconForThisComponent;
-                return null;
+                System.Drawing.Bitmap b = Properties.Resources.RayTracing;
+                b.MakeTransparent(System.Drawing.Color.White);
+                return b;
             }
         }
 

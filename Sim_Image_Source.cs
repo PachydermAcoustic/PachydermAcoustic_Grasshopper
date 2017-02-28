@@ -100,11 +100,26 @@ namespace PachydermGH
 
                 DA.SetData(0, IS);
                 List<Grasshopper.Kernel.Types.GH_Curve> cvs = new List<Grasshopper.Kernel.Types.GH_Curve>();
-                for (int i = 0; i < Rec.Count; i++)
-                {
-                    for (int j = 0; j < IS.Paths[i].Count; j++) cvs.Add(new Grasshopper.Kernel.Types.GH_Curve(IS.Paths[i][j].PolyLine[0].ToNurbsCurve()));
-                }
 
+                if (IS.Paths.Length > 0)
+                {
+                    for (int i = 0; i < Rec.Count; i++)
+                    {
+                        foreach (Pachyderm_Acoustic.Deterministic_Reflection R in IS.Paths[i])
+                        {
+                            Polyline[] path = new Polyline[R.Path.Length];
+                            for (int j = 0; j < R.Path.Length; j++)
+                            {
+                                path[j] = new Polyline();
+                                foreach (Hare.Geometry.Point pt in R.Path[j])
+                                {
+                                    path[j].Add(pt.x, pt.y, pt.z);
+                                }
+                                for (int k = 0; k < path.Length; k++) cvs.Add(new Grasshopper.Kernel.Types.GH_Curve(path[k].ToNurbsCurve()));
+                            }
+                        }
+                    }
+                }
                 DA.SetDataList(2, cvs);
             }
         }
@@ -117,9 +132,9 @@ namespace PachydermGH
         {
             get
             {
-                // You can add image files to your project resources and access them like this:
-                //return Resources.IconForThisComponent;
-                return null;
+                System.Drawing.Bitmap b = Properties.Resources.ImageSource;
+                b.MakeTransparent(System.Drawing.Color.White);
+                return b;
             }
         }
 

@@ -20,8 +20,6 @@ using System;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using FFTWSharp;
-using System.Runtime.InteropServices;
 
 namespace PachydermGH
 {
@@ -89,9 +87,9 @@ namespace PachydermGH
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
-                return null;
+                System.Drawing.Bitmap b = Properties.Resources.SignaltoList;
+                b.MakeTransparent(System.Drawing.Color.White);
+                return b;
             }
         }
 

@@ -60,8 +60,7 @@ namespace PachydermGH
         {
             Audio_Signal ETC = null;
             DA.GetData<Audio_Signal>(0, ref ETC);
-            int Dx = 30;
-            DA.GetData<int>(1, ref Dx);
+            int Dx = 50;
 
             List<double> D = new List<double>();
             foreach (double[] f in ETC.Value)
@@ -73,7 +72,7 @@ namespace PachydermGH
                     s[i] += (double)f[i];
                     if (start == 0) if (s[i] != 0) start = i;
                 }
-                D.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Definition(s, ETC.SampleFrequency, Dx/1000, (double)start/(double)ETC.SampleFrequency, false));
+                D.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Definition(s, ETC.SampleFrequency, Dx/1000.0, (double)start/(double)ETC.SampleFrequency, false));
             }
 
             DA.SetDataList(0, D);
@@ -86,9 +85,9 @@ namespace PachydermGH
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
-                return null;
+                System.Drawing.Bitmap b = Properties.Resources.Definition;
+                b.MakeTransparent(System.Drawing.Color.White);
+                return b;
             }
         }
 

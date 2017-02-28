@@ -161,7 +161,7 @@ namespace PachydermGH
             }
             else if (I == interface_selection.Pach_Mapping_Method && Pachyderm_Acoustic.UI.Pach_Mapping_Control.Instance.Auralisation_Ready())
             {
-                Pachyderm_Acoustic.Mapping.PachMapReceiver[] PMR = new Pachyderm_Acoustic.Mapping.PachMapReceiver[0];
+                Pachyderm_Acoustic.PachMapReceiver[] PMR = new Pachyderm_Acoustic.PachMapReceiver[0];
                 Pachyderm_Acoustic.UI.Pach_Mapping_Control.Instance.GetSims(ref PMR);
                 D = new Pachyderm_Acoustic.Direct_Sound[PMR.Length];
                 IS = new Pachyderm_Acoustic.ImageSourceData[PMR.Length];
@@ -203,7 +203,7 @@ namespace PachydermGH
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("{7DE02523-EDD5-4680-A72F-F49616D5976D}"); }
+            get { return new Guid("{900E0EF8-E7B5-4D36-B574-3A9BC98A7550}"); }
         }
     }
 }

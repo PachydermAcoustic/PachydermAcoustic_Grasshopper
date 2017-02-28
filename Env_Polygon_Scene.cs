@@ -83,23 +83,39 @@ namespace PachydermGH
             settings.VisibleFilter = true;
             settings.ObjectTypeFilter = Rhino.DocObjects.ObjectType.Brep & Rhino.DocObjects.ObjectType.Surface & Rhino.DocObjects.ObjectType.Extrusion;
             List<Rhino.DocObjects.RhinoObject> RC_List = new List<Rhino.DocObjects.RhinoObject>();
-            foreach (Rhino.DocObjects.RhinoObject RHobj in Rhino.RhinoDoc.ActiveDoc.Objects.GetObjectList(settings))
+
+            if (RG)
             {
-                if (RHobj.ObjectType == Rhino.DocObjects.ObjectType.Brep || RHobj.ObjectType == Rhino.DocObjects.ObjectType.Surface || RHobj.ObjectType == Rhino.DocObjects.ObjectType.Extrusion)
+                foreach (Rhino.DocObjects.RhinoObject RHobj in Rhino.RhinoDoc.ActiveDoc.Objects.GetObjectList(settings))
                 {
-                    RC_List.Add(RHobj);
+                    if (RHobj.ObjectType == Rhino.DocObjects.ObjectType.Brep || RHobj.ObjectType == Rhino.DocObjects.ObjectType.Surface || RHobj.ObjectType == Rhino.DocObjects.ObjectType.Extrusion)
+                    {
+                        RC_List.Add(RHobj);
+                    }
                 }
             }
+            else if (GG.Count == 0)
+            {
+                return;
+            }
 
-            if (RC_List.Count == 0 && GG.Count == 0) throw new Exception("Scene could jnot be constructed because there is no geometry...");
+            if (RC_List.Count == 0 && GG.Count == 0) throw new Exception("Scene could not be constructed because there is no geometry...");
             if (GG.Count != GL.Count) throw new Exception("Number of Grasshopper Objects(GG) and number of Rhino Layer(GL) indices must match (one layer per object)");
 
-            Pachyderm_Acoustic.Environment.Polygon_Scene PS = new Pachyderm_Acoustic.Environment.Polygon_Scene(RC_List, GG, GL, 20, 50, 1031.25, 0, false, true);
+            List<Brep> RhG = new List<Brep>();
+            foreach(Rhino.Geometry.GeometryBase G in GG)
+            {
+                Brep B = G as Brep;
+                if (B == null) throw new Exception("at least one entry in GG is not a Brep...");
+                RhG.Add(B);
+            }
+
+            Pachyderm_Acoustic.Environment.RhCommon_PolygonScene PS = new Pachyderm_Acoustic.Environment.RhCommon_PolygonScene(RC_List, RhG, GL.ToArray(), false, 20, 50, 1031.25, 0, false, true);
             PS.partition(VG);
 
             if (PS.hasnulllayers)
             {
-                throw new Exception("Set materials to layer using the Materials tab in Pachyderm ror Rhino.");
+                throw new Exception("Set materials to layer using the Materials tab in Pachyderm for Rhino.");
             }
             else
             {
@@ -114,9 +130,9 @@ namespace PachydermGH
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
-                return null;
+                System.Drawing.Bitmap b = Properties.Resources.PolygonScene;
+                b.MakeTransparent(System.Drawing.Color.White);
+                return b;
             }
         }
 

@@ -89,7 +89,8 @@ namespace PachydermGH
 
             List<int> scope = new List<int>();
 
-            for(int i = (int)I.T0; i < (int)I.T1+1; i++) scope.Add(i);
+            scope.Add((int)I.T0);
+            scope.Add((int)I.T1);
 
             int s_id = 0;
             foreach (Pachyderm_Acoustic.Environment.Source Pt in Src)
@@ -99,9 +100,9 @@ namespace PachydermGH
                 do { System.Threading.Thread.Sleep(100); } while (RT.ThreadState() == System.Threading.ThreadState.Running);
                 RT.Combine_ThreadLocal_Results();
                 s_id++;
-                if (RT.GetReceiver.GetType() == typeof(Pachyderm_Acoustic.Mapping.PachMapReceiver))
+                if (RT.GetReceiver.GetType() == typeof(Pachyderm_Acoustic.PachMapReceiver))
                 {
-                    DA.SetData(0, RT.GetReceiver as Pachyderm_Acoustic.Mapping.PachMapReceiver);
+                    DA.SetData(0, RT.GetReceiver as Pachyderm_Acoustic.PachMapReceiver);
                 }
                 else
                 {
@@ -118,9 +119,9 @@ namespace PachydermGH
         {
             get
             {
-                // You can add image files to your project resources and access them like this:
-                //return Resources.IconForThisComponent;
-                return null;
+                System.Drawing.Bitmap b = Properties.Resources.RayTracing;
+                b.MakeTransparent(System.Drawing.Color.White);
+                return b;
             }
         }
 

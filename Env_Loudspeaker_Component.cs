@@ -116,7 +116,7 @@ namespace PachydermGH
                     Sensitivity = CLF_Contents[2];
                     Max = CLF_Contents[3];
                     string[] Code = new string[] { CLF_Contents[4], CLF_Contents[5], CLF_Contents[6], CLF_Contents[7], CLF_Contents[8], CLF_Contents[9], CLF_Contents[10], CLF_Contents[11] };
-                    Balloon = new Speaker_Balloon(Code, Sensitivity, int.Parse(CLF_Contents[1]), new Point3d(0, 0, 0));
+                    Balloon = new Speaker_Balloon(Code, Sensitivity, int.Parse(CLF_Contents[1]), new Hare.Geometry.Point(0, 0, 0));
                 }
 
                  string[] B = CLF_Contents[12].Split(';');
@@ -135,14 +135,15 @@ namespace PachydermGH
                         break;
                 }
 
-                Balloon.Update_Position(new Point3f((float)Origin.X, (float)Origin.Y, (float)Origin.Z));
+                //Balloon.Update_Position(new Point3f((float)Origin.X, (float)Origin.Y, (float)Origin.Z));
+                Balloon.Update_Position(new Hare.Geometry.Point(Origin.X, Origin.Y, Origin.Z));
                 Balloon.CurrentAlt = (float)(Math.Asin(V.Z / Math.Sqrt(V.X * V.X + V.Y * V.Y + V.Z * V.Z)) * 180 / Math.PI);
                 Balloon.CurrentAzi = (float)(-Math.Atan2(V.X, V.Y) * 180 / Math.PI);
                 Balloon.CurrentAxi = (float)rot;
                 Balloon.Update_Aim();
 
-                S = new Pachyderm_Acoustic.Environment.SpeakerSource(Balloon, SWL, new double[] { 0, 0, 0, 0, 0, 0, 0, 0 }, Origin, new int[] { int.Parse(B[0]), int.Parse(B[1]) }, delay, 0);
-                M = Balloon.m_DisplayMesh;
+                S = new Pachyderm_Acoustic.Environment.SpeakerSource(Balloon, SWL, new double[] { 0, 0, 0, 0, 0, 0, 0, 0 }, new Hare.Geometry.Point(Origin.X, Origin.Y, Origin.Z), new int[] { int.Parse(B[0]), int.Parse(B[1]) }, delay, 0);
+                M = Pachyderm_Acoustic.Utilities.RC_PachTools.Hare_to_RhinoMesh(Balloon.m_DisplayMesh, false);
                 M.Flip(true, true, true);
             }
 
@@ -164,9 +165,9 @@ namespace PachydermGH
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                //return 
-                return null;
+                System.Drawing.Bitmap b = Properties.Resources.Loudspeaker;
+                b.MakeTransparent(System.Drawing.Color.White);
+                return b;
             }
         }
 

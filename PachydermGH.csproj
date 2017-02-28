@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug32</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PachydermGH</RootNamespace>
     <AssemblyName>PachydermGH</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <TargetFrameworkProfile />
@@ -43,33 +43,32 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CLF_Read, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Resources\CLF_Read.dll</HintPath>
+    <Reference Include="CLF_Read">
+      <HintPath>..\PachydermAcoustic_Rhinoceros\Resources\CLF_Read.dll</HintPath>
     </Reference>
     <Reference Include="GH_IO">
-      <HintPath>..\..\..\..\..\Program Files\Common Files\McNeel\Rhinoceros\5.0\Plug-ins\Grasshopper (b45a29b1-4343-4035-989e-044e8580d9cf)\0.9.75.0\GH_IO.dll</HintPath>
+      <HintPath>..\..\..\..\..\Program Files\Common Files\McNeel\Rhinoceros\5.0\Plug-ins\Grasshopper (b45a29b1-4343-4035-989e-044e8580d9cf)\0.9.76.0\GH_IO.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Grasshopper">
-      <HintPath>..\..\..\..\..\Program Files\Common Files\McNeel\Rhinoceros\5.0\Plug-ins\Grasshopper (b45a29b1-4343-4035-989e-044e8580d9cf)\0.9.75.0\Grasshopper.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\..\..\..\..\Program Files\Common Files\McNeel\Rhinoceros\5.0\Plug-ins\Grasshopper (b45a29b1-4343-4035-989e-044e8580d9cf)\0.9.76.0\Grasshopper.dll</HintPath>
     </Reference>
-    <Reference Include="Hare, Version=0.0.0.5, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Resources\Hare.dll</HintPath>
+    <Reference Include="Hare">
+      <HintPath>..\PachydermAcoustic_Rhinoceros\Resources\Hare.dll</HintPath>
     </Reference>
-    <Reference Include="MathNet.Numerics, Version=3.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\MathNet.Numerics.3.7.0\lib\net40\MathNet.Numerics.dll</HintPath>
+    <Reference Include="MathNet.Numerics, Version=3.17.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\PachydermAcoustic_BigBang\Pachyderm_Whole\packages\MathNet.Numerics.3.17.0\lib\net40\MathNet.Numerics.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="NAudio, Version=1.5.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Resources\NAudio.dll</HintPath>
+    <Reference Include="NAudio, Version=1.8.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\PachydermAcoustic_BigBang\Pachyderm_Whole\packages\NAudio.1.8.0\lib\net35\NAudio.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Pachyderm_Acoustic, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Resources\Pachyderm_Acoustic.dll</HintPath>
+    <Reference Include="Pachyderm_Acoustic">
+      <HintPath>..\PachydermAcoustic_Rhinoceros\bin\Release\Pachyderm_Acoustic.dll</HintPath>
+    </Reference>
+    <Reference Include="Pachyderm_Acoustic_Universal">
+      <HintPath>..\PachydermAcoustic_Core\Pachyderm_Acoustic_Universal\Pachyderm_Acoustic_Universal\bin\Release\Pachyderm_Acoustic_Universal.dll</HintPath>
     </Reference>
     <Reference Include="RhinoCommon">
       <HintPath>..\..\..\..\..\Program Files\Rhinoceros 5 (64-bit)\System\RhinoCommon.dll</HintPath>
@@ -82,6 +81,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ana_SpeechTransmissionIndex.cs" />
     <Compile Include="Ana_CenterTime.cs" />
     <Compile Include="Ana_EDT.cs" />
     <Compile Include="Ana_SPLA.cs" />
@@ -98,6 +98,7 @@
     <Compile Include="Aud_Signal2List.cs" />
     <Compile Include="Aud_Spectrum2List.cs" />
     <Compile Include="Env_NURBS_Scene .cs" />
+    <Compile Include="PachGH_AssemblyPriority.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -128,35 +129,107 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Resources\CLF_Read.dll" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Hare.dll" />
+    <None Include="Resources\Auralization.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Icon1.png" />
+    <None Include="Resources\CenterTime.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\libfftw3-3.dll" />
+    <None Include="Resources\Clarity.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Logo1Splash.png" />
+    <None Include="Resources\Definition.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\NAudio.dll" />
+    <None Include="Resources\DirectSound.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\PIcon1.ico" />
+    <None Include="Resources\DivideSignal.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\ZedGraph.dll" />
+    <None Include="Resources\EDT.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\Pachyderm_Acoustic.dll" />
+    <None Include="Resources\EnergyTimeCurve.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\FalseColorMeshMapping.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\FFT.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\FilterOctaveBand.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\GeodesicSource.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ImageSource.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ITDG.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Loudspeaker.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MediumProperty.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\NurbScene.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\PolygonScene.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\RadiationAbsorption.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\RadiationImpedance.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\RayTracing.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\RealPressuretoSPL.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Receiver.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\RT.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\RT2.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\SignaltoList.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\SignaltoSpectrum.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\SPL.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Strength.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\UnweaveSignal.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Visualization.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\WaveFile.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -168,16 +241,8 @@
   -->
   <PropertyGroup>
     <PostBuildEvent>Copy "$(TargetPath)" "$(TargetDir)$(ProjectName).gha"
-Copy "$(SolutionDir)Resources\libfftw3-3.dll" "$(TargetDir)"
-
 copy /Y "$(TargetDir)$(ProjectName).gha" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\$(ProjectName).gha"
-copy /Y "$(TargetDir)Pachyderm_Acoustic.dll" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\Pachyderm_Acoustic.dll"
-copy /Y "$(TargetDir)Hare.dll" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\Hare.dll"
-copy /Y "$(TargetDir)NAudio.dll" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\NAudio.dll"
-copy /Y "$(TargetDir)ZedGraph.dll" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\ZedGraph.dll"
-copy /Y "$(TargetDir)fftwlib3-3.dll" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\fftwlib3-3.dll"
-copy /Y "$(TargetDir)CLF_Read.dll" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\CLF_Read.dll"
-copy /Y "$(TargetDir)MathNet.Numerics.dll" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\MathNet.Numerics.dll"</PostBuildEvent>
+</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug32|AnyCPU' ">
     <StartArguments>

@@ -64,9 +64,9 @@ namespace PachydermGH
             DA.GetData<Mesh>(0, ref m);
             if (m.Faces.Count == 0)
             {
-                Pachyderm_Acoustic.Mapping.PachMapReceiver map = new Pachyderm_Acoustic.Mapping.PachMapReceiver();
+                Pachyderm_Acoustic.PachMapReceiver map = new Pachyderm_Acoustic.PachMapReceiver();
                 DA.GetData(0, ref map);
-                m = map.Map_Mesh;
+                m = Pachyderm_Acoustic.Utilities.RC_PachTools.Hare_to_RhinoMesh(map.Map_Mesh, false);
                 if (m.Vertices.Count != 0) this.ClearRuntimeMessages();
             }
 
@@ -114,9 +114,9 @@ namespace PachydermGH
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
-                return null;
+                System.Drawing.Bitmap b = Properties.Resources.FalseColorMeshMapping;
+                b.MakeTransparent(System.Drawing.Color.White);
+                return b;
             }
         }
 

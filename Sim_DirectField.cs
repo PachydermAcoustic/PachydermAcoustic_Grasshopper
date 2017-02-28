@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using Pachyderm_Acoustic;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 
@@ -85,7 +84,7 @@ namespace PachydermGH
 
             Random Rnd = new Pachyderm_Acoustic.Utilities.PachTools.RandomNumberGenerator();
 
-            double c = MP.Sound_Speed(Pts[0]);
+            double c = MP.Sound_Speed(new Hare.Geometry.Point(Pts[0].X, Pts[0].Y, Pts[0].Z));
 
             double[] lambda2pi = new double[8]{ 2 * Math.PI * 62.5 / c, 2 / Math.PI * 125 / c, 2 / Math.PI * 250 / c, 2 * Math.PI * 500 / c, 2 * Math.PI * 1000 / c, 2 * Math.PI * 2000 / c, 2 * Math.PI * 4000 / c, 2 * Math.PI * 8000 / c };
 
@@ -94,7 +93,7 @@ namespace PachydermGH
                 double[] P_Real = new double[No_of_octaves], P_Imag = new double[No_of_octaves];
                 for (int S_id = 0; S_id < Src.Count; S_id++)
                 {
-                    Vector3d V = Pts[i] - Src[S_id].Origin();
+                    Vector3d V = Pts[i] - new Point3d(Src[S_id].Origin().x, Src[S_id].Origin().y, Src[S_id].Origin().z);
                     double Length = V.Length;
                     int id;
                     id = Rnd.Next();
@@ -106,8 +105,9 @@ namespace PachydermGH
                         double I = Power[oct+LF] * Math.Pow(10, -MP.Attenuation_Coef(0)[oct+LF] * Length) / (4 * Math.PI * Length * Length);
                         double real, imag;
                         Pachyderm_Acoustic.Utilities.Numerics.ExpComplex(0, (lambda2pi[oct+LF] * (Length + delay) + Src[S_id].Phase(new Hare.Geometry.Vector(V.X, V.Y, V.Z))[oct+LF]), out real, out imag);
-                        P_Real[oct] += Math.Sqrt(I * MP.Rho_C(Pachyderm_Acoustic.Utilities.PachTools.RPttoHPt(Pts[i]))) * real;
-                        P_Imag[oct] += Math.Sqrt(I * MP.Rho_C(Pachyderm_Acoustic.Utilities.PachTools.RPttoHPt(Pts[i]))) * imag;
+                        Hare.Geometry.Point pt = new Hare.Geometry.Point(Pts[i].X, Pts[i].Y, Pts[i].Z);
+                        P_Real[oct] += Math.Sqrt(I * MP.Rho_C(pt)) * real;
+                        P_Imag[oct] += Math.Sqrt(I * MP.Rho_C(pt)) * imag;
                     }
                 }
 
@@ -130,9 +130,9 @@ namespace PachydermGH
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
-                return null;
+                System.Drawing.Bitmap b = Properties.Resources.DirectSound;
+                b.MakeTransparent(System.Drawing.Color.White);
+                return b;
             }
         }
 

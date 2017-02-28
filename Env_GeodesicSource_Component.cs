@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
-using Pachyderm_Acoustic;
 
 namespace PachydermGH
 {
@@ -78,7 +77,7 @@ namespace PachydermGH
             DA.GetData<double>(2, ref delay);
             DA.GetDataList<double>(3, phase);
 
-            Pachyderm_Acoustic.Environment.GeodesicSource S = new Pachyderm_Acoustic.Environment.GeodesicSource(Level.ToArray(), phase.ToArray(), Origin, DA.Iteration);
+            Pachyderm_Acoustic.Environment.GeodesicSource S = new Pachyderm_Acoustic.Environment.GeodesicSource(Level.ToArray(), phase.ToArray(), new Hare.Geometry.Point(Origin.X, Origin. Y, Origin.Z), DA.Iteration);
             DA.SetData(0, S);
         }
 
@@ -89,9 +88,9 @@ namespace PachydermGH
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                //return 
-                return null;
+                System.Drawing.Bitmap b = Properties.Resources.GeodesicSource;
+                b.MakeTransparent(System.Drawing.Color.White);
+                return b;
             }
         }
 

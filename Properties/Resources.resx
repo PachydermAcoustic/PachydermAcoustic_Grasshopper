@@ -118,28 +118,100 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="CLF_Read" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\CLF_Read.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Auralization" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Auralization.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Hare" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Hare.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="CenterTime" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CenterTime.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Icon1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Icon1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Clarity" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Clarity.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="libfftw3_3" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\libfftw3-3.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Definition" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Definition.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Logo1Splash" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Logo1Splash.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="DirectSound" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\DirectSound.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="NAudio" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\NAudio.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="DivideSignal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\DivideSignal.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="PIcon1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\PIcon1.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="EDT" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\EDT.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ZedGraph" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ZedGraph.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="EnergyTimeCurve" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\EnergyTimeCurve.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="FalseColorMeshMapping" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\FalseColorMeshMapping.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="FFT" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\FFT.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="FilterOctaveBand" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\FilterOctaveBand.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="GeodesicSource" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\GeodesicSource.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImageSource" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ImageSource.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ITDG" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ITDG.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Loudspeaker" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Loudspeaker.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MediumProperty" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MediumProperty.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NurbScene" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NurbScene.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="PolygonScene" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\PolygonScene.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="RadiationAbsorption" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\RadiationAbsorption.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="RadiationImpedance" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\RadiationImpedance.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="RayTracing" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\RayTracing.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="RealPressuretoSPL" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\RealPressuretoSPL.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Receiver" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Receiver.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="RT" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\RT.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="RT2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\RT2.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="SignaltoList" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\SignaltoList.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="SignaltoSpectrum" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\SignaltoSpectrum.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="SPL" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\SPL.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Strength" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Strength.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="UnweaveSignal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\UnweaveSignal.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Visualization" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Visualization.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="WaveFile" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\WaveFile.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

@@ -78,7 +78,7 @@ namespace PachydermGH
             }
             else if (extension.ToLower() == ".pachm")
             {
-                Pachyderm_Acoustic.Mapping.PachMapReceiver[] PMR = new Pachyderm_Acoustic.Mapping.PachMapReceiver[0];
+                Pachyderm_Acoustic.PachMapReceiver[] PMR = new Pachyderm_Acoustic.PachMapReceiver[0];
                 Pachyderm_Acoustic.Utilities.FileIO.Read_pachm(p, ref PMR);
                 DA.SetDataList(0, null);
                 DA.SetDataList(1, null);

@@ -1,5 +1,5 @@
 ﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL) by Arthur van der Harten 
-//' 
+//' C:\Users\Arthu\Desktop\DEV\PachydermAcoustic_Grasshopper\Ana_Strength.cs
 //'This file is part of Pachyderm-Acoustic. 
 //' 
 //'Copyright (c) 2008-2015, Arthur van der aHrten 
@@ -41,7 +41,7 @@ namespace PachydermGH
         {
             pManager.AddGenericParameter("Energy Time Curve", "ETC", "Energy Time Curve", GH_ParamAccess.item);
             pManager.AddNumberParameter("Source Power", "SWL", "sound power of the source object", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Pressure?", "P/I", "True to use pressure (Coherent mixing) or false for intensity (incoherent mixing)...", GH_ParamAccess.item);
+            pManager.AddBooleanParameter("Pressure?", "P/I", "True to use pressure (Coherent mixing) or false for intensity (incoherent mixing)...", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -83,9 +83,9 @@ namespace PachydermGH
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
-                return null;
+                System.Drawing.Bitmap b = Properties.Resources.Strength;
+                b.MakeTransparent(System.Drawing.Color.White);
+                return b;
             }
         }
 

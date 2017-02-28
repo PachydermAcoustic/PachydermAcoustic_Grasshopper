@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
-using Pachyderm_Acoustic;
 
 namespace PachydermGH
 {
@@ -68,7 +67,9 @@ namespace PachydermGH
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             List<Point3d> Origin = new List<Point3d>();
+            List<Hare.Geometry.Point> H_Origin = new List<Hare.Geometry.Point>();
             DA.GetDataList<Point3d>(0, Origin);
+            foreach (Point3d p in Origin) H_Origin.Add(new Hare.Geometry.Point(p.X, p.Y, p.Z));
             List<Pachyderm_Acoustic.Environment.Source> Srcs = new List<Pachyderm_Acoustic.Environment.Source>();
             DA.GetDataList<Pachyderm_Acoustic.Environment.Source>(1, Srcs);
             Pachyderm_Acoustic.Environment.Polygon_Scene S = null;
@@ -80,7 +81,7 @@ namespace PachydermGH
 
             for(int i = 0; i < Srcs.Count; i++)
             {
-                Pachyderm_Acoustic.Environment.Receiver_Bank RB = new Pachyderm_Acoustic.Environment.Receiver_Bank(Origin, Srcs[i].Origin(), S, Fs, COTime, Srcs[i].Delay, Pachyderm_Acoustic.Environment.Receiver_Bank.Type.Stationary); 
+                Pachyderm_Acoustic.Environment.Receiver_Bank RB = new Pachyderm_Acoustic.Environment.Receiver_Bank(H_Origin, Srcs[i].Origin(), S, Fs, COTime, Srcs[i].Delay, Pachyderm_Acoustic.Environment.Receiver_Bank.Type.Stationary); 
                 DA.SetData(0, RB);
             }
         }
@@ -92,9 +93,9 @@ namespace PachydermGH
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                //return 
-                return null;
+                System.Drawing.Bitmap b = Properties.Resources.Receiver;
+                b.MakeTransparent(System.Drawing.Color.White);
+                return b;
             }
         }
 
