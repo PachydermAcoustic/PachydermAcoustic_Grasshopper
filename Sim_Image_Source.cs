@@ -132,7 +132,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.ImageSource;
+                System.Drawing.Bitmap b = Properties.Resources.Image_Source;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }

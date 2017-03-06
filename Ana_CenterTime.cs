@@ -84,7 +84,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.CenterTime;
+                System.Drawing.Bitmap b = Properties.Resources.Center_Time;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }

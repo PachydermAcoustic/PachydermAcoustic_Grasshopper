@@ -82,7 +82,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.UnweaveSignal;
+                System.Drawing.Bitmap b = Properties.Resources.Unweave_Signal;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }

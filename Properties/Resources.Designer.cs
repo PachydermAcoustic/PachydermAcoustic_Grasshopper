@@ -73,9 +73,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap CenterTime {
+        internal static System.Drawing.Bitmap Center_Time {
             get {
-                object obj = ResourceManager.GetObject("CenterTime", resourceCulture);
+                object obj = ResourceManager.GetObject("Center_Time", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -103,9 +103,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap DirectSound {
+        internal static System.Drawing.Bitmap Delay_Gap {
             get {
-                object obj = ResourceManager.GetObject("DirectSound", resourceCulture);
+                object obj = ResourceManager.GetObject("Delay_Gap", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -113,9 +113,19 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap DivideSignal {
+        internal static System.Drawing.Bitmap Direct_Sound {
             get {
-                object obj = ResourceManager.GetObject("DivideSignal", resourceCulture);
+                object obj = ResourceManager.GetObject("Direct_Sound", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Divide_Signal {
+            get {
+                object obj = ResourceManager.GetObject("Divide_Signal", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -133,9 +143,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap EnergyTimeCurve {
+        internal static System.Drawing.Bitmap Energy_Time_Curve {
             get {
-                object obj = ResourceManager.GetObject("EnergyTimeCurve", resourceCulture);
+                object obj = ResourceManager.GetObject("Energy_Time_Curve", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -143,9 +153,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap FalseColorMeshMapping {
+        internal static System.Drawing.Bitmap False_Color_Mesh_Mapping {
             get {
-                object obj = ResourceManager.GetObject("FalseColorMeshMapping", resourceCulture);
+                object obj = ResourceManager.GetObject("False_Color_Mesh_Mapping", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -163,9 +173,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap FilterOctaveBand {
+        internal static System.Drawing.Bitmap Filter_Octave_Band {
             get {
-                object obj = ResourceManager.GetObject("FilterOctaveBand", resourceCulture);
+                object obj = ResourceManager.GetObject("Filter_Octave_Band", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -173,9 +183,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap GeodesicSource {
+        internal static System.Drawing.Bitmap Geodesic_Source {
             get {
-                object obj = ResourceManager.GetObject("GeodesicSource", resourceCulture);
+                object obj = ResourceManager.GetObject("Geodesic_Source", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -183,9 +193,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ImageSource {
+        internal static System.Drawing.Bitmap Image_Source {
             get {
-                object obj = ResourceManager.GetObject("ImageSource", resourceCulture);
+                object obj = ResourceManager.GetObject("Image_Source", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -193,9 +203,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ITDG {
+        internal static System.Drawing.Bitmap LoudSpeaker {
             get {
-                object obj = ResourceManager.GetObject("ITDG", resourceCulture);
+                object obj = ResourceManager.GetObject("LoudSpeaker", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -203,9 +213,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Loudspeaker {
+        internal static System.Drawing.Bitmap Medium_Properties {
             get {
-                object obj = ResourceManager.GetObject("Loudspeaker", resourceCulture);
+                object obj = ResourceManager.GetObject("Medium_Properties", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -213,9 +223,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap MediumProperty {
+        internal static System.Drawing.Bitmap Microphone {
             get {
-                object obj = ResourceManager.GetObject("MediumProperty", resourceCulture);
+                object obj = ResourceManager.GetObject("Microphone", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -223,9 +233,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap NurbScene {
+        internal static System.Drawing.Bitmap Nurb_Scene {
             get {
-                object obj = ResourceManager.GetObject("NurbScene", resourceCulture);
+                object obj = ResourceManager.GetObject("Nurb_Scene", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -233,9 +243,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap PolygonScene {
+        internal static System.Drawing.Bitmap Pachyderm_file {
             get {
-                object obj = ResourceManager.GetObject("PolygonScene", resourceCulture);
+                object obj = ResourceManager.GetObject("Pachyderm_file", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -243,9 +253,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap RadiationAbsorption {
+        internal static System.Drawing.Bitmap Pachyderm_for_Rhino_result {
             get {
-                object obj = ResourceManager.GetObject("RadiationAbsorption", resourceCulture);
+                object obj = ResourceManager.GetObject("Pachyderm_for_Rhino_result", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -253,9 +263,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap RadiationImpedance {
+        internal static System.Drawing.Bitmap Patch_Direct {
             get {
-                object obj = ResourceManager.GetObject("RadiationImpedance", resourceCulture);
+                object obj = ResourceManager.GetObject("Patch_Direct", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -263,9 +273,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap RayTracing {
+        internal static System.Drawing.Bitmap Polygon_Scene {
             get {
-                object obj = ResourceManager.GetObject("RayTracing", resourceCulture);
+                object obj = ResourceManager.GetObject("Polygon_Scene", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -273,9 +283,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap RealPressuretoSPL {
+        internal static System.Drawing.Bitmap Radiation_Absorption {
             get {
-                object obj = ResourceManager.GetObject("RealPressuretoSPL", resourceCulture);
+                object obj = ResourceManager.GetObject("Radiation_Absorption", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -283,9 +293,29 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Receiver {
+        internal static System.Drawing.Bitmap Radiation_Impedance {
             get {
-                object obj = ResourceManager.GetObject("Receiver", resourceCulture);
+                object obj = ResourceManager.GetObject("Radiation_Impedance", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Ray_Tracing {
+            get {
+                object obj = ResourceManager.GetObject("Ray_Tracing", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Real_Pressure_to_SPL {
+            get {
+                object obj = ResourceManager.GetObject("Real_Pressure_to_SPL", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -303,9 +333,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap RT2 {
+        internal static System.Drawing.Bitmap Signal_to_List {
             get {
-                object obj = ResourceManager.GetObject("RT2", resourceCulture);
+                object obj = ResourceManager.GetObject("Signal_to_List", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -313,9 +343,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap SignaltoList {
+        internal static System.Drawing.Bitmap Spectrum_to_List {
             get {
-                object obj = ResourceManager.GetObject("SignaltoList", resourceCulture);
+                object obj = ResourceManager.GetObject("Spectrum_to_List", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -323,9 +353,19 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap SignaltoSpectrum {
+        internal static System.Drawing.Bitmap Speech_Transmission_Index_1 {
             get {
-                object obj = ResourceManager.GetObject("SignaltoSpectrum", resourceCulture);
+                object obj = ResourceManager.GetObject("Speech_Transmission_Index_1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Speech_Transmission_Index_2 {
+            get {
+                object obj = ResourceManager.GetObject("Speech_Transmission_Index_2", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -353,9 +393,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap UnweaveSignal {
+        internal static System.Drawing.Bitmap Unweave_Signal {
             get {
-                object obj = ResourceManager.GetObject("UnweaveSignal", resourceCulture);
+                object obj = ResourceManager.GetObject("Unweave_Signal", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -373,9 +413,9 @@ namespace PachydermGH.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap WaveFile {
+        internal static System.Drawing.Bitmap Wave_File {
             get {
-                object obj = ResourceManager.GetObject("WaveFile", resourceCulture);
+                object obj = ResourceManager.GetObject("Wave_File", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

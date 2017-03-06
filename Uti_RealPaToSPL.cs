@@ -73,7 +73,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.RealPressuretoSPL;
+                System.Drawing.Bitmap b = Properties.Resources.Real_Pressure_to_SPL;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }

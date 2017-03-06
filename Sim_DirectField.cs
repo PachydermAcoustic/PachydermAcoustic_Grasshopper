@@ -130,7 +130,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.DirectSound;
+                System.Drawing.Bitmap b = Properties.Resources.Patch_Direct;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }

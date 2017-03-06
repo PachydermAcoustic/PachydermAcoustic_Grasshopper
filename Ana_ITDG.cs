@@ -78,7 +78,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.ITDG;
+                System.Drawing.Bitmap b = Properties.Resources.Delay_Gap;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }

@@ -87,7 +87,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.SignaltoList;
+                System.Drawing.Bitmap b = Properties.Resources.Signal_to_List;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }

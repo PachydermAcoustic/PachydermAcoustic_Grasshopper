@@ -73,7 +73,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.MediumProperty;
+                System.Drawing.Bitmap b = Properties.Resources.Medium_Properties;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }

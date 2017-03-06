@@ -114,7 +114,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.NurbScene;
+                System.Drawing.Bitmap b = Properties.Resources.Nurb_Scene;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }

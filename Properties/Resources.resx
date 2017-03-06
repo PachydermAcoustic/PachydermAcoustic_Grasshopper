@@ -119,99 +119,111 @@
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="Auralization" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Auralization.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Resources\Auralization.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="CenterTime" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\CenterTime.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Center_Time" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Center Time.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Clarity" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Clarity.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Resources\Clarity.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Definition" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Definition.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Resources\Definition.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="DirectSound" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\DirectSound.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Delay_Gap" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Delay Gap.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="DivideSignal" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\DivideSignal.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Direct_Sound" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Direct Sound.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Divide_Signal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Divide Signal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="EDT" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\EDT.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Resources\EDT.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="EnergyTimeCurve" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\EnergyTimeCurve.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Energy_Time_Curve" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Energy Time Curve.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="FalseColorMeshMapping" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\FalseColorMeshMapping.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="False_Color_Mesh_Mapping" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\False Color Mesh Mapping.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="FFT" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\FFT.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Resources\FFT.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="FilterOctaveBand" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\FilterOctaveBand.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Filter_Octave_Band" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Filter Octave Band.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="GeodesicSource" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\GeodesicSource.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Geodesic_Source" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Geodesic Source.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ImageSource" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ImageSource.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Image_Source" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Image Source.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="ITDG" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ITDG.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="LoudSpeaker" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\LoudSpeaker.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Loudspeaker" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Loudspeaker.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Medium_Properties" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Medium Properties.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="MediumProperty" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\MediumProperty.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Microphone" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Microphone.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="NurbScene" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\NurbScene.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Nurb_Scene" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Nurb Scene.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="PolygonScene" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\PolygonScene.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Pachyderm_file" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Pachyderm file.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="RadiationAbsorption" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\RadiationAbsorption.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Pachyderm_for_Rhino_result" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Pachyderm for Rhino result.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="RadiationImpedance" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\RadiationImpedance.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Patch_Direct" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Patch-Direct.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="RayTracing" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\RayTracing.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Polygon_Scene" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Polygon Scene.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="RealPressuretoSPL" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\RealPressuretoSPL.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Radiation_Absorption" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Radiation Absorption.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Receiver" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Receiver.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Radiation_Impedance" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Radiation Impedance.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Ray_Tracing" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Ray Tracing.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Real_Pressure_to_SPL" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Real Pressure to SPL.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="RT" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\RT.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Resources\RT.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="RT2" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\RT2.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Signal_to_List" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Signal to List.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="SignaltoList" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\SignaltoList.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Spectrum_to_List" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Spectrum to List.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="SignaltoSpectrum" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\SignaltoSpectrum.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Speech_Transmission_Index_1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Speech Transmission Index 1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Speech_Transmission_Index_2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Speech Transmission Index 2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="SPL" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\SPL.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Resources\SPL.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Strength" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Strength.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Resources\Strength.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="UnweaveSignal" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\UnweaveSignal.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Unweave_Signal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Unweave Signal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Visualization" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Visualization.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Resources\Visualization.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="WaveFile" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\WaveFile.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Wave_File" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Wave File.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

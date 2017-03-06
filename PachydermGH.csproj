@@ -136,100 +136,115 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Auralization.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\CenterTime.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Clarity.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Definition.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\DirectSound.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\DivideSignal.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\EDT.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\EnergyTimeCurve.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\FalseColorMeshMapping.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\FFT.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\FilterOctaveBand.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\GeodesicSource.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\ImageSource.bmp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\ITDG.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Loudspeaker.bmp" />
+    <None Include="Resources\Auralization.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\MediumProperty.bmp" />
+    <None Include="Resources\Center Time.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\NurbScene.bmp" />
+    <None Include="Resources\Clarity.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\PolygonScene.bmp" />
+    <None Include="Resources\Definition.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\RadiationAbsorption.bmp" />
+    <None Include="Resources\Delay Gap.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\RadiationImpedance.bmp" />
+    <None Include="Resources\Direct Sound.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\RayTracing.bmp" />
+    <None Include="Resources\Divide Signal.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\RealPressuretoSPL.bmp" />
+    <None Include="Resources\EDT.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Receiver.bmp" />
+    <None Include="Resources\Energy Time Curve.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\RT.bmp" />
+    <None Include="Resources\False Color Mesh Mapping.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\RT2.bmp" />
+    <None Include="Resources\FFT.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\SignaltoList.bmp" />
+    <None Include="Resources\Filter Octave Band.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\SignaltoSpectrum.bmp" />
+    <None Include="Resources\Geodesic Source.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\SPL.bmp" />
+    <None Include="Resources\Image Source.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Strength.bmp" />
+    <None Include="Resources\LoudSpeaker.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\UnweaveSignal.bmp" />
+    <None Include="Resources\Medium Properties.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Visualization.bmp" />
+    <None Include="Resources\Microphone.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\WaveFile.bmp" />
+    <None Include="Resources\Nurb Scene.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Pachyderm file.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Pachyderm for Rhino result.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Patch-Direct.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Polygon Scene.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Radiation Absorption.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Radiation Impedance.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Ray Tracing.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Real Pressure to SPL.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\RT.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Signal to List.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Spectrum to List.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Speech Transmission Index 1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Speech Transmission Index 2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\SPL.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Strength.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Unweave Signal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Visualization.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Wave File.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

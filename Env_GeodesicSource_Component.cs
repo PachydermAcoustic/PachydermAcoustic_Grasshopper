@@ -41,7 +41,7 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddPointParameter("Origin", "Or", "Acoustic Center of the Speaker", GH_ParamAccess.item);
+            pManager.AddPointParameter("Origin", "Or", "Acoustic Center of the Sound Source", GH_ParamAccess.item);
             pManager.AddNumberParameter("Power", "P", "The power spectrum for the source(0 = 62.5, 1 = 125 ... 7 = 8000)", GH_ParamAccess.list);
             pManager.AddNumberParameter("Delay", "D", "Signal delay", GH_ParamAccess.item);
             pManager.AddNumberParameter("Phase", "PH", "The phase spectrum for the source(0 = 62.5, 1 = 125 ... 7 = 8000)", GH_ParamAccess.list);
@@ -88,7 +88,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.GeodesicSource;
+                System.Drawing.Bitmap b = Properties.Resources.Geodesic_Source;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }

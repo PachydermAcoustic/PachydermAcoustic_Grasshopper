@@ -36,7 +36,6 @@ namespace PachydermGH
         Vector3d CurrentD;
         Point3d CurrentO;
         double CurrentR;
-        int CurrentP;
 
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
@@ -54,24 +53,21 @@ namespace PachydermGH
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddPointParameter("Origin", "Or", "Acoustic Center of the Speaker", GH_ParamAccess.item);
-            //pManager.AddPathParameter("CLF File", "CLF", "The path to a Common Loudspeaker Format file.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Power", "P", "0 for Sensitivity, 1 for Max, anything else for Flat spectrum.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Delay", "D", "Signal delay", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Phase", "PH", "The phase spectrum for the loudspeaker(0 = 62.5, 1 = 125 ... 7 = 8000)", GH_ParamAccess.list);
             pManager.AddVectorParameter("Direction", "D", "Aiming direction for the loudspeaker", GH_ParamAccess.item);
             pManager.AddNumberParameter("Rotation", "R", "Rotation of Speaker in degrees", GH_ParamAccess.item);
-
+            pManager.AddNumberParameter("Power", "P", "0 for Sensitivity, 1 for Max, anything else for Flat spectrum.", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Delay", "D", "Signal delay", GH_ParamAccess.item);
+            
             Grasshopper.Kernel.Parameters.Param_Number param = (pManager[1] as Grasshopper.Kernel.Parameters.Param_Number);
             if (param != null) param.SetPersistentData(new List<GH_Number> { new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120) });
+            Grasshopper.Kernel.Parameters.Param_Vector param1 = (pManager[1] as Grasshopper.Kernel.Parameters.Param_Vector);
+            if (param1 != null) param1.SetPersistentData(new GH_Vector(new Vector3d(1,0,0)));
             Grasshopper.Kernel.Parameters.Param_Number param2 = (pManager[2] as Grasshopper.Kernel.Parameters.Param_Number);
             if (param2 != null) param2.SetPersistentData(0);
-            Grasshopper.Kernel.Parameters.Param_Number param3 = (pManager[3] as Grasshopper.Kernel.Parameters.Param_Number);
-            if (param3 != null) param3.SetPersistentData(new List<GH_Number> { new GH_Number(0), new GH_Number(0), new GH_Number(0), new GH_Number(0), new GH_Number(0), new GH_Number(0), new GH_Number(0), new GH_Number(0) });
-            Grasshopper.Kernel.Parameters.Param_Vector param4 = (pManager[4] as Grasshopper.Kernel.Parameters.Param_Vector);
-            if (param4 != null) param4.SetPersistentData(new GH_Vector(new Vector3d(0,0,0)));
-            Grasshopper.Kernel.Parameters.Param_Number param5 = (pManager[5] as Grasshopper.Kernel.Parameters.Param_Number);
-            if (param5 != null) param5.SetPersistentData(0);
-            
+            Grasshopper.Kernel.Parameters.Param_Number param3 = (pManager[2] as Grasshopper.Kernel.Parameters.Param_Number);
+            if (param3 != null) param3.SetPersistentData(0);
+            Grasshopper.Kernel.Parameters.Param_Number param4 = (pManager[3] as Grasshopper.Kernel.Parameters.Param_Number);
+            if (param4 != null) param4.SetPersistentData(new List<GH_Number> { new GH_Number(0), new GH_Number(0), new GH_Number(0), new GH_Number(0), new GH_Number(0), new GH_Number(0), new GH_Number(0), new GH_Number(0) });
         }
 
         /// <summary>
@@ -88,26 +84,24 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Point3d Origin = default(Point3d);
-            //string CLF_Path = "";
+            Point3d Origin = new Point3d();
             double delay = 0, rot = 0;
-            int Level = 0;
+            List<double> Level = new List<double>();
             List<double> phase = new List<double>();
             Vector3d V = default(Vector3d);
             DA.GetData<Point3d>(0, ref Origin);
-            //DA.GetData<string>(1, ref CLF_Path);
-            DA.GetData<double>(1, ref delay);
-            DA.GetData<int>(2, ref Level);
-            DA.GetDataList<double>(3, phase);
-            DA.GetData<Vector3d>(4, ref V);
-            DA.GetData<double>(5, ref rot);
+            DA.GetData<Vector3d>(1, ref V);
+            DA.GetData<double>(2, ref rot);
+            DA.GetDataList<double>(3, Level);
+            DA.GetData<double>(4, ref delay);
 
-            if (!CurrentD.Equals(V) || !CurrentO.Equals(Origin) || CurrentR != rot || CurrentP != Level)
+            if (V == null || V.Length == 0) throw new Exception("Provide a vector indicating the direction of the speaker.");
+
+            if (!CurrentD.Equals(V) || !CurrentO.Equals(Origin) || CurrentR != rot)
             {
                 CurrentD = V;
                 CurrentO = Origin;
                 CurrentR = rot;
-                CurrentP = Level;
 
                 if (S == null)
                 {
@@ -122,20 +116,30 @@ namespace PachydermGH
                  string[] B = CLF_Contents[12].Split(';');
 
                 double[] SWL;
-                switch (Level)
+                if (Level.Count == 1)
                 {
-                    case 0:
+                    if (Level[0] == 0)
+                    {
                         SWL = Pachyderm_Acoustic.Utilities.PachTools.DecodeSourcePower(Sensitivity);
-                        break;
-                    case 1:
+                    }
+                    if (Level[0] == 1)
+                    {
                         SWL = Pachyderm_Acoustic.Utilities.PachTools.DecodeSourcePower(Max);
-                        break;
-                    default:
-                        SWL = new double[] { Level, Level, Level, Level, Level, Level, Level, Level };
-                        break;
+                    }
+                    else
+                    { 
+                        SWL = new double[] { Level[0], Level[0], Level[0], Level[0], Level[0], Level[0], Level[0], Level[0] };
+                    }
+                }
+                else if (Level.Count == 8)
+                {
+                    SWL = Level.ToArray();
+                }
+                else
+                {
+                    throw new Exception("Power Levels are coded incorrectly. Use 0 for Sensitivity, 1 for Max level, any number for a flat level, or specify by octave band.");
                 }
 
-                //Balloon.Update_Position(new Point3f((float)Origin.X, (float)Origin.Y, (float)Origin.Z));
                 Balloon.Update_Position(new Hare.Geometry.Point(Origin.X, Origin.Y, Origin.Z));
                 Balloon.CurrentAlt = (float)(Math.Asin(V.Z / Math.Sqrt(V.X * V.X + V.Y * V.Y + V.Z * V.Z)) * 180 / Math.PI);
                 Balloon.CurrentAzi = (float)(-Math.Atan2(V.X, V.Y) * 180 / Math.PI);
@@ -165,7 +169,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.Loudspeaker;
+                System.Drawing.Bitmap b = Properties.Resources.LoudSpeaker;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }

@@ -114,7 +114,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.FalseColorMeshMapping;
+                System.Drawing.Bitmap b = Properties.Resources.False_Color_Mesh_Mapping;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }

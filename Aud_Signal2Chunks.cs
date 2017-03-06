@@ -110,7 +110,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.DivideSignal;
+                System.Drawing.Bitmap b = Properties.Resources.Divide_Signal;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }

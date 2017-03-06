@@ -103,7 +103,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.FilterOctaveBand;
+                System.Drawing.Bitmap b = Properties.Resources.Filter_Octave_Band;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }

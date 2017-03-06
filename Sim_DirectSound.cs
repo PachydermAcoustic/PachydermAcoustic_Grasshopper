@@ -91,7 +91,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.DirectSound;
+                System.Drawing.Bitmap b = Properties.Resources.Direct_Sound;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }

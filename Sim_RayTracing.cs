@@ -119,7 +119,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.RayTracing;
+                System.Drawing.Bitmap b = Properties.Resources.Ray_Tracing;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }

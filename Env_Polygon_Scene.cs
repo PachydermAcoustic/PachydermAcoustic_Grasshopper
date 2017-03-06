@@ -130,7 +130,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.PolygonScene;
+                System.Drawing.Bitmap b = Properties.Resources.Polygon_Scene;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }

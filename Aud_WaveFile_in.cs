@@ -157,7 +157,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.WaveFile;
+                System.Drawing.Bitmap b = Properties.Resources.Wave_File;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }
