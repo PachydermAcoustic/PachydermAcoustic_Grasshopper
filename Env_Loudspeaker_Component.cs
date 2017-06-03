@@ -32,7 +32,7 @@ namespace PachydermGH
         Speaker_Balloon Balloon;
         string Sensitivity;
         string Max;
-        Pachyderm_Acoustic.Environment.SpeakerSource S;
+        Pachyderm_Acoustic.Environment.DirectionalSource S;
         Vector3d CurrentD;
         Point3d CurrentO;
         double CurrentR;
@@ -87,7 +87,6 @@ namespace PachydermGH
             Point3d Origin = new Point3d();
             double delay = 0, rot = 0;
             List<double> Level = new List<double>();
-            List<double> phase = new List<double>();
             Vector3d V = default(Vector3d);
             DA.GetData<Point3d>(0, ref Origin);
             DA.GetData<Vector3d>(1, ref V);
@@ -146,7 +145,7 @@ namespace PachydermGH
                 Balloon.CurrentAxi = (float)rot;
                 Balloon.Update_Aim();
 
-                S = new Pachyderm_Acoustic.Environment.SpeakerSource(Balloon, SWL, new double[] { 0, 0, 0, 0, 0, 0, 0, 0 }, new Hare.Geometry.Point(Origin.X, Origin.Y, Origin.Z), new int[] { int.Parse(B[0]), int.Parse(B[1]) }, delay, 0);
+                S = new Pachyderm_Acoustic.Environment.DirectionalSource(Balloon, SWL, new Hare.Geometry.Point(Origin.X, Origin.Y, Origin.Z), new int[] { int.Parse(B[0]), int.Parse(B[1]) }, delay, 0);
                 M = Pachyderm_Acoustic.Utilities.RC_PachTools.Hare_to_RhinoMesh(Balloon.m_DisplayMesh, false);
                 M.Flip(true, true, true);
             }

@@ -49,7 +49,7 @@ namespace PachydermGH
             pManager[2].Optional = true;
 
             Grasshopper.Kernel.Parameters.Param_Integer param = (pManager[3] as Grasshopper.Kernel.Parameters.Param_Integer);
-            if (param != null) param.SetPersistentData(15);
+            if (param != null) param.SetPersistentData(7);
         }
 
         /// <summary>
@@ -83,18 +83,31 @@ namespace PachydermGH
             settings.VisibleFilter = true;
             settings.ObjectTypeFilter = Rhino.DocObjects.ObjectType.Brep & Rhino.DocObjects.ObjectType.Surface & Rhino.DocObjects.ObjectType.Extrusion;
             List<Rhino.DocObjects.RhinoObject> RC_List = new List<Rhino.DocObjects.RhinoObject>();
-            foreach (Rhino.DocObjects.RhinoObject RHobj in Rhino.RhinoDoc.ActiveDoc.Objects.GetObjectList(settings))
+
+            if (RG)
             {
-                if (RHobj.ObjectType == Rhino.DocObjects.ObjectType.Brep || RHobj.ObjectType == Rhino.DocObjects.ObjectType.Surface || RHobj.ObjectType == Rhino.DocObjects.ObjectType.Extrusion)
+                foreach (Rhino.DocObjects.RhinoObject RHobj in Rhino.RhinoDoc.ActiveDoc.Objects.GetObjectList(settings))
                 {
-                    RC_List.Add(RHobj);
+                    if (RHobj.ObjectType == Rhino.DocObjects.ObjectType.Brep || RHobj.ObjectType == Rhino.DocObjects.ObjectType.Surface || RHobj.ObjectType == Rhino.DocObjects.ObjectType.Extrusion)
+                    {
+                        RC_List.Add(RHobj);
+                    }
                 }
+            }
+            else if (GG.Count == 0)
+            {
+                return;
+            }
+            else
+            {
+                GG = null;
+                GL = null;
             }
 
             if (RC_List.Count == 0 && GG.Count == 0) throw new Exception("Scene could jnot be constructed because there is no geometry...");
             if (GG.Count != GL.Count) throw new Exception("Number of Grasshopper Objects(GG) and number of Rhino Layer(GL) indices must match (one layer per object)");
 
-            Pachyderm_Acoustic.Environment.RhCommon_Scene PS = new Pachyderm_Acoustic.Environment.RhCommon_Scene(RC_List, 20, 50, 1031.25, 0, false, true); //(RC_List, GG, GL, 20, 50, 1031.25, 0, false, true);
+            Pachyderm_Acoustic.Environment.RhCommon_Scene PS = new Pachyderm_Acoustic.Environment.RhCommon_Scene(RC_List, 20, 50, 1031.25, 0, false, true, GG, GL);
             PS.partition(VG);
 
             if (PS.hasnulllayers)

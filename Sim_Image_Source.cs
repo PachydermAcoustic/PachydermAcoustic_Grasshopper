@@ -84,6 +84,8 @@ namespace PachydermGH
 
             int ct = 0;
             int s_id = 0;
+            List<Grasshopper.Kernel.Types.GH_Curve> cvs = new List<Grasshopper.Kernel.Types.GH_Curve>();
+
             foreach (Pachyderm_Acoustic.Environment.Source Pt in Src)
             {
                 //Pachyderm_Acoustic.Environment.Receiver_Bank RB = new Pachyderm_Acoustic.Environment.Receiver_Bank(Rec, Pt, S, 0, 1000, 1000, Pachyderm_Acoustic.Environment.Receiver_Bank.Type.Stationary); 
@@ -99,8 +101,7 @@ namespace PachydermGH
                 s_id++;
 
                 DA.SetData(0, IS);
-                List<Grasshopper.Kernel.Types.GH_Curve> cvs = new List<Grasshopper.Kernel.Types.GH_Curve>();
-
+                
                 if (IS.Paths.Length > 0)
                 {
                     for (int i = 0; i < Rec.Count; i++)
@@ -120,8 +121,8 @@ namespace PachydermGH
                         }
                     }
                 }
-                DA.SetDataList(2, cvs);
             }
+            DA.SetDataList(2, cvs);
         }
 
         /// <summary>

@@ -104,7 +104,7 @@ namespace PachydermGH
                     {
                         double I = Power[oct+LF] * Math.Pow(10, -MP.Attenuation_Coef(0)[oct+LF] * Length) / (4 * Math.PI * Length * Length);
                         double real, imag;
-                        Pachyderm_Acoustic.Utilities.Numerics.ExpComplex(0, (lambda2pi[oct+LF] * (Length + delay) + Src[S_id].Phase(new Hare.Geometry.Vector(V.X, V.Y, V.Z))[oct+LF]), out real, out imag);
+                        Pachyderm_Acoustic.Utilities.Numerics.ExpComplex(0, lambda2pi[oct+LF] * (Length + delay), out real, out imag);
                         Hare.Geometry.Point pt = new Hare.Geometry.Point(Pts[i].X, Pts[i].Y, Pts[i].Z);
                         P_Real[oct] += Math.Sqrt(I * MP.Rho_C(pt)) * real;
                         P_Imag[oct] += Math.Sqrt(I * MP.Rho_C(pt)) * imag;

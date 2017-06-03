@@ -44,14 +44,10 @@ namespace PachydermGH
             pManager.AddPointParameter("Origin", "Or", "Acoustic Center of the Sound Source", GH_ParamAccess.item);
             pManager.AddNumberParameter("Power", "P", "The power spectrum for the source(0 = 62.5, 1 = 125 ... 7 = 8000)", GH_ParamAccess.list);
             pManager.AddNumberParameter("Delay", "D", "Signal delay", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Phase", "PH", "The phase spectrum for the source(0 = 62.5, 1 = 125 ... 7 = 8000)", GH_ParamAccess.list);
             Grasshopper.Kernel.Parameters.Param_Number param = (pManager[1] as Grasshopper.Kernel.Parameters.Param_Number);
             if (param != null) param.SetPersistentData(new List<GH_Number> { new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120) });
             Grasshopper.Kernel.Parameters.Param_Number param2 = (pManager[2] as Grasshopper.Kernel.Parameters.Param_Number);
             if (param2 != null) param2.SetPersistentData(0);
-            Grasshopper.Kernel.Parameters.Param_Number param3 = (pManager[3] as Grasshopper.Kernel.Parameters.Param_Number);
-            if (param3 != null) param3.SetPersistentData(new List<GH_Number> { new GH_Number(0), new GH_Number(0), new GH_Number(0), new GH_Number(0), new GH_Number(0), new GH_Number(0), new GH_Number(0), new GH_Number(0) });
-
         }
 
         /// <summary>
@@ -70,14 +66,12 @@ namespace PachydermGH
         {
             Point3d Origin = new Point3d();
             List<double> Level = new List<double>();
-            List<double> phase = new List<double>();
             double delay = 0;
             DA.GetData<Point3d>(0, ref Origin);
             DA.GetDataList<double>(1, Level);
             DA.GetData<double>(2, ref delay);
-            DA.GetDataList<double>(3, phase);
-
-            Pachyderm_Acoustic.Environment.GeodesicSource S = new Pachyderm_Acoustic.Environment.GeodesicSource(Level.ToArray(), phase.ToArray(), new Hare.Geometry.Point(Origin.X, Origin. Y, Origin.Z), DA.Iteration);
+            
+            Pachyderm_Acoustic.Environment.GeodesicSource S = new Pachyderm_Acoustic.Environment.GeodesicSource(Level.ToArray(), new Hare.Geometry.Point(Origin.X, Origin. Y, Origin.Z), DA.Iteration);
             DA.SetData(0, S);
         }
 
