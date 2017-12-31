@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 
@@ -93,21 +92,29 @@ namespace PachydermGH
             scope.Add((int)I.T1);
 
             int s_id = 0;
-            foreach (Pachyderm_Acoustic.Environment.Source Pt in Src)
+            try
             {
-                Pachyderm_Acoustic.SplitRayTracer RT = new Pachyderm_Acoustic.SplitRayTracer(Pt, Rec[s_id], S, CO_Time, RayCt, scope.ToArray(), IS_Order);
-                RT.Begin();
-                do { System.Threading.Thread.Sleep(100); } while (RT.ThreadState() == System.Threading.ThreadState.Running);
-                RT.Combine_ThreadLocal_Results();
-                s_id++;
-                if (RT.GetReceiver.GetType() == typeof(Pachyderm_Acoustic.PachMapReceiver))
+                foreach (Pachyderm_Acoustic.Environment.Source Pt in Src)
                 {
-                    DA.SetData(0, RT.GetReceiver as Pachyderm_Acoustic.PachMapReceiver);
+                    Pachyderm_Acoustic.SplitRayTracer RT = new Pachyderm_Acoustic.SplitRayTracer(Pt, Rec[s_id], S, CO_Time, RayCt, scope.ToArray(), IS_Order);
+                    RT.Begin();
+                    do { System.Threading.Thread.Sleep(100); } while (RT.ThreadState() == System.Threading.ThreadState.Running);
+                    RT.Combine_ThreadLocal_Results();
+                    s_id++;
+                    if (RT.GetReceiver.GetType() == typeof(Pachyderm_Acoustic.PachMapReceiver))
+                    {
+                        DA.SetData(0, RT.GetReceiver as Pachyderm_Acoustic.PachMapReceiver);
+                    }
+                    else
+                    {
+                        DA.SetData(0, RT.GetReceiver);
+                    }
                 }
-                else
-                {
-                    DA.SetData(0, RT.GetReceiver);
-                }
+            }
+            catch
+            (System.IndexOutOfRangeException)
+            {
+                this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Raytracing operation failed. This can be due to an unsuitable scene object. For example, did you set materials on all layers referenced by Rhinoceros Geometry?");
             }
         }
 
