@@ -2,7 +2,7 @@
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
-//'Copyright (c) 2008-2015, Arthur van der Harten 
+//'Copyright (c) 2008-2018, Arthur van der Harten 
 //'Pachyderm-Acoustic is free software; you can redistribute it and/or modify 
 //'it under the terms of the GNU General Public License as published 
 //'by the Free Software Foundation; either version 3 of the License, or 
@@ -145,12 +145,10 @@ namespace PachydermGH
                 Balloon.CurrentAxi = (float)rot;
                 Balloon.Update_Aim();
 
-                S = new Pachyderm_Acoustic.Environment.DirectionalSource(Balloon, SWL, new Hare.Geometry.Point(Origin.X, Origin.Y, Origin.Z), new int[] { int.Parse(B[0]), int.Parse(B[1]) }, delay, 0);
+                S = new Pachyderm_Acoustic.Environment.DirectionalSource(Balloon, SWL, new Hare.Geometry.Point(Origin.X, Origin.Y, Origin.Z), new int[] { int.Parse(B[0]), int.Parse(B[1]) }, 0);
                 M = Pachyderm_Acoustic.Utilities.RC_PachTools.Hare_to_RhinoMesh(Balloon.m_DisplayMesh, false);
                 M.Flip(true, true, true);
             }
-
-            S.Delay = delay;
 
             DA.SetData("Source", S);
         }

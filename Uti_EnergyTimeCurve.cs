@@ -2,7 +2,7 @@
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
-//'Copyright (c) 2008-2015, Arthur van der Harten 
+//'Copyright (c) 2008-2018, Arthur van der Harten 
 //'Pachyderm-Acoustic is free software; you can redistribute it and/or modify 
 //'it under the terms of the GNU General Public License as published 
 //'by the Free Software Foundation; either version 3 of the License, or 
@@ -103,7 +103,7 @@ namespace PachydermGH
 
                     for (int o = (int)Oct.T0; o <= Oct.T1; o++)
                     {
-                        double[] ETC = Pachyderm_Acoustic.Utilities.AcousticalMath.ETCurve(D[i], IS[i], Rec[i], Rec[i].CutOffTime, Rec[i].SampleRate, o, r, false);
+                        double[] ETC = Pachyderm_Acoustic.Utilities.IR_Construction.ETCurve(D[i], IS[i], Rec[i], Rec[i].CutOffTime, Rec[i].SampleRate, o, r, false);
                         S[(int)(o - Oct.T0)] = ETC;
                     }
                     AS.Add(new Audio_Signal(S, Rec[0].SampleRate));

@@ -2,7 +2,7 @@
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
-//'Copyright (c) 2008-2015, Arthur van der Harten 
+//'Copyright (c) 2008-2018, Arthur van der Harten 
 //'Pachyderm-Acoustic is free software; you can redistribute it and/or modify 
 //'it under the terms of the GNU General Public License as published 
 //'by the Free Software Foundation; either version 3 of the License, or 
@@ -49,7 +49,7 @@ namespace PachydermGH
             SamplingFrequency = Fs;
             base.Value = new double[Aud_in.Length][];
             for (int i = 0; i < Aud_in.Length; i++) Value[i] = new double[Aud_in[i].Length];
-            for (int i = 0; i < Aud_in.Length; i++) for(int j = 0; j < Aud_in.Length; j++) base.Value[i][j] = (double)Aud_in[i][j];
+            for (int i = 0; i < Aud_in.Length; i++) for(int j = 0; j < Aud_in[i].Length; j++) base.Value[i][j] = (double)Aud_in[i][j];
             //no jagged arrays allowed. Pad with zeros where necessary.
             int length = 0;
             foreach (float[] signal in Aud_in) if (signal.Length > length) length = signal.Length;
