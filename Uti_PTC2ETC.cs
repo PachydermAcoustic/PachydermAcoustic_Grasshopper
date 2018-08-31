@@ -24,15 +24,15 @@ using Rhino.Geometry;
 
 namespace PachydermGH
 {
-    public class EnergyTimeCurve : GH_Component
+    public class PTC2ETC : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the MyComponent2 class.
         /// </summary>
-        public EnergyTimeCurve()
-            : base("Energy-Time Curve", "ETC",
-                "Creates the Energy-Time Curve from simulation results",
-                "Acoustics", "UTilities")
+        public PTC2ETC()
+            : base("Energy-Time Curve from Impulse Response", "IR-2-ETC",
+                "Creates the Energy-Time Curve from an impulse response, measured or simulated",
+                "Acoustics", "Utility")
         {
         }
 
@@ -41,14 +41,7 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Direct Sound", "D", "Plug the Direct Sound in here.", GH_ParamAccess.list);
-            pManager.AddGenericParameter("Image Source", "IS", "Plug the Image Source in here.", GH_ParamAccess.list);
-            pManager.AddGenericParameter("Ray Tracing", "Tr", "Plug the Receiver from Ray Tracing in here.", GH_ParamAccess.list);
-            pManager.AddIntervalParameter("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", GH_ParamAccess.item);
-
-            pManager[1].Optional = true;
-            pManager[2].Optional = true;
-            pManager[3].Optional = true;
+            pManager.AddGenericParameter("Impulse Response", "IR", "Plug the audio signal impulse response in here.", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -56,7 +49,7 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Energy-Time Curve", "ETC", "The energy-time-curve result of the simulation...", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Energy-Time Curve", "ETC", "The energy-time-curve result of conversion...", GH_ParamAccess.item);
         }
 
         public override bool AppendMenuItems(ToolStripDropDown menu)
@@ -79,44 +72,29 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            List<Pachyderm_Acoustic.Direct_Sound> D = new List<Pachyderm_Acoustic.Direct_Sound>();
-            DA.GetDataList<Pachyderm_Acoustic.Direct_Sound>(0, D);
-            List<Pachyderm_Acoustic.ImageSourceData> IS = new List<Pachyderm_Acoustic.ImageSourceData>();
-            DA.GetDataList<Pachyderm_Acoustic.ImageSourceData>(1, IS);
-            List<Pachyderm_Acoustic.Environment.Receiver_Bank> Rec = new List<Pachyderm_Acoustic.Environment.Receiver_Bank>();
-            DA.GetDataList<Pachyderm_Acoustic.Environment.Receiver_Bank>(2, Rec);
-            Interval Oct = new Interval(0, 7);
-            DA.GetData<Interval>(3, ref Oct);
-
-            int max = Math.Max(D.Count, Rec.Count);
-            if (D.Count == 0) for(int i = 0; i < max; i++) D.Add(null);
-            if (IS.Count == 0) for (int i = 0; i < max; i++) IS.Add(null);
-            if (Rec.Count == 0) for (int i = 0; i < max; i++) Rec.Add(null);
+            Audio_Signal IR = new Audio_Signal();
+            DA.GetData<Audio_Signal>(0, ref IR);
 
             List<Audio_Signal> AS_final = new List<Audio_Signal>();
-            for (int i = 0; i < max; i++)
-            {
-                List<Audio_Signal> AS = new List<Audio_Signal>();
-                for (int r = 0; r < Rec[i].Rec_List.Length; r++)
-                {
-                    double[][] S = new double[(int)Math.Abs(Oct.T1 - Oct.T0 + 1)][];
 
-                    for (int o = (int)Oct.T0; o <= Oct.T1; o++)
-                    {
-                        double[] ETC = Pachyderm_Acoustic.Utilities.IR_Construction.ETCurve(D[i], IS[i], Rec[i], Rec[i].CutOffTime, Rec[i].SampleRate, o, r, false);
-                        S[(int)(o - Oct.T0)] = ETC;
-                    }
-                    AS.Add(new Audio_Signal(S, Rec[0].SampleRate));
-                }
-                if (AS_final.Count == 0) AS_final.AddRange(AS);
-                else if (Combine)
+            double[][] signal = new double[8][];
+            for (int i = 0; i < IR.ChannelCount; i++) signal[i] = new double[IR.Count];
+
+            for (int j = 0; j < IR.ChannelCount; j++)
+            {
+                for (int oct = 0; oct < 8; oct++)
                 {
-                    for (int r = 0; r < Rec[i].Rec_List.Length; r++)
+                    double[] IR_oct = Pachyderm_Acoustic.Audio.Pach_SP.FIR_Bandpass(IR[j], oct, IR.SampleFrequency, 0);
+                    signal[oct] = new double[IR_oct.Length];
+                    for (int i = 0; i < IR_oct.Length; i++)
                     {
-                        AS_final[r] += AS[r];
+                        signal[oct][i] = IR_oct[i] * IR_oct[i];
                     }
                 }
+
+                AS_final.Add(new Audio_Signal(signal, IR.SampleFrequency));
             }
+
             DA.SetDataList(0, AS_final);
         }
 
@@ -138,7 +116,7 @@ namespace PachydermGH
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("{D6198179-44DC-4DF9-8B4C-7DC35C268E8B}"); }
+            get { return new Guid("{2F45F41C-3027-4FE1-8071-26495398C06B}"); }
         }
     }
 }

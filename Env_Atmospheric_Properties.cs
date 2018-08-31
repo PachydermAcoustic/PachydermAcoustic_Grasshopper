@@ -29,7 +29,7 @@ namespace PachydermGH
         public Atmospheric_Properties()
             : base("Medium Properties", "MP",
                 "Acoustically significant properties of the vibrating medium.",
-                "Acoustics", "General")
+                "Acoustics", "Model")
         {
         }
 

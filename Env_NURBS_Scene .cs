@@ -31,7 +31,7 @@ namespace PachydermGH
         public NURBSScene_Component()
             : base("NURBS Scene", "NURBS Scene",
                 "Constructs a scene with the existing geometry in the model and/or geometry from grasshopper definitions",
-                "Acoustics", "Scenes")
+                "Acoustics", "Model")
         {
         }
 

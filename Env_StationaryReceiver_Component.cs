@@ -31,7 +31,7 @@ namespace PachydermGH
         public StationaryReceiver_Component()
             : base("Stationary Receiver", "StatRec",
                 "Non-growing 1 meter wide spherical receiver object",
-                "Acoustics", "Receiver Modelling")
+                "Acoustics", "Model")
         {
         }
 

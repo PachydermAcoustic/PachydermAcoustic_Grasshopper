@@ -32,7 +32,7 @@ namespace PachydermGH
         public GeodesicSource_Component()
             : base("GeodesicSource", "GeoSrc",
                 "Geodesic Omnidirectional Source Object",
-                "Acoustics", "Source Modelling")
+                "Acoustics", "Model")
         {
         }
 

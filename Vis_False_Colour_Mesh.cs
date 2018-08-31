@@ -33,7 +33,7 @@ namespace PachydermGH
         public False_Colour_Mesh()
             : base("False Colour Mesh Mapping", "False Colour",
                 "Mapping of false colors onto vertices of meshes.",
-                "Acoustics", "General")
+                "Acoustics", "Visualization")
         {
         }
 

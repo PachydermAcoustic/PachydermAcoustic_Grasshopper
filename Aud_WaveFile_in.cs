@@ -28,7 +28,7 @@ namespace PachydermGH
         /// Initializes a new instance of the MyComponent1 class.
         /// </summary>
         public OpenWaveFile()
-            : base("WaveFile", ".Wav",
+            : base("Read WaveFile", ".Wav-in",
                 "Opens a Wave File",
                 "Acoustics", "Audio")
         {
@@ -102,47 +102,65 @@ namespace PachydermGH
                         throw new Exception("Invalid bit depth variable... Where did you get this audio file again?");
                 }
 
-                for (int s = 0; s < WP.SampleCount; s++)//Have we chosen the right property to get the number of bytes in the file?
-                {
-                    WP.Read(signalbuffer, 0, BytesPerSample);
-                    temp = new Byte[4];
+                //for (int s = 0; s < WP.SampleCount; s++)//Have we chosen the right property to get the number of bytes in the file?
+                //{
+                //    WP.Read(signalbuffer, 0, BytesPerSample);
+                //    temp = new Byte[4];
 
-                    if (WP.WaveFormat.BitsPerSample == 32)
-                    {
-                        Signal.Add((BitConverter.ToInt32(signalbuffer, 0) / Max));
-                    }
-                    else if (WP.WaveFormat.BitsPerSample == 24)
-                    {
-                        for (int c = 0; c < ChannelCt[i]; c++)
-                        {
-                            temp[1] = signalbuffer[c * BytesPerChannel];
-                            temp[2] = signalbuffer[c * BytesPerChannel + 1];
-                            temp[3] = signalbuffer[c * BytesPerChannel + 2];
-                            Signal.Add((float)(BitConverter.ToInt32(temp, 0)) / Max);
-                        }
-                    }
-                    else if (WP.WaveFormat.BitsPerSample == 16)
-                    {
-                        for (int c = 0; c < ChannelCt[i]; c++)
-                        {
-                            temp[2] = signalbuffer[c * BytesPerChannel];
-                            temp[3] = signalbuffer[c * BytesPerChannel + 1];
-                            Signal.Add((float)(BitConverter.ToInt16(temp, 2)) / Max);
-                        }
-                    }
-                }
+                //    if (WP.WaveFormat.BitsPerSample == 32)
+                //    {
+                //        for (int c = 0; c < ChannelCt[i]; c++)
+                //        {
+                //            temp[0] = signalbuffer[c * BytesPerChannel];
+                //            temp[1] = signalbuffer[c * BytesPerChannel + 1];
+                //            temp[2] = signalbuffer[c * BytesPerChannel + 2];
+                //            temp[3] = signalbuffer[c * BytesPerChannel + 3];
+                //            Signal.Add((float)(BitConverter.ToInt32(temp, 0) / Max));
+                //        }
+                //    }
+                //    else if (WP.WaveFormat.BitsPerSample == 24)
+                //    {
+                //        for (int c = 0; c < ChannelCt[i]; c++)
+                //        {
+                //            temp[1] = signalbuffer[c * BytesPerChannel];
+                //            temp[2] = signalbuffer[c * BytesPerChannel + 1];
+                //            temp[3] = signalbuffer[c * BytesPerChannel + 2];
+                //            Signal.Add((float)(BitConverter.ToInt32(temp, 0)) / Max);
+                //        }
+                //    }
+                //    else if (WP.WaveFormat.BitsPerSample == 16)
+                //    {
+                //        for (int c = 0; c < ChannelCt[i]; c++)
+                //        {
+                //            temp[2] = signalbuffer[c * BytesPerChannel];
+                //            temp[3] = signalbuffer[c * BytesPerChannel + 1];
+                //            Signal.Add((float)(BitConverter.ToInt16(temp, 2)) / Max);
+                //        }
+                //    }
+                //}
                 
                 float[][] S = new float[ChannelCt[i]][];
-                for (int j = 0; j < ChannelCt[i]; j++)
-                {
-                    int pos = 0;
-                    S[j] = new float[Signal.Count / ChannelCt[i]];
-                    for (int k = 0; k < (Signal.Count - ChannelCt[i]); k += ChannelCt[i])
+                //for (int j = 0; j < ChannelCt[i]; j++)
+                //{
+                //    int pos = 0;
+                //    S[j] = new float[Signal.Count / ChannelCt[i]];
+                //    for (int k = 0; k < (Signal.Count - ChannelCt[i]); k += ChannelCt[i])
+                //    {
+                //        S[j][pos] = Signal[k + j];
+                //        pos++;
+                //    }
+                //}
+
+                    for (int k = 0; k < ChannelCt[i]; k++) S[k] = new float[WP.SampleCount];
+    
+                    for (int k = 0; k < WP.SampleCount; k++)
                     {
-                        S[j][pos] = Signal[k + j];
-                        pos++;
+                        float[] frame = WP.ReadNextSampleFrame();
+                        for (int l = 0; l < frame.Length; l++)
+                        {
+                            S[l][k] = frame[l];
+                        }
                     }
-                }
 
                 Audio_Signal AS = new Audio_Signal(S, Sample_Freq[i]);
                 DA.SetData(0, AS);

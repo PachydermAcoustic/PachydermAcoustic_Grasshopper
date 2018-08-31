@@ -18,20 +18,21 @@
 
 using System;
 using System.Collections.Generic;
-
+using System.Windows.Forms;
 using Grasshopper.Kernel;
+using Rhino.Geometry;
 
 namespace PachydermGH
 {
-    public class RealPaToSPL : GH_Component
+    public class ExportWaveFile : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the MyComponent2 class.
         /// </summary>
-        public RealPaToSPL()
-            : base("Real Pressure to SPL", "SPL-RPa",
-                "Converts real pressure values to Sound Pressure Level",
-                "Acoustics", "Utility")
+        public ExportWaveFile()
+            : base("Write Wave File", ".wav-out",
+                "Writes a signal to a wave file.",
+                "Acoustics", "Audio")
         {
         }
 
@@ -40,7 +41,8 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddNumberParameter("Magnitude Pressure", "P", "Real-valued pressure", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Signal Buffer", "Signal", "All input signals to be written to wave file. Signals will be written in channels according to their order at input.", GH_ParamAccess.item);
+            pManager.AddTextParameter("Wave File Path", "Path", "The location of the wave file.", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -48,7 +50,26 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("Sound Pressure Level", "SPL", "Sound Pressure Level", GH_ParamAccess.list);
+        }
+
+        public override bool AppendMenuItems(ToolStripDropDown menu)
+        {
+            if (base.AppendMenuItems(menu))
+            {
+                Menu_AppendItem(menu, "16-bit", bitrate_click, true, bitrate == 16);
+                Menu_AppendItem(menu, "24-bit", bitrate_click, true, bitrate == 24);
+                Menu_AppendItem(menu, "32-bit", bitrate_click, true, bitrate == 32);
+                return true;
+            }
+            return false;
+        }
+
+        int bitrate = 16;
+
+        public void bitrate_click(Object sender, EventArgs e)
+        {
+            bitrate = int.Parse(sender.ToString().Split('-')[0]);
+            this.ExpireSolution(true);
         }
 
         /// <summary>
@@ -56,14 +77,25 @@ namespace PachydermGH
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
-        {
-            List<double> Pa = new List<double>();
-            DA.GetDataList<double>(0, Pa);
-            for(int i = 0; i < Pa.Count; i++)
+        {   
+            Audio_Signal S = new Audio_Signal();
+            DA.GetData<Audio_Signal>(0, ref S);
+            if (S.Count < 1) throw new Exception("Signals should be type of Audio Signal.");
+
+            string path = "";
+            DA.GetData(1, ref path);
+            if (!path.EndsWith(".wav")) throw new Exception("Path invalid. Make sure that directory exists, and that ");
+
+            NAudio.Wave.WaveFileWriter WR = new NAudio.Wave.WaveFileWriter(path, new NAudio.Wave.WaveFormat(S.SampleFrequency, bitrate, S.ChannelCount));
+
+            for (int j = 0; j < S.Count; j++)
             {
-                Pa[i] = Pachyderm_Acoustic.Utilities.AcousticalMath.SPL_Pressure(Pa[i]);
+                for (int i = 0; i < S.ChannelCount; i++) WR.WriteSample((float)S[i][j]);
             }
-            DA.SetDataList(0, Pa);
+            WR.Close();
+            WR.Dispose();
+            //System.Media.SoundPlayer Player = new System.Media.SoundPlayer(SaveWave.FileName);
+            //Player.Play();
         }
 
         /// <summary>
@@ -73,7 +105,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.Real_Pressure_to_SPL;
+                System.Drawing.Bitmap b = Properties.Resources.Wave_File;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }
@@ -84,7 +116,7 @@ namespace PachydermGH
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("{1b1f9d4c-ae74-480b-b4be-41423aafa517}"); }
+            get { return new Guid("{F3098E20-508B-4ED3-BE41-5BDDDE87E71D}"); }
         }
     }
 }

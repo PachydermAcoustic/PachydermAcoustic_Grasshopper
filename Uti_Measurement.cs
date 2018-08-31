@@ -24,15 +24,15 @@ using Rhino.Geometry;
 
 namespace PachydermGH
 {
-    public class RT_X_ETC : GH_Component
+    public class Measurement : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the MyComponent2 class.
         /// </summary>
-        public RT_X_ETC()
-            : base("Reverberation Time", "RT",
-                "Computes reverberation time from Energy Time Curve",
-                "Acoustics", "Analysis")
+        public Measurement()
+            : base("Impulse_Measurement", "IR_Meas",
+                "Measures the impulse response using hardware hooked up to your computer. (Works best with a professional grade interface and a relatively flat omnidirectional microphone.",
+                "Acoustics", "Utility")
         {
         }
 
@@ -41,11 +41,19 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Energy Time Curve", "ETC", "Energy Time Curve", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Decay Index", "t_X", "A linear regression will be performed on the schroeder integral from -5 dB of decay to -X-5 dB of decay", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Number of Channels", "Ch#", "The number of microphone/input channels", GH_ParamAccess.item, 1);
+            pManager.AddIntegerParameter("Number of Averages", "Av#", "The number of averaged impulse responses taken in a single measurement.", GH_ParamAccess.item, 1);
+            pManager.AddIntegerParameter("Sample Frequency", "FS", "The frequency of input and output channels", GH_ParamAccess.item, 44100);
+            pManager.AddNumberParameter("Gain", "G", "A factor indicating the strength of the signal.", GH_ParamAccess.item, 1);
+            pManager.AddNumberParameter("Signal Time", "ST", "The duration of each impulse response.", GH_ParamAccess.item, 1.1);
+        }
 
-            Grasshopper.Kernel.Parameters.Param_Integer param = (pManager[1] as Grasshopper.Kernel.Parameters.Param_Integer);
-            if (param != null) param.SetPersistentData(30);
+        /// <summary>
+        /// Registers all the output parameters for this component.
+        /// </summary>
+        protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
+        {
+            pManager.AddGenericParameter("Impulse Response", "IR", "The Measured impulse responses...", GH_ParamAccess.list);
         }
 
         public override bool AppendMenuItems(ToolStripDropDown menu)
@@ -70,34 +78,27 @@ namespace PachydermGH
         }
 
         /// <summary>
-        /// Registers all the output parameters for this component.
-        /// </summary>
-        protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
-        {
-            pManager.AddNumberParameter("Rerberation Time", "RT", "Reverberation Time", GH_ParamAccess.list);
-        }
-
-        /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Audio_Signal ETC = null;
-            DA.GetData<Audio_Signal>(0, ref ETC);
-            int tx = 30;
-            DA.GetData<int>(1, ref tx);
+            int NC = 0, NA = 0, FS = 0;
+            double G = 0, ST = 0;
+            DA.GetData(0, ref NC);
+            DA.GetData(1, ref NA);
+            DA.GetData(2, ref FS);
+            DA.GetData(3, ref G);
+            DA.GetData(4, ref ST);
 
-            List<double> RT = new List<double>();
-            foreach (double[] f in ETC.Value)
-            {
-                double[] s = new double[f.Length];
-                for (int i = 0; i < f.Length; i++) s[i] += (double)f[i];
-                double[] si = Pachyderm_Acoustic.Utilities.AcousticalMath.Schroeder_Integral(s);
-                RT.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.T_X(si, tx, ETC.SampleFrequency));
-            }
+            List<Audio_Signal> AS_final = new List<Audio_Signal>();
+            Pachyderm_Acoustic.Audio.Pach_SP.Measurement.IO_Tester test = new Pachyderm_Acoustic.Audio.Pach_SP.Measurement.IO_Tester() { Sample_Frequency = FS, Gain = G, No_of_Averages = NA, No_of_Channels = NC, Signal_Time_s = ST };
 
-            DA.SetDataList(0, RT);
+            test.Acquire(input_id, Pachyderm_Acoustic.Audio.Pach_SP.Measurement.Signal_Type.Swept_Sine, output_id);
+
+            for (int i = 0; i < NC; i++) AS_final.Add(new Audio_Signal(test.IR[i], test.Sample_Frequency));
+
+            DA.SetDataList(0, AS_final);
         }
 
         /// <summary>
@@ -107,7 +108,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.RT;
+                System.Drawing.Bitmap b = Properties.Resources.Energy_Time_Curve;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }
@@ -118,7 +119,7 @@ namespace PachydermGH
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("{575F7509-97DE-4021-8A46-B72BA96E6531}"); }
+            get { return new Guid("{3E8A5783-B435-4576-8906-AEED7D47E9FB}"); }
         }
     }
 }

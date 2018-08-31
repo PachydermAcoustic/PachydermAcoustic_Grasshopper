@@ -31,7 +31,7 @@ namespace PachydermGH
         public PolygonScene_Component()
             : base("Polygon Scene", "Poly Scene",
                 "Constructs a scene with the existing geometry in the model and/or geometry from grasshopper definitions",
-                "Acoustics", "Scenes")
+                "Acoustics", "Model")
         {
         }
 

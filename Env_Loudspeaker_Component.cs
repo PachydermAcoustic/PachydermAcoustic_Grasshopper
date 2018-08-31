@@ -43,7 +43,7 @@ namespace PachydermGH
         public Loudspeaker_Component()
             : base("Loudspeaker", "Speaker",
                 "Common Loudspeaker Format",
-                "Acoustics", "Source Modelling")
+                "Acoustics", "Model")
         {
         }
 
