@@ -98,6 +98,14 @@ namespace PachydermGH
 
             for (int i = 0; i < NC; i++) AS_final.Add(new Audio_Signal(test.IR[i], test.Sample_Frequency));
 
+            while(test.Running)
+            {
+                System.Threading.Thread.Sleep(100);
+            }
+
+            string message = "Signal to Noise Ratio \n" + "Freq  63    125   250   500   1000  2000  4000  8000";
+            for (int i = 0; i < NC; i++) message += "\nch." + i + "   " + Math.Round(test.SNR[i][0], 1) + "   " + Math.Round(test.SNR[i][1], 1) + "   " + Math.Round(test.SNR[i][2], 1) + "   " + Math.Round(test.SNR[i][3], 1) + "   " + Math.Round(test.SNR[i][4], 1) + "   " + Math.Round(test.SNR[i][5], 1) + "   " + Math.Round(test.SNR[i][6], 1) + "   " + Math.Round(test.SNR[i][7], 1);
+            this.Message = message;
             DA.SetDataList(0, AS_final);
         }
 

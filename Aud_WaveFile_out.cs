@@ -99,7 +99,7 @@ namespace PachydermGH
         }
 
         /// <summary>
-        /// Provides an Icon for the component.
+        /// Provides an Icon for the component....
         /// </summary>
         protected override System.Drawing.Bitmap Icon
         {

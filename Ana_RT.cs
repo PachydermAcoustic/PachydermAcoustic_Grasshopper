@@ -48,25 +48,18 @@ namespace PachydermGH
             if (param != null) param.SetPersistentData(30);
         }
 
+        bool Noise_Compensation = false;
+
         public override bool AppendMenuItems(ToolStripDropDown menu)
         {
-            List<string> input = Pachyderm_Acoustic.Audio.Pach_SP.Measurement.Get_Input_Devices();
-            List<string> output = Pachyderm_Acoustic.Audio.Pach_SP.Measurement.Get_Output_Devices();
-            for (int i = 0; i < input.Count; i++) Menu_AppendItem(menu, i.ToString() + ":" + input[i], input_click, true, i == input_id);
-            for (int i = 0; i < output.Count; i++) Menu_AppendItem(menu, i.ToString() + ":" + output[i], output_click, true, i == output_id);
+            Menu_AppendItem(menu, "Noise Compensation (Not needed for Simulated IRs)", Comp_click, true, Noise_Compensation);
             return base.AppendMenuItems(menu);
         }
 
-        int input_id = 0, output_id = 0;
-
-        public void input_click(Object sender, EventArgs e)
+        public void Comp_click(Object sender, EventArgs e)
         {
-            input_id = int.Parse(sender.ToString().Split(':')[0]);
-        }
-
-        public void output_click(Object sender, EventArgs e)
-        {
-            output_id = int.Parse(sender.ToString().Split(':')[0]);
+            Noise_Compensation = !Noise_Compensation;
+            this.ExpireSolution(true);
         }
 
         /// <summary>
@@ -94,9 +87,13 @@ namespace PachydermGH
                 double[] s = new double[f.Length];
                 for (int i = 0; i < f.Length; i++) s[i] += (double)f[i];
                 double[] si = Pachyderm_Acoustic.Utilities.AcousticalMath.Schroeder_Integral(s);
+                if (Noise_Compensation)
+                {
+                    double EDT = Pachyderm_Acoustic.Utilities.AcousticalMath.EarlyDecayTime(si, ETC.SampleFrequency);
+                    si = Pachyderm_Acoustic.Utilities.AcousticalMath.Schroeder_Integral(s, EDT * 1000 * (tx + 10) / 60);
+                }
                 RT.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.T_X(si, tx, ETC.SampleFrequency));
             }
-
             DA.SetDataList(0, RT);
         }
 
