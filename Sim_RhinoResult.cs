@@ -2,7 +2,7 @@
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
-//'Copyright (c) 2008-2018, Arthur van der Harten 
+//'Copyright (c) 2008-2019, Arthur van der Harten 
 //'Pachyderm-Acoustic is free software; you can redistribute it and/or modify 
 //'it under the terms of the GNU General Public License as published 
 //'by the Free Software Foundation; either version 3 of the License, or 
@@ -70,7 +70,7 @@ namespace PachydermGH
                     pManager.AddGenericParameter("Ray Tracing Data", "RT", "The pachyderm ray tracing data", GH_ParamAccess.list);
                     break;
                 case interface_selection.Pach_Numeric_TimeDomain:
-                    pManager.AddGenericParameter("Numeric Time Domain Data", "NTD", "The pachyderm Finite Volume Method model", GH_ParamAccess.item);
+                    pManager.AddGenericParameter("Numeric Time Domain Data", "NTD", "Recorded signal at receivers.", GH_ParamAccess.item);
                     break;
             }
         }
@@ -81,7 +81,7 @@ namespace PachydermGH
             Menu_AppendEnableItem(menu);
             Menu_AppendItem(menu, "Obtain data from Pach_Hybrid_Method", Hybrid_Click);
             Menu_AppendItem(menu, "Obtain data from Pach_Mapping_Method", Mapping_Click);
-            //Menu_AppendItem(menu, "Obtain data from Numeric_TimeDomain_Method", NTD_Click);
+            Menu_AppendItem(menu, "Obtain data from Numeric_TimeDomain_Method", NTD_Click);
             return true;
         }
 
@@ -133,13 +133,22 @@ namespace PachydermGH
             //this.ComputeData();
         }
 
-        //private void NTD_Click(Object sender, EventArgs e)
-        //{
-        //    I = interface_selection.Pach_Numeric_TimeDomain;
-        //    ExpireSolution(true);
-        //    Params.Clear();
-        //    RegisterOutputParams(Params);
-        //}
+        private void NTD_Click(Object sender, EventArgs e)
+        {
+            I = interface_selection.Pach_Numeric_TimeDomain;
+            //ExpireSolution(true);
+            Params.Clear();
+            for (int i = 0; i < Params.Output.Count; i++) Params.UnregisterParameter(Params.Output[i]);
+            Grasshopper.Kernel.Parameters.Param_GenericObject PN = new Grasshopper.Kernel.Parameters.Param_GenericObject();
+            PN.Name = "Recording";
+            PN.NickName = "R";
+            PN.Description = "A signal object representing the recording at each receiver in the Rhinoceros FVM Visualization simulation.";
+            PN.Access = GH_ParamAccess.list;
+            Params.RegisterOutputParam(PN);
+            Params.OnParametersChanged();
+            this.ExpireSolution(true);
+            //ExpireSolution(true);
+        }
 
         /// <summary>
         /// This is the method that actually does the work.
@@ -159,6 +168,9 @@ namespace PachydermGH
                 Pachyderm_Acoustic.UI.Pach_Hybrid_Control.Instance.GetSims(ref SRC, ref REC, ref D, ref IS, ref RT);
                 if (RT.Length == 0) RT = new Pachyderm_Acoustic.Environment.Receiver_Bank[D.Length];
                 if (IS.Length == 0) IS = new Pachyderm_Acoustic.ImageSourceData[D.Length];
+                DA.SetDataList(0, D);
+                DA.SetDataList(1, IS);
+                DA.SetDataList(2, RT);
             }
             else if (I == interface_selection.Pach_Mapping_Method && Pachyderm_Acoustic.UI.Pach_Mapping_Control.Instance.Auralisation_Ready())
             {
@@ -173,14 +185,19 @@ namespace PachydermGH
                     IS[i] = null;
                     RT[i] = PMR[i];
                 }
+                DA.SetDataList(0, D);
+                DA.SetDataList(1, IS);
+                DA.SetDataList(2, RT);
             }
-            DA.SetDataList(0, null);
-            DA.SetDataList(1, null);
-            DA.SetDataList(2, RT);
-            //else if(I == interface_selection.Pach_Numeric_TimeDomain && Pachyderm_Acoustic.UI.Pach_TD_Numeric_Control.HasData)
-            //{
-
-            //}
+            else if (I == interface_selection.Pach_Numeric_TimeDomain && Pachyderm_Acoustic.UI.Pach_TD_Numeric_Control.Instance.FDTD != null && Pachyderm_Acoustic.UI.Pach_TD_Numeric_Control.Instance.FDTD.Mic != null)
+            {
+                double[][] Rec = Pachyderm_Acoustic.UI.Pach_TD_Numeric_Control.Instance.FDTD.Mic.Recordings_Current();
+                if (Rec == null || Rec.Length < 1) throw new Exception("Recordings not found. Are you sure you have receivers, and that you have run your FDTD simulation?");
+                double FS = Pachyderm_Acoustic.UI.Pach_TD_Numeric_Control.Instance.FDTD.SampleFrequency;
+                System.Collections.Generic.List<Audio_Signal> AS = new System.Collections.Generic.List<Audio_Signal>();
+                for (int i = 0; i < Rec.Length; i++) AS.Add(new Audio_Signal(Rec[i], (int)FS));
+                DA.SetDataList(0, AS);
+            }
         }
 
         /// <summary>
