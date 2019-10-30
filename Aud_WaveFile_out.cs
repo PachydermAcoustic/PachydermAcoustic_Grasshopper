@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
+using System.Linq;
 
 namespace PachydermGH
 {
@@ -57,18 +58,26 @@ namespace PachydermGH
             if (base.AppendMenuItems(menu))
             {
                 Menu_AppendItem(menu, "16-bit", bitrate_click, true, bitrate == 16);
-                Menu_AppendItem(menu, "24-bit", bitrate_click, true, bitrate == 24);
+                //Menu_AppendItem(menu, "24-bit", bitrate_click, true, bitrate == 24);
                 Menu_AppendItem(menu, "32-bit", bitrate_click, true, bitrate == 32);
+                Menu_AppendItem(menu, "Normalize", normalize_click, true, Normalize);
                 return true;
             }
             return false;
         }
 
         int bitrate = 16;
+        bool Normalize = false;
 
         public void bitrate_click(Object sender, EventArgs e)
         {
             bitrate = int.Parse(sender.ToString().Split('-')[0]);
+            this.ExpireSolution(true);
+        }
+
+        public void normalize_click(Object sender, EventArgs e)
+        {
+            Normalize = !Normalize;
             this.ExpireSolution(true);
         }
 
@@ -84,18 +93,20 @@ namespace PachydermGH
 
             string path = "";
             DA.GetData(1, ref path);
-            if (!path.EndsWith(".wav")) throw new Exception("Path invalid. Make sure that directory exists, and that ");
+            if (!path.EndsWith(".wav")) throw new Exception("Path invalid. Make sure that directory exists, and that the ");
 
-            NAudio.Wave.WaveFileWriter WR = new NAudio.Wave.WaveFileWriter(path, new NAudio.Wave.WaveFormat(S.SampleFrequency, bitrate, S.ChannelCount));
-
-            for (int j = 0; j < S.Count; j++)
+            if (Normalize)
             {
-                for (int i = 0; i < S.ChannelCount; i++) WR.WriteSample((float)S[i][j]);
+                for (int a = 0; a < S.Count; a++)
+                {
+                    double m = S[a].Max();
+                    for (int i = 0; i < S[a].Length; i++) S[a][i] /= m;
+                }
             }
-            WR.Close();
-            WR.Dispose();
-            //System.Media.SoundPlayer Player = new System.Media.SoundPlayer(SaveWave.FileName);
-            //Player.Play();
+
+            float[][] data = new float[S.ChannelCount][];
+            for (int i = 0; i < S.ChannelCount; i++) data[i] = S.toFloat(i);
+            Pachyderm_Acoustic.Audio.Pach_SP.Wave.Write(data, S.SampleFrequency, path, bitrate);
         }
 
         /// <summary>

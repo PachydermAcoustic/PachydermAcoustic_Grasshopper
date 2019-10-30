@@ -194,3 +194,6 @@ ModelManifest.xml
 /.vs/PachydermGH/v15/sqlite3/db.lock
 /.vs/PachydermGH/v15/sqlite3/storage.ide-shm
 /.vs/PachydermGH/v15/sqlite3/storage.ide-wal
+/Aud_Play_Signal.cs
+/Aud_PlayContinuous.cs
+/Aud_Convolution.cs

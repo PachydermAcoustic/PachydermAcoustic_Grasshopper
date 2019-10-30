@@ -58,8 +58,9 @@ namespace PachydermGH
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddGenericParameter("Image Source Data", "IS", "The pachyderm image source data object", GH_ParamAccess.list);
-            pManager.AddTextParameter("ReflectionTag", "PT", "The unique descriptive identifier for each reflection", GH_ParamAccess.list);
-            pManager.AddCurveParameter("Reflections", "P", "Curves indicating the Snell's Law paths of sound.", GH_ParamAccess.list);
+            pManager.AddTextParameter("ReflectionTag", "PT", "The unique descriptive identifier for each reflection", GH_ParamAccess.tree);
+            pManager.AddCurveParameter("Reflections", "P", "Curves indicating the Snell's Law paths of sound.", GH_ParamAccess.tree);
+            pManager.AddNumberParameter("Intensity", "I", "Sound Intensity of each reflection. Data is organized in the order of Source:Receiver:Octave Band", GH_ParamAccess.tree);
         }
 
         /// <summary>
@@ -84,11 +85,12 @@ namespace PachydermGH
 
             int ct = 0;
             int s_id = 0;
-            List<Grasshopper.Kernel.Types.GH_Curve> cvs = new List<Grasshopper.Kernel.Types.GH_Curve>();
+            Grasshopper.DataTree<Grasshopper.Kernel.Types.GH_Curve> cvs = new Grasshopper.DataTree<Grasshopper.Kernel.Types.GH_Curve>();
+            Grasshopper.DataTree<string> txt = new Grasshopper.DataTree<string>();
+            Grasshopper.DataTree<double> I = new Grasshopper.DataTree<double>();
 
             foreach (Pachyderm_Acoustic.Environment.Source Pt in Src)
             {
-                //Pachyderm_Acoustic.Environment.Receiver_Bank RB = new Pachyderm_Acoustic.Environment.Receiver_Bank(Rec, Pt, S, 0, 1000, 1000, Pachyderm_Acoustic.Environment.Receiver_Bank.Type.Stationary); 
                 Pachyderm_Acoustic.Direct_Sound DS = new Pachyderm_Acoustic.Direct_Sound(Pt, Rec[ct], S, new int[] { 0, 1, 2, 3, 4, 5, 6, 7 });
                 DS.Begin();
                 do { System.Threading.Thread.Sleep(100); } while (DS.ThreadState() == System.Threading.ThreadState.Running);
@@ -104,25 +106,30 @@ namespace PachydermGH
                 
                 if (IS.Paths.Length > 0)
                 {
-                    for (int i = 0; i < Rec.Count; i++)
+                    for (int i = 0; i < Rec[0].Count; i++)
                     {
-                        foreach (Pachyderm_Acoustic.Deterministic_Reflection R in IS.Paths[i])
+                        for(int h = 0; h < IS.Paths[i].Count; h++)
                         {
-                            Polyline[] path = new Polyline[R.Path.Length];
-                            for (int j = 0; j < R.Path.Length; j++)
+                            Polyline[] path = new Polyline[IS.Paths[i][h].Path.Length];
+                            for (int j = 0; j < IS.Paths[i][h].Path.Length; j++)
                             {
                                 path[j] = new Polyline();
-                                foreach (Hare.Geometry.Point pt in R.Path[j])
+                                foreach (Hare.Geometry.Point pt in IS.Paths[i][h].Path[j])
                                 {
                                     path[j].Add(pt.x, pt.y, pt.z);
                                 }
-                                for (int k = 0; k < path.Length; k++) cvs.Add(new Grasshopper.Kernel.Types.GH_Curve(path[k].ToNurbsCurve()));
+                                List<double> I_oct = new List<double>();
+                                for (int oct = 0; oct < 8; oct++) I.Add(IS.Paths[i][h].Energy(oct, 44100)[0], new Grasshopper.Kernel.Data.GH_Path(new int[] {i, h, oct}));
+                                txt.Add(IS.Paths[i][h].ToString(), new Grasshopper.Kernel.Data.GH_Path(new int[] {i ,h}));
+                                for (int k = 0; k < path.Length; k++)if (path[k] != null) cvs.Add(new Grasshopper.Kernel.Types.GH_Curve(path[k].ToNurbsCurve()), new Grasshopper.Kernel.Data.GH_Path(new int[] { i, h }));
                             }
                         }
                     }
                 }
             }
-            DA.SetDataList(2, cvs);
+            DA.SetDataTree(1, txt);
+            DA.SetDataTree(2, cvs);
+            DA.SetDataTree(3, I);
         }
 
         /// <summary>

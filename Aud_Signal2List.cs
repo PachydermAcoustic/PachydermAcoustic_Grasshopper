@@ -72,6 +72,8 @@ namespace PachydermGH
 
             double[] SignalBuffer = Buffer[chan];
 
+            if (domain[1] - domain[0] < 1) domain[1] = Buffer.Count;
+
             List<double> signal = new List<double>();
             for (int i = (int)domain.Min; i < (int)domain.Max; i++) { signal.Add(SignalBuffer[i]); }
             //foreach (float s in SignalBuffer) signal.Add(s);

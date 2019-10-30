@@ -83,9 +83,6 @@
     <Reference Include="MathNet.Numerics, Version=4.5.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\PachydermAcoustic_BigBang\Pachyderm_Whole\packages\MathNet.Numerics.4.5.1\lib\net461\MathNet.Numerics.dll</HintPath>
     </Reference>
-    <Reference Include="NAudio, Version=1.9.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\PachydermAcoustic_BigBang\Pachyderm_Whole\packages\NAudio.1.9.0-preview1\lib\net35\NAudio.dll</HintPath>
-    </Reference>
     <Reference Include="RhinoCommon, Version=6.7.18177.12461, Culture=neutral, PublicKeyToken=552281e97c755530, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Program Files\Rhinoceros 5 (64-bit)\System\RhinoCommon.dll</HintPath>
@@ -110,6 +107,9 @@
     <Compile Include="Ana_Deutlich.cs" />
     <Compile Include="Ana_Clarity.cs" />
     <Compile Include="Ana_SPL.cs" />
+    <Compile Include="Aud_PlayContinuous.cs" />
+    <Compile Include="Aud_Play_Signal.cs" />
+    <Compile Include="Aud_Convolution.cs" />
     <Compile Include="Aud_Signal2Chunks.cs" />
     <Compile Include="Aud_Fourier_Transform.cs" />
     <Compile Include="Aud_OctFilter.cs" />
@@ -117,6 +117,7 @@
     <Compile Include="Aud_Objects.cs" />
     <Compile Include="Aud_Signal2List.cs" />
     <Compile Include="Aud_Spectrum2List.cs" />
+    <Compile Include="Env_LayerProps.cs" />
     <Compile Include="Env_NURBS_Scene .cs" />
     <Compile Include="User_Feedback.cs">
       <SubType>Form</SubType>
@@ -134,7 +135,7 @@
     <Compile Include="Sim_RhinoResult.cs" />
     <Compile Include="Sim_Image_Source.cs" />
     <Compile Include="Sim_DirectSound.cs" />
-    <Compile Include="Uti_EnergyTimeCurve - Copy.cs" />
+    <Compile Include="Uti_EnergyTimeCurve.cs" />
     <Compile Include="Uti_Measurement.cs" />
     <Compile Include="Uti_RealPaToSPL.cs" />
     <Compile Include="Vis_FVM_CustomMesh.cs" />
