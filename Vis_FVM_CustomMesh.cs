@@ -38,7 +38,7 @@ namespace PachydermGH
                 "Acoustics", "Visualization")
         {
             Sim = Pachyderm_Acoustic.UI.Pach_TD_Numeric_Control.Instance;
-            Sim.Incremented += Sim_Incremented;
+            if (Sim != null) Sim.Incremented += Sim_Incremented;
         }
 
         private void Sim_Incremented(object sender, EventArgs e)

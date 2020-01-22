@@ -98,10 +98,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ana_Sabine.cs" />
     <Compile Include="Ana_SpeechTransmissionIndex.cs" />
     <Compile Include="Ana_CenterTime.cs" />
     <Compile Include="Ana_EDT.cs" />
     <Compile Include="Ana_SPLA.cs" />
+    <Compile Include="Ana_Lombard.cs" />
     <Compile Include="Ana_Strength.cs" />
     <Compile Include="Ana_ITDG.cs" />
     <Compile Include="Ana_Deutlich.cs" />

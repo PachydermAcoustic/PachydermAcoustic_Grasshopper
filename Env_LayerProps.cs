@@ -17,6 +17,7 @@
 //'Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
 
 using System;
+using System.Windows.Forms;
 using Grasshopper.Kernel;
 
 namespace PachydermGH
@@ -54,6 +55,19 @@ namespace PachydermGH
             pManager.AddIntegerParameter("Layer Index", "L ID", "The zero-based index of the layer. This is also how layer are identified in scene components.", GH_ParamAccess.item);
         }
 
+        bool recompute = true;
+        bool expired = false;
+        protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+        {
+            Menu_AppendItem(menu, "Trigger Recompute", ToggleRecompute, true, recompute);
+            base.AppendAdditionalComponentMenuItems(menu);
+        }
+
+        private void ToggleRecompute(object sender, EventArgs e)
+        {
+            recompute = !recompute;
+        }
+
         /// <summary>
         /// This is the method that actually does the work.
         /// </summary>
@@ -81,6 +95,18 @@ namespace PachydermGH
             Pachyderm_Acoustic.Utilities.RC_PachTools.Material_SetLayer(id, ABS.ToArray(), SCT.ToArray(), TRN.ToArray());
 
             DA.SetData(0, id);
+
+            if (recompute && !expired)
+            {
+                foreach (GH_DocumentObject C in Grasshopper.Instances.ActiveCanvas.Document.Objects)
+                {
+                    if (C is NURBSScene_Component) (C as NURBSScene_Component).ExpireSolution(true);
+                    if (C is PolygonScene_Component) (C as PolygonScene_Component).ExpireSolution(true);
+                }
+                expired = true;
+            }
+            else expired = false;
+
         }
 
         /// <summary>

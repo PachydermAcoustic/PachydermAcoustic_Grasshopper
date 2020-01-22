@@ -41,7 +41,7 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Energy Time Curve", "ETC", "Energy Time Curve", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Energy Time Curve", "ETC", "Energy Time Curve", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -58,22 +58,34 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Audio_Signal ETC = null;
-            DA.GetData<Audio_Signal>(0, ref ETC);
-
+            List<Audio_Signal> ETC = new List<Audio_Signal>();
             double SW = 0;
-            if (ETC.ChannelCount != 8) throw new Exception("For A-Weighted Sound Pressure Level, full spectrum data is needed. Please supply data for octaves 0 through 7.");
+            List<double> spec = new List<double>();
 
-            double[] AFactors = new double[8] { Math.Pow(10, (-26.2 / 10)), Math.Pow(10, (-16.1 / 10)), Math.Pow(10, (-8.6 / 10)), Math.Pow(10, (-3.2 / 10)), 1, Math.Pow(10, (1.2 / 10)), Math.Pow(10, (1 / 10)), Math.Pow(10, (-1.1 / 10)) };
-
-            for (int f = 0; f < ETC.ChannelCount; f++)
+            if (DA.GetDataList<double>(0, spec))
             {
-                double s = 0;
-                for (int i = 0; i < ETC.Count; i++) s += ETC[f][i];
-                SW += s * AFactors[f];
+                if (spec.Count != 8) throw new Exception("For A-Weighted Sound Pressure Level, full spectrum data is needed. Please supply data for octaves 0 through 7.");
+                SW = Pachyderm_Acoustic.Utilities.AcousticalMath.Sound_Pressure_Level_A(spec.ToArray());
+                DA.SetData(0, SW);
             }
+            else if (DA.GetDataList<Audio_Signal>(0, ETC))
+            {
+                for (int i = 0; i < ETC.Count; i++)
+                {
+                    if (ETC[i].ChannelCount != 8) throw new Exception("For A-Weighted Sound Pressure Level, full spectrum data is needed. Please supply data for octaves 0 through 7.");
 
-            DA.SetData(0, Pachyderm_Acoustic.Utilities.AcousticalMath.SPL_Intensity(SW));
+                    double[] AFactors = new double[8] { Math.Pow(10, (-26.2 / 10)), Math.Pow(10, (-16.1 / 10)), Math.Pow(10, (-8.6 / 10)), Math.Pow(10, (-3.2 / 10)), 1, Math.Pow(10, (1.2 / 10)), Math.Pow(10, (1 / 10)), Math.Pow(10, (-1.1 / 10)) };
+
+                    for (int f = 0; f < ETC[i].ChannelCount; f++)
+                    {
+                        double s = 0;
+                        for (int j = 0; j < ETC.Count; j++) s += ETC[i][f][j];
+                        SW += s * AFactors[f];
+                        DA.SetData(0, Pachyderm_Acoustic.Utilities.AcousticalMath.SPL_Intensity(SW));
+                    }
+                }
+            }
+            
         }
 
         /// <summary>

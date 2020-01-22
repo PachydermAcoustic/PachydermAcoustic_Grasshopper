@@ -18,18 +18,20 @@
 
 using System;
 using System.Collections.Generic;
+using System.Windows.Forms;
 using Grasshopper.Kernel;
+using Rhino.Geometry;
 
 namespace PachydermGH
 {
-    public class STI_ETC : GH_Component
+    public class RT_Sabine : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the MyComponent2 class.
         /// </summary>
-        public STI_ETC()
-            : base("Speech Transmission Index", "STI",
-                "Computes Center Time from Energy Time Curve",
+        public RT_Sabine()
+            : base("Sabine Reverberation", "RT",
+                "Computes reverberation time from the model using the Sabine method",
                 "Acoustics", "Analysis")
         {
         }
@@ -39,8 +41,11 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Energy Time Curve", "ETC", "Energy Time Curve", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Noise Levels", "N", "Background Noise, by octave band...", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Room", "R", "Pachyderm Scene", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Volume", "V", "Room volume in cubic meters.", GH_ParamAccess.item);
+
+            Grasshopper.Kernel.Parameters.Param_Integer param = (pManager[1] as Grasshopper.Kernel.Parameters.Param_Integer);
+            if (param != null) param.Optional = true;
         }
 
         /// <summary>
@@ -48,7 +53,7 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("Speech Transmission Index", "STI", "Speech Transmission Index", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Rerberation Time", "RT", "Reverberation Time", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -57,18 +62,15 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Audio_Signal ETC = null;
-            DA.GetData<Audio_Signal>(0, ref ETC);
-            List<double> Noise = new List<double>();
-            DA.GetDataList<double>(1, Noise);
-            if (Noise.Count != 8) throw new Exception("Noise should be specified by octave band, 0 for 63 Hz. through 7 for 8000 Hz.");
+            Pachyderm_Acoustic.Environment.Scene Room = null;
+            DA.GetData<Pachyderm_Acoustic.Environment.Scene>(0, ref Room);
+            double Volume = 0;
+            if (DA.GetData<double>(1, ref Volume));
 
-            double[][] etc = new double[8][];
-            for (int oct = 0; oct < 8; oct++) etc[oct] = ETC[oct];
+            double[] RT = new double[8];
+            Pachyderm_Acoustic.Utilities.AcousticalMath.Sabine(Room, Volume, ref RT);
 
-            double[] STI = Pachyderm_Acoustic.Utilities.AcousticalMath.Speech_Transmission_Index(etc, 343*1.22, Noise.ToArray(), ETC.SampleFrequency);
-
-            DA.SetDataList(0, STI);
+            DA.SetDataList(0, RT);
         }
 
         /// <summary>
@@ -78,9 +80,9 @@ namespace PachydermGH
         {
             get
             {
-                //You can add image files to your project resources and access them like this:
-                // return Resources.IconForThisComponent;
-                return Properties.Resources.Speech_Transmission_Index_2;
+                System.Drawing.Bitmap b = Properties.Resources.RT;
+                b.MakeTransparent(System.Drawing.Color.White);
+                return b;
             }
         }
 
@@ -89,7 +91,7 @@ namespace PachydermGH
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("{0DD773A3-374D-4449-A34C-63EC1C7E6ED3}"); }
+            get { return new Guid("{61CF0D82-4D78-4575-996B-4162E9362E0B}"); }
         }
     }
 }
