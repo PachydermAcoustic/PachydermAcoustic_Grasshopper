@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PachydermGH</RootNamespace>
     <AssemblyName>PachydermGH</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <TargetFrameworkProfile />
@@ -50,6 +50,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug64|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -60,6 +61,7 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -69,23 +71,27 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CLF_Read">
       <HintPath>..\PachydermAcoustic_Rhinoceros\Resources\CLF_Read.dll</HintPath>
     </Reference>
-    <Reference Include="GH_IO">
-      <HintPath>..\..\..\..\..\Program Files\Common Files\McNeel\Rhinoceros\5.0\Plug-ins\Grasshopper (b45a29b1-4343-4035-989e-044e8580d9cf)\0.9.76.0\GH_IO.dll</HintPath>
+    <Reference Include="GH_IO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6a29997d2e6b4f97, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Program Files\Rhino 6\Plug-ins\Grasshopper\GH_IO.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="Grasshopper">
-      <HintPath>..\..\..\..\..\Program Files\Common Files\McNeel\Rhinoceros\5.0\Plug-ins\Grasshopper (b45a29b1-4343-4035-989e-044e8580d9cf)\0.9.76.0\Grasshopper.dll</HintPath>
+    <Reference Include="Grasshopper, Version=1.0.0.20, Culture=neutral, PublicKeyToken=dda4f5ec2cd80803, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Program Files\Rhino 6\Plug-ins\Grasshopper\Grasshopper.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MathNet.Numerics, Version=4.5.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\PachydermAcoustic_BigBang\Pachyderm_Whole\packages\MathNet.Numerics.4.5.1\lib\net461\MathNet.Numerics.dll</HintPath>
     </Reference>
-    <Reference Include="RhinoCommon, Version=6.7.18177.12461, Culture=neutral, PublicKeyToken=552281e97c755530, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Program Files\Rhinoceros 5 (64-bit)\System\RhinoCommon.dll</HintPath>
+    <Reference Include="RhinoCommon">
+      <HintPath>..\..\..\..\..\Program Files\Rhino 6\System\RhinoCommon.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -119,8 +125,11 @@
     <Compile Include="Aud_Objects.cs" />
     <Compile Include="Aud_Signal2List.cs" />
     <Compile Include="Aud_Spectrum2List.cs" />
+    <Compile Include="Env_Loudspeaker_Component.cs" />
+    <Compile Include="Mat_Airspace.cs" />
     <Compile Include="Env_LayerProps.cs" />
     <Compile Include="Env_NURBS_Scene .cs" />
+    <Compile Include="Env_RhinoSource.cs" />
     <Compile Include="User_Feedback.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -145,7 +154,7 @@
     <Compile Include="Uti_Radiation_Absorption.cs" />
     <Compile Include="Uti_Radiation_Impedance.cs" />
     <Compile Include="Env_StationaryReceiver_Component.cs" />
-    <Compile Include="Env_Loudspeaker_Component.cs" />
+    <Compile Include="Env_TrafficSource_Component.cs" />
     <Compile Include="Env_GeodesicSource_Component.cs" />
     <Compile Include="Sim_DirectField.cs" />
     <Compile Include="Env_Atmospheric_Properties.cs" />
@@ -306,9 +315,8 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>Copy "$(TargetPath)" "$(TargetDir)$(ProjectName).gha"
-copy /Y "$(TargetDir)$(ProjectName).gha" "%25userprofile%25\AppData\Roaming\Grasshopper\Libraries\$(ProjectName).gha"
-</PostBuildEvent>
+    <PostBuildEvent>Copy /y "$(TargetPath)" "$(TargetDir)$(ProjectName).gha"
+Copy /y "$(TargetDir)$(ProjectName).gha" "%25appdata%25\Grasshopper\6\Libraries\$(ProjectName).gha"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug32|AnyCPU' ">
     <StartArguments>

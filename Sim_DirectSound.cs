@@ -46,6 +46,7 @@ namespace PachydermGH
             pManager.AddGenericParameter("Room Model", "Room", "The Pachyderm Room Model Reference", GH_ParamAccess.item);
             pManager.AddGenericParameter("Source", "Src", "Sound Source Objects...", GH_ParamAccess.list);
             pManager.AddGenericParameter("Receiver", "Rec", "Listening Object (Receiver_Bank)...", GH_ParamAccess.list);
+            pManager.AddBooleanParameter("Screen Attenuation", "SCR", "Toggles the screen attenuation option. Obstructed receivers will receive energy based on the shortest clear path around obstructions.", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -69,12 +70,14 @@ namespace PachydermGH
             DA.GetDataList<Pachyderm_Acoustic.Environment.Source>(1, Src);
             List<Pachyderm_Acoustic.Environment.Receiver_Bank> Rec = new List<Pachyderm_Acoustic.Environment.Receiver_Bank>();
             DA.GetDataList<Pachyderm_Acoustic.Environment.Receiver_Bank>(2, Rec);
+            bool screen = false;
+            DA.GetData<bool>(3, ref screen);
 
             int ct = 0;
             int s_id = 0;
             foreach (Pachyderm_Acoustic.Environment.Source Pt in Src)
             {
-                Pachyderm_Acoustic.Direct_Sound DS = new Pachyderm_Acoustic.Direct_Sound(Pt, Rec[ct], S, new int[] { 0, 1, 2, 3, 4, 5, 6, 7 });
+                Pachyderm_Acoustic.Direct_Sound DS = new Pachyderm_Acoustic.Direct_Sound(Pt, Rec[ct], S, new int[] { 0, 1, 2, 3, 4, 5, 6, 7 }, screen);
                 DS.Begin();
                 do { System.Threading.Thread.Sleep(100); } while (DS.ThreadState() == System.Threading.ThreadState.Running);
                 DS.Combine_ThreadLocal_Results();

@@ -96,8 +96,8 @@ namespace PachydermGH
 
             if (V == null || V.Length == 0) throw new Exception("Provide a vector indicating the direction of the speaker.");
 
-            if (!CurrentD.Equals(V) || !CurrentO.Equals(Origin) || CurrentR != rot)
-            {
+            //if (!CurrentD.Equals(V) || !CurrentO.Equals(Origin) || CurrentR != rot)
+            //{
                 CurrentD = V;
                 CurrentO = Origin;
                 CurrentR = rot;
@@ -148,7 +148,7 @@ namespace PachydermGH
                 S = new Pachyderm_Acoustic.Environment.DirectionalSource(Balloon, SWL, new Hare.Geometry.Point(Origin.X, Origin.Y, Origin.Z), new int[] { int.Parse(B[0]), int.Parse(B[1]) }, 0);
                 M = Pachyderm_Acoustic.Utilities.RC_PachTools.Hare_to_RhinoMesh(Balloon.m_DisplayMesh, false);
                 M.Flip(true, true, true);
-            }
+            //}
 
             DA.SetData("Source", S);
         }
