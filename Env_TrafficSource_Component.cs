@@ -61,7 +61,7 @@ namespace PachydermGH
             pManager.AddIntegerParameter("Buses", "B", "Number of buses per hour", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Motorcyles", "M", "Number of motorcycles per hour", GH_ParamAccess.item);
             pManager.AddBooleanParameter("Full Throttle?", "TH", "Full throttle generally occurs on highway on-ramps. Is traffic pedal to the metal?", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Samples per Meter", "S_M", "The number of point sources per meter that will be used to approximate the line source. 4 is the default for Pachyderm, but other numbers may achieve similar results with less time, depending on the model.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Samples per Meter", "S_M", "The number of point sources per meter that will be used to approximate the line source. 4 is the default for Pachyderm, but other numbers may achieve similar results with less time, depending on the model.", GH_ParamAccess.item);
 
             Grasshopper.Kernel.Parameters.Param_Integer paramp = (pManager[1] as Grasshopper.Kernel.Parameters.Param_Integer);
             if (paramp != null) paramp.SetPersistentData(0);
@@ -102,7 +102,7 @@ namespace PachydermGH
             int pavement = 0;
             int speed = 0, auto = 0, mt = 0, ht = 0, b = 0, m = 0;
             Boolean throttle = false;
-            int el_m = 0;
+            double el_m = 0;
             DA.GetData<int>(1, ref pavement);
             DA.GetData<int>(2, ref speed);
             DA.GetData<int>(3, ref auto);
@@ -111,7 +111,7 @@ namespace PachydermGH
             DA.GetData<int>(6, ref b);
             DA.GetData<int>(7, ref m);
             DA.GetData<Boolean>(8, ref throttle);
-            DA.GetData<int>(9, ref el_m);
+            DA.GetData<double>(9, ref el_m);
 
             double[] SWL = Pachyderm_Acoustic.Utilities.StandardConstructions.FHWA_TNM10_SoundPower(speed, pavement, auto, mt, ht, b, m, throttle);
 

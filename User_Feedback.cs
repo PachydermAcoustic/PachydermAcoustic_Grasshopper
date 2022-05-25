@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Grasshopper.Kernel;
 
 namespace PachydermGH
 {
@@ -15,12 +16,15 @@ namespace PachydermGH
         public User_Feedback()
         {
             InitializeComponent();
+            this.Focus();
         }
 
         public void Display(string s)
         {
             text_display.Text = s;
             text_display.Refresh();
+            this.Refresh();
+            this.Focus();
         }
     }
 }

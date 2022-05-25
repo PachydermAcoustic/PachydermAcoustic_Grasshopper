@@ -130,6 +130,7 @@
     <Compile Include="Env_LayerProps.cs" />
     <Compile Include="Env_NURBS_Scene .cs" />
     <Compile Include="Env_RhinoSource.cs" />
+    <Compile Include="Sim_FVM13.cs" />
     <Compile Include="User_Feedback.cs">
       <SubType>Form</SubType>
     </Compile>
