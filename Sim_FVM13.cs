@@ -85,7 +85,7 @@ namespace PachydermGH
             {
                 Signal_Driver_Compact Sig = new Signal_Driver_Compact(Signal_Driver_Compact.Signal_Type.Sine_Pulse, freq, 1, Src.ToArray());
                 Microphone_Compact Mic = new Microphone_Compact(Rec[i].Origins());
-                Acoustic_Compact_FDTD FVM = new Acoustic_Compact_FDTD(S, ref Sig, ref Mic, freq, tmaxms, Acoustic_Compact_FDTD.GridType.TransparencyLab, Pachyderm_Acoustic.Utilities.RC_PachTools.RPttoHPt(BB.Value.Center), BB.Value.X.Length, BB.Value.Y.Length, BB.Value.Z.Length, false);
+                Acoustic_Compact_FDTD FVM = new Acoustic_Compact_FDTD(S, ref Sig, ref Mic, freq, tmaxms * 2, Acoustic_Compact_FDTD.GridType.TransparencyLab, Pachyderm_Acoustic.Utilities.RC_PachTools.RPttoHPt(BB.Value.Center), BB.Value.X.Length, BB.Value.Y.Length, BB.Value.Z.Length, false);
                 FVM.RuntoCompletion();
                 Mic.reset();
                 Audio_Signal AS = new Audio_Signal(Mic.Recordings()[0], (int)FVM.SampleFrequency);

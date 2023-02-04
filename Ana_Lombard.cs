@@ -62,8 +62,6 @@ namespace PachydermGH
                     levelschild[i] = Pachyderm_Acoustic.Utilities.AcousticalMath.Children[i][oct];
                 }
 
-                
-
                 Speech[0][oct] = MathNet.Numerics.Interpolation.CubicSpline.InterpolateAkima(femaleDBA, levelsfemale);
                 Speech[1][oct] = MathNet.Numerics.Interpolation.CubicSpline.InterpolateAkima(maleDBA, levelsfemale);
                 Speech[2][oct] = MathNet.Numerics.Interpolation.CubicSpline.InterpolateAkima(childrenDBA, levelschild);
@@ -108,7 +106,11 @@ namespace PachydermGH
             Pachyderm_Acoustic.Utilities.AcousticalMath.Absorption_Total(Room, out A);
             double[] Knoise = new double[8] { 26, 51, 79, 86, 90, 86, 78, 69 };
 
-            double Lna = 93 - 20 * Math.Log10(A[4] / No_of_People);
+            double Lna0 = Pachyderm_Acoustic.Utilities.AcousticalMath.Sound_Pressure_Level_A(Noise.ToArray());
+
+            int People_Apparent = (int)Math.Round(Math.Pow(10, (Lna0 - 93 + 20 * Math.Log10(A[4])) / 20));
+
+            double Lna = 93 - 20 * Math.Log10(A[4] / (No_of_People + People_Apparent));
             double SPL1m = 55 + 0.5 * (Lna - 45);
 
             double diff = Lna - SPL1m;
