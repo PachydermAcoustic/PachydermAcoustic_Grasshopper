@@ -26,7 +26,6 @@ namespace PachydermGH
 {
     public class FVM_InsertMesh : GH_Component
     {
-        List<Mesh> m;
         Pachyderm_Acoustic.UI.Pach_TD_Numeric_Control Sim;
 
         /// <summary>
@@ -118,12 +117,6 @@ namespace PachydermGH
                 return b;
             }
         }
-
-        //public override void DrawViewportMeshes(IGH_PreviewArgs args)
-        //{
-        //    args.Display.DrawMeshFalseColors(m);
-        //    //base.DrawViewportMeshes(args);
-        //}
 
         /// <summary>
         /// Gets the unique ID for this component. Do not change this ID after release.

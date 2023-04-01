@@ -12,7 +12,7 @@ using Rhino.PlugIns;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Pachyderm Acoustic")]
 [assembly: AssemblyProduct("")]
-[assembly: AssemblyCopyright("Copyright © Pachyderm Acoustic 2017-2023")]
+[assembly: AssemblyCopyright("Copyright © Pachyderm Acoustic 2023-2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

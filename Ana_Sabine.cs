@@ -65,7 +65,7 @@ namespace PachydermGH
             Pachyderm_Acoustic.Environment.Scene Room = null;
             DA.GetData<Pachyderm_Acoustic.Environment.Scene>(0, ref Room);
             double Volume = 0;
-            if (DA.GetData<double>(1, ref Volume));
+            DA.GetData<double>(1, ref Volume);
 
             double[] RT = new double[8];
             Pachyderm_Acoustic.Utilities.AcousticalMath.Sabine(Room, Volume, ref RT);

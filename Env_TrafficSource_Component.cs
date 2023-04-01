@@ -27,15 +27,7 @@ namespace PachydermGH
 {
     public class Trafficsource_Component : GH_Component
     {
-        Mesh M;
-        string[] CLF_Contents;
-        Speaker_Balloon Balloon;
-        string Sensitivity;
-        string Max;
         Pachyderm_Acoustic.Environment.LineSource S;
-        Vector3d CurrentD;
-        Point3d CurrentO;
-        double CurrentR;
 
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.

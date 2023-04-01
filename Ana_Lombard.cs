@@ -97,7 +97,7 @@ namespace PachydermGH
             Pachyderm_Acoustic.Environment.Scene Room = null;
             DA.GetData<Pachyderm_Acoustic.Environment.Scene>(0, ref Room);
             double No_of_People = 0;
-            if (DA.GetData<double>(1, ref No_of_People)) ;
+            DA.GetData<double>(1, ref No_of_People);
             List<double> Noise = new List<double>();
             DA.GetDataList<double>(2, Noise);
             if (Noise.Count != 8) throw new Exception("Noise should be specified by octave band, 0 for 63 Hz. through 7 for 8000 Hz.");
