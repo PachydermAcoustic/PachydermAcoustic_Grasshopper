@@ -48,7 +48,7 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("Speech Transmission Index", "STI", "Speech Transmission Index", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Speech Transmission Index", "STI", "Speech Transmission Index (3 forms - 0: General via 2003 standard; 2: Using a male speech spectrum; 2: Using a female speech spectrum;", GH_ParamAccess.list);
         }
 
         /// <summary>

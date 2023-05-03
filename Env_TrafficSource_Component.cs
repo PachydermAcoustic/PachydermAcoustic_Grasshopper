@@ -115,7 +115,7 @@ namespace PachydermGH
             {
                 Samples[i] = Pachyderm_Acoustic.Utilities.RC_PachTools.RPttoHPt(pts[i]);
             }
-            S = new Pachyderm_Acoustic.Environment.LineSource(Samples, (Origin.Value as Curve).GetLength(), Pachyderm_Acoustic.Utilities.PachTools.EncodeSourcePower(SWL), el_m, 0);
+            S = new Pachyderm_Acoustic.Environment.LineSource(Samples, (Origin.Value as Curve).GetLength(), Pachyderm_Acoustic.Utilities.PachTools.EncodeSourcePower(SWL), el_m, 0, false);
 
             DA.SetData("Source", S);
         }

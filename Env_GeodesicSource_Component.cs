@@ -71,7 +71,7 @@ namespace PachydermGH
             DA.GetDataList<double>(1, Level);
             DA.GetData<double>(2, ref delay);
             
-            Pachyderm_Acoustic.Environment.GeodesicSource S = new Pachyderm_Acoustic.Environment.GeodesicSource(Level.ToArray(), new Hare.Geometry.Point(Origin.X, Origin. Y, Origin.Z), DA.Iteration);
+            Pachyderm_Acoustic.Environment.GeodesicSource S = new Pachyderm_Acoustic.Environment.GeodesicSource(Level.ToArray(), new Hare.Geometry.Point(Origin.X, Origin. Y, Origin.Z), DA.Iteration, Level.Count > 8 );
             DA.SetData(0, S);
         }
 
