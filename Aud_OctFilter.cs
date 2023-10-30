@@ -64,6 +64,7 @@ namespace PachydermGH
             int oct_id = 0;
             DA.GetData<Audio_Signal>(0, ref Buffer);
             DA.GetData<int>(1, ref oct_id);
+            int[] direct_samples = new int[Buffer.ChannelCount];
 
             double[][] sig = new double[Buffer.ChannelCount][];
 
@@ -74,6 +75,7 @@ namespace PachydermGH
                 {
                     sig[channel][s] = Buffer[channel][s];
                 }
+                direct_samples[channel] = Buffer.Direct_Sample[channel];
             }
 
             for (int channel = 0; channel < Buffer.ChannelCount; channel++)
@@ -92,7 +94,7 @@ namespace PachydermGH
                 }
             }
 
-            Audio_Signal result = new Audio_Signal(sigf, Buffer.SampleFrequency);
+            Audio_Signal result = new Audio_Signal(sigf, Buffer.SampleFrequency, direct_samples);
             DA.SetData(0, result);
         }
 

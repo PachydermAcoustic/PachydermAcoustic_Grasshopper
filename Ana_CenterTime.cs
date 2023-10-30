@@ -58,20 +58,24 @@ namespace PachydermGH
         {
             Audio_Signal ETC = null;
             DA.GetData<Audio_Signal>(0, ref ETC);
-            int Cx = 30;
-            DA.GetData<int>(1, ref Cx);
-
+            //int Cx = 30;
+            //DA.GetData<int>(1, ref Cx);
+            int it = 0;
             List<double> CT = new List<double>();
             foreach (double[] f in ETC.Value)
             {
                 double[] s = new double[f.Length];
                 int start = 0;
-                for (int i = 0; i < f.Length; i++)
+                if (ETC.Direct_Sample == null)
                 {
-                    s[i] += (double)f[i];
-                    if (start == 0) if (s[i] != 0) start = i;
+                    for (int i = 0; i < f.Length; i++)
+                    {
+                        if (start == 0) if (f[i] != 0) start = i;
+                    }
                 }
-                CT.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Center_Time(s, ETC.SampleFrequency, (double)start/(double)ETC.SampleFrequency));
+                else start = ETC.Direct_Sample[0];
+                it++;
+                CT.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Center_Time(f, ETC.SampleFrequency, (double)start/(double)ETC.SampleFrequency));
             }
 
             DA.SetDataList(0, CT);

@@ -67,6 +67,9 @@ namespace PachydermGH
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            System.Diagnostics.Process P = System.Diagnostics.Process.GetCurrentProcess();
+            P.PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
+
             Polygon_Scene S = null;
             DA.GetData<Polygon_Scene>(0, ref S);
             List<Source> Src = new List<Pachyderm_Acoustic.Environment.Source>();
@@ -91,6 +94,7 @@ namespace PachydermGH
                 Audio_Signal AS = new Audio_Signal(Mic.Recordings()[0], (int)FVM.SampleFrequency);
                 DA.SetData(0, AS);
             }
+            P.PriorityClass = System.Diagnostics.ProcessPriorityClass.Normal;
         }
 
         /// <summary>

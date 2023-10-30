@@ -17,21 +17,19 @@
 //'Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
 
 using System;
-using System.Collections.Generic;
-
+using System.Windows.Forms;
 using Grasshopper.Kernel;
-using Rhino.Geometry;
 
 namespace PachydermGH
 {
-    public class D_X_ETC : GH_Component
+    public class Assess_Direct : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the MyComponent2 class.
         /// </summary>
-        public D_X_ETC()
-            : base("Definition", "D50",
-                "Computes Energy Ratio (Definition style) from Energy Time Curve",
+        public Assess_Direct()
+            : base("Assess Direct Time", "Find Direct",
+                "Takes an impulse response, finds the direct sound, and adds the direct time to the signal object for use in analysis.",
                 "Acoustics", "Analysis")
         {
         }
@@ -41,15 +39,21 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Energy Time Curve", "ETC", "Energy Time Curve", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Impulse Response", "IR", "The impulse response, or other signal for which the direct sound must be found.", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Mod-ms", "_t", "Did we get the time wrong? This method is pretty good, but it isn't perfect. Use this to specify the number of milliseconds to modify it by.", GH_ParamAccess.item, 0);
+            pManager[1].Optional = true;
+            Grasshopper.Kernel.Parameters.Param_Integer param = (pManager[1] as Grasshopper.Kernel.Parameters.Param_Integer);
         }
+
+        bool Noise_Compensation = false;
 
         /// <summary>
         /// Registers all the output parameters for this component.
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("Definition", "D", "Definition", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Impulse Response_out", "IRout", "The modified impulse response with the direct time built in.", GH_ParamAccess.item);
+
         }
 
         /// <summary>
@@ -60,25 +64,29 @@ namespace PachydermGH
         {
             Audio_Signal ETC = null;
             DA.GetData<Audio_Signal>(0, ref ETC);
-            int Dx = 50;
+            int tx = 0;
+            DA.GetData<int>(1, ref tx);
 
-            List<double> D = new List<double>();
-            foreach (double[] f in ETC.Value)
-            {
-                double[] s = new double[f.Length];
-                int start = 0;
-                if (ETC.Direct_Sample == null)
+            ETC.Direct_Sample = new int[ETC.ChannelCount];
+
+            double deltaEMax = 0;
+            int D_Sound = 0;
+            for (int c = 0; c < ETC.ChannelCount; c++)
+            { 
+                for (int i = 1; i < ETC.Count; i++)
                 {
-                    for (int i = 0; i < f.Length; i++)
+                    double deltaE = ETC[c][i] * ETC[c][i] - ETC[c][i - 1] * ETC[c][i - 1];
+                    if (deltaE > deltaEMax)
                     {
-                        if (start == 0) if (f[i] != 0) start = i;
+                        deltaEMax = deltaE;
+                        D_Sound = i;
                     }
                 }
-                else start = ETC.Direct_Sample[0];
-                D.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Definition(s, ETC.SampleFrequency, Dx/1000.0, (double)start/(double)ETC.SampleFrequency, false));
+                ETC.Direct_Sample[c] = D_Sound + (int)(tx * ETC.SampleFrequency);
+                
             }
 
-            DA.SetDataList(0, D);
+            DA.SetData(0, ETC);
         }
 
         /// <summary>
@@ -88,7 +96,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.Definition;
+                System.Drawing.Bitmap b = Properties.Resources.RT;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }
@@ -99,7 +107,7 @@ namespace PachydermGH
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("{6F6911C6-00BE-4D0D-87B6-B32378C780F8}"); }
+            get { return new Guid("{E60566C0-95C5-4FC0-BEA2-EDEECD31A5FD}"); }
         }
     }
 }

@@ -81,7 +81,7 @@ namespace PachydermGH
 
             for(int i = 0; i < Srcs.Count; i++)
             {
-                Pachyderm_Acoustic.Environment.Receiver_Bank RB = new Pachyderm_Acoustic.Environment.Receiver_Bank(H_Origin, Srcs[i].Origin(), S, Fs, COTime, Pachyderm_Acoustic.Environment.Receiver_Bank.Type.Stationary, false); 
+                Pachyderm_Acoustic.Environment.Receiver_Bank RB = new Pachyderm_Acoustic.Environment.Receiver_Bank(H_Origin, Srcs[i].Origin(), S, Fs, COTime, Pachyderm_Acoustic.Environment.Receiver_Bank.Type.Stationary);//, false); 
                 DA.SetData(0, RB);
             }
         }

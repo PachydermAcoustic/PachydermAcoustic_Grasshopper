@@ -145,7 +145,7 @@ namespace PachydermGH
                 Balloon.CurrentAxi = (float)rot;
                 Balloon.Update_Aim();
 
-                S = new Pachyderm_Acoustic.Environment.DirectionalSource(Balloon, SWL, new Hare.Geometry.Point(Origin.X, Origin.Y, Origin.Z), new int[] { int.Parse(B[0]), int.Parse(B[1]) }, 0, false);
+                S = new Pachyderm_Acoustic.Environment.DirectionalSource(Balloon, SWL, new Hare.Geometry.Point(Origin.X, Origin.Y, Origin.Z), new int[] { int.Parse(B[0]), int.Parse(B[1]) }, 0);
                 M = Pachyderm_Acoustic.Utilities.RC_PachTools.Hare_to_RhinoMesh(Balloon.m_DisplayMesh, false);
                 M.Flip(true, true, true);
             //}

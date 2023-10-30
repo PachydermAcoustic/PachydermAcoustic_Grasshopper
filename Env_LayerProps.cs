@@ -92,6 +92,8 @@ namespace PachydermGH
                 TRN = new System.Collections.Generic.List<int> { 0, 0, 0, 0, 0, 0, 0, 0 };
             }
 
+            for(int i = 0; i < ABS.Count; i++) { ABS[i] *= 10; }
+
             Pachyderm_Acoustic.Utilities.RC_PachTools.Material_SetLayer(id, ABS.ToArray(), SCT.ToArray(), TRN.ToArray());
 
             DA.SetData(0, id);

@@ -102,6 +102,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ana_AssessDirect.cs" />
     <Compile Include="Ana_Sabine.cs" />
     <Compile Include="Ana_SpeechTransmissionIndex.cs" />
     <Compile Include="Ana_CenterTime.cs" />
@@ -128,7 +129,7 @@
     <Compile Include="Env_LayerProps.cs" />
     <Compile Include="Env_NURBS_Scene .cs" />
     <Compile Include="Env_RhinoSource.cs" />
-    <Compile Include="MyComponent1.cs" />
+    <Compile Include="Aud_MLS_Tail.cs" />
     <Compile Include="Sim_FVM13.cs" />
     <Compile Include="User_Feedback.cs">
       <SubType>Form</SubType>
@@ -147,7 +148,11 @@
     <Compile Include="Sim_Image_Source.cs" />
     <Compile Include="Sim_DirectSound.cs" />
     <Compile Include="Uti_EnergyTimeCurve.cs" />
+    <Compile Include="Uti_AuralizationFilter_Omni.cs" />
+    <Compile Include="Uti_PressureTimeCurve.cs" />
     <Compile Include="Uti_Measurement.cs" />
+    <Compile Include="Uti_SignalCorrelation.cs" />
+    <Compile Include="Uti_SchroederCorrelation.cs" />
     <Compile Include="Uti_RealPaToSPL.cs" />
     <Compile Include="Vis_FVM_CustomMesh.cs" />
     <Compile Include="Vis_RayShooter.cs" />

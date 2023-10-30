@@ -64,6 +64,9 @@ namespace PachydermGH
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            System.Diagnostics.Process P = System.Diagnostics.Process.GetCurrentProcess();
+            P.PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
+
             Pachyderm_Acoustic.Environment.Polygon_Scene S = null;
             DA.GetData<Pachyderm_Acoustic.Environment.Polygon_Scene>(0, ref S);
             List<Pachyderm_Acoustic.Environment.Source> Src = new List<Pachyderm_Acoustic.Environment.Source>();
@@ -72,6 +75,7 @@ namespace PachydermGH
             DA.GetDataList<Pachyderm_Acoustic.Environment.Receiver_Bank>(2, Rec);
             bool screen = false;
             DA.GetData<bool>(3, ref screen);
+            List<Pachyderm_Acoustic.Direct_Sound> DSS = new List<Pachyderm_Acoustic.Direct_Sound>();
 
             int ct = 0;
             int s_id = 0;
@@ -82,8 +86,10 @@ namespace PachydermGH
                 do { System.Threading.Thread.Sleep(100); } while (DS.ThreadState() == System.Threading.ThreadState.Running);
                 DS.Combine_ThreadLocal_Results();
                 s_id++;
-                DA.SetData(0, DS);
+                DSS.Add(DS);
             }
+            DA.SetDataList(0, DSS);
+            P.PriorityClass = System.Diagnostics.ProcessPriorityClass.Normal;
         }
 
         /// <summary>

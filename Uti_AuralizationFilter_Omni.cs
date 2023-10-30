@@ -25,14 +25,14 @@ using Rhino.Geometry;
 
 namespace PachydermGH
 {
-    public class EnergyTimeCurve : GH_Component
+    public class Auralization_Filter : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the MyComponent2 class.
         /// </summary>
-        public EnergyTimeCurve()
-            : base("Energy-Time Curve", "ETC",
-                "Creates the Energy-Time Curve from simulation results",
+        public Auralization_Filter()
+            : base("AuralizationFilter", "AFTC",
+                "Creates the Impulse Response from simulation results. Note that this version of the impulse response has a flat power spectrum, and can be used for auralizations, but should not be used for sound pressure level predictions.",
                 "Acoustics", "Utility")
         {
         }
@@ -94,24 +94,18 @@ namespace PachydermGH
             if (IS.Count == 0) for (int i = 0; i < max; i++) IS.Add(null);
             if (Rec.Count == 0) for (int i = 0; i < max; i++) Rec.Add(null);
 
-            //List<List<Audio_Signal>> AS_final = new List<List<Audio_Signal>>();
             Grasshopper.DataTree<Audio_Signal> AS_final = new Grasshopper.DataTree<Audio_Signal>();
             List<Audio_Signal> AS_comb = new List<Audio_Signal>();
 
             for (int s = 0; s < max; s++)
             {
+                //Need to create filters?
+
                 List<Audio_Signal> AS = new List<Audio_Signal>();
                 for (int r = 0; r < Rec[s].Rec_List.Length; r++)
                 {
-                    double[][] S = new double[(int)Math.Abs(Oct.T1 - Oct.T0 + 1)][];
-                    int[] direct = new int[(int)Oct.T1 - (int)Oct.T0 + 1];
-                    for (int o = (int)Oct.T0; o <= Oct.T1; o++)
-                    {
-                        double[] ETC = Pachyderm_Acoustic.Utilities.IR_Construction.ETCurve(D[s], IS[s], Rec[s], Rec[s].CutOffTime, Rec[s].SampleRate, o, r, false);
-                        S[(int)(o - Oct.T0)] = ETC;
-                        direct[(int)(o - Oct.T0)] = (int)Math.Round(D[s].Time(r) * Rec[s].SampleRate);
-                    }
-                    AS.Add(new Audio_Signal(S, Rec[0].SampleRate, direct));
+                    double[] AFTC = Pachyderm_Acoustic.Utilities.IR_Construction.Auralization_Filter(D.ToArray(), IS.ToArray(), Rec.ToArray(), Rec[s].CutOffTime, Rec[s].SampleRate, r, new List<int> { s }, false, true);
+                    AS.Add(new Audio_Signal(AFTC, Rec[0].SampleRate, (int)Math.Round(D[s].Time(r) * Rec[s].SampleRate)));
                 }
 
                 if (s == 0)
@@ -161,7 +155,7 @@ namespace PachydermGH
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("{D6198179-44DC-4DF9-8B4C-7DC35C268E8B}"); }
+            get { return new Guid("{B03885B7-AF2B-459C-AB3B-97B67C0A57BA}"); }
         }
     }
 }

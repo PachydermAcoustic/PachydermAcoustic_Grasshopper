@@ -18,8 +18,9 @@
 
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 
 namespace PachydermGH
@@ -41,7 +42,7 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Energy Time Curve", "ETC", "Energy Time Curve", GH_ParamAccess.list);
+            pManager.AddGenericParameter("Energy Time Curve", "ETC", "Energy Time Curve", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -49,7 +50,7 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("Sound Pressure Level(A)", "SPLA", "A-weighted Sound Pressure Level", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Sound Pressure Level(A)", "SPLA", "A-weighted Sound Pressure Level", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -58,34 +59,52 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            List<Audio_Signal> ETC = new List<Audio_Signal>();
-            double SW = 0;
-            List<double> spec = new List<double>();
+            Audio_Signal ETC = new Audio_Signal();
+            DA.GetData<Audio_Signal>(0, ref ETC);
 
-            if (DA.GetDataList<double>(0, spec))
+            List<double> SPL = new List<double>();
+
+            double s = 0;
+            for (int i = 0; i < ETC.Value.Length; i++)
             {
-                if (spec.Count != 8) throw new Exception("For A-Weighted Sound Pressure Level, full spectrum data is needed. Please supply data for octaves 0 through 7.");
-                SW = Pachyderm_Acoustic.Utilities.AcousticalMath.Sound_Pressure_Level_A(spec.ToArray());
-                DA.SetData(0, SW);
+                for (int j = 0; j < ETC.Value[i].Length; j++) s += (double)ETC.Value[i][j];
+                SPL.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.SPL_Intensity(s));
             }
-            else if (DA.GetDataList<Audio_Signal>(0, ETC))
-            {
-                for (int i = 0; i < ETC.Count; i++)
-                {
-                    if (ETC[i].ChannelCount != 8) throw new Exception("For A-Weighted Sound Pressure Level, full spectrum data is needed. Please supply data for octaves 0 through 7.");
+            DA.SetData(0, Pachyderm_Acoustic.Utilities.AcousticalMath.Sound_Pressure_Level_A(SPL.ToArray()));
 
-                    double[] AFactors = new double[8] { Math.Pow(10, (-26.2 / 10)), Math.Pow(10, (-16.1 / 10)), Math.Pow(10, (-8.6 / 10)), Math.Pow(10, (-3.2 / 10)), 1, Math.Pow(10, (1.2 / 10)), Math.Pow(10, (1 / 10)), Math.Pow(10, (-1.1 / 10)) };
+            //Grasshopper.Kernel.Data.GH_Structure<Audio_Signal> ETC = new Grasshopper.Kernel.Data.GH_Structure<Audio_Signal>();
+            //Grasshopper.Kernel.Data.GH_Structure<GH_Goo<double>> spec = new Grasshopper.Kernel.Data.GH_Structure<GH_Goo<double>>();
 
-                    for (int f = 0; f < ETC[i].ChannelCount; f++)
-                    {
-                        double s = 0;
-                        for (int j = 0; j < ETC.Count; j++) s += ETC[i][f][j];
-                        SW += s * AFactors[f];
-                        DA.SetData(0, Pachyderm_Acoustic.Utilities.AcousticalMath.SPL_Intensity(SW));
-                    }
-                }
-            }
-            
+            //if (DA.GetDataTree<GH_Goo<double>>(0, out spec))
+            //{
+            //    //if (spec.Branches[0].Count != 8) throw new Exception("For A-Weighted Sound Pressure Level, full spectrum data is needed. Please supply data for octaves 0 through 7.");
+            //    List<double> SW = new List<double>();
+            //    for (int i = 0; i < spec.Branches.Count; i++)
+            //    {
+            //        if (spec[i].Count < 8) SW.Add(double.NaN);
+            //        double[] spl = new double[8];
+            //        for (int oct = 0; oct < 8; oct++) spl[oct] = spec.Branches[i][oct].Value;
+            //        SW.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Sound_Pressure_Level_A(spl));
+            //    }
+            //    DA.SetDataList(0, SW);
+            //}
+            //else if (DA.GetDataTree<Audio_Signal>(0, out ETC))
+            //{
+            //    for (int i = 0; i < ETC.Branches.Count; i++)
+            //    {
+            //        if (ETC.get_DataItem(i).ChannelCount != 8) throw new Exception("For A-Weighted Sound Pressure Level, full spectrum data is needed. Please supply data for octaves 0 through 7.");
+            //        double SW = 0;
+            //        double[] AFactors = new double[8] { Math.Pow(10, (-26.2 / 10)), Math.Pow(10, (-16.1 / 10)), Math.Pow(10, (-8.6 / 10)), Math.Pow(10, (-3.2 / 10)), 1, Math.Pow(10, (1.2 / 10)), Math.Pow(10, (1 / 10)), Math.Pow(10, (-1.1 / 10)) };
+
+            //        for (int f = 0; f < ETC.get_DataItem(i).ChannelCount; f++)
+            //        {
+            //            double s = 0;
+            //            for (int j = 0; j < ETC.Branches.Count; j++) s += ETC.get_DataItem(i)[f][j];
+            //            SW += s * AFactors[f];
+            //            DA.SetData(0, Pachyderm_Acoustic.Utilities.AcousticalMath.SPL_Intensity(SW));
+            //        }
+            //    }
+            //}
         }
 
         /// <summary>

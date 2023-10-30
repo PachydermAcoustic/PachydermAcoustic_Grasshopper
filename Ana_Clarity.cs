@@ -72,12 +72,15 @@ namespace PachydermGH
             {
                 double[] s = new double[f.Length];
                 int start = 0;
-                for (int i = 0; i < f.Length; i++)
+                if (ETC.Direct_Sample == null)
                 {
-                    s[i] += (double)f[i];
-                    if (start == 0) if (s[i] != 0) start = i;
+                    for (int i = 0; i < f.Length; i++)
+                    {
+                        if (start == 0) if (f[i] != 0) start = i;
+                    }
                 }
-                C.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Clarity(s, ETC.SampleFrequency, (double)Cx/1000, (double)start/(double)ETC.SampleFrequency, false));
+                else start = ETC.Direct_Sample[0];
+                C.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Clarity(f, ETC.SampleFrequency, (double)Cx/1000, (double)start / ETC.SampleFrequency, false));
             }
 
             DA.SetDataList(0, C);

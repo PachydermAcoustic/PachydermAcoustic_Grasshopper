@@ -70,6 +70,9 @@ namespace PachydermGH
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            System.Diagnostics.Process P = System.Diagnostics.Process.GetCurrentProcess();
+            P.PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
+
             Pachyderm_Acoustic.Environment.Polygon_Scene S = null;
             DA.GetData<Pachyderm_Acoustic.Environment.Polygon_Scene>(0, ref S);
             int order = 0;
@@ -88,21 +91,22 @@ namespace PachydermGH
             Grasshopper.DataTree<Grasshopper.Kernel.Types.GH_Curve> cvs = new Grasshopper.DataTree<Grasshopper.Kernel.Types.GH_Curve>();
             Grasshopper.DataTree<string> txt = new Grasshopper.DataTree<string>();
             Grasshopper.DataTree<double> I = new Grasshopper.DataTree<double>();
+            Grasshopper.DataTree<Pachyderm_Acoustic.ImageSourceData> ISS = new Grasshopper.DataTree<Pachyderm_Acoustic.ImageSourceData>();
 
             foreach (Pachyderm_Acoustic.Environment.Source Pt in Src)
             {
-                Pachyderm_Acoustic.Direct_Sound DS = new Pachyderm_Acoustic.Direct_Sound(Pt, Rec[ct], S, new int[] { 0, 1, 2, 3, 4, 5, 6, 7 });
+                Pachyderm_Acoustic.Direct_Sound DS = new Pachyderm_Acoustic.Direct_Sound(Pt, Rec[0], S, new int[] { 0, 1, 2, 3, 4, 5, 6, 7 });
                 DS.Begin();
                 do { System.Threading.Thread.Sleep(100); } while (DS.ThreadState() == System.Threading.ThreadState.Running);
                 DS.Combine_ThreadLocal_Results();
-                Pachyderm_Acoustic.ImageSourceData IS = new Pachyderm_Acoustic.ImageSourceData(Pt, Rec[ct], DS, S, order, s_id);
+                Pachyderm_Acoustic.ImageSourceData IS = new Pachyderm_Acoustic.ImageSourceData(Pt, Rec[0], DS, S, order, s_id);
                 IS.Begin();
                 do { System.Threading.Thread.Sleep(100); } while (IS.ThreadState() == System.Threading.ThreadState.Running);
                 IS.Combine_ThreadLocal_Results();
                 if (Rec.Count != 0) ct++;
                 s_id++;
 
-                DA.SetData(0, IS);
+                ISS.Add(IS);
                 
                 if (IS.Paths.Length > 0)
                 {
@@ -127,9 +131,11 @@ namespace PachydermGH
                     }
                 }
             }
+            DA.SetDataTree(0, ISS);
             DA.SetDataTree(1, txt);
             DA.SetDataTree(2, cvs);
             DA.SetDataTree(3, I);
+            P.PriorityClass = System.Diagnostics.ProcessPriorityClass.Normal;
         }
 
         /// <summary>

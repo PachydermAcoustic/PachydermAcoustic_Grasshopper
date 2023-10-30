@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
+using Pachyderm_Acoustic.Environment;
 using Rhino.Geometry;
 
 namespace PachydermGH
@@ -110,6 +111,9 @@ namespace PachydermGH
         /// to store data in output parameters.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
+            System.Diagnostics.Process P = System.Diagnostics.Process.GetCurrentProcess();
+            P.PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
+
             Pachyderm_Acoustic.Environment.Scene S = null;
             DA.GetData<Pachyderm_Acoustic.Environment.Scene>(0, ref S);
             int RayCt = 0;
@@ -128,14 +132,14 @@ namespace PachydermGH
             DA.GetDataList<Pachyderm_Acoustic.Environment.Receiver_Bank>(5, Rec);
             Rhino.Geometry.Interval I = new Interval();
             DA.GetData<Rhino.Geometry.Interval>(6, ref I);
-
             List<int> scope = new List<int>();
-
             scope.Add((int)I.T0);
             scope.Add((int)I.T1);
             Rhino.RhinoApp.EscapeKeyPressed += Escape;
             CancelCalc = false;
             Rhino.ApplicationSettings.FileSettings.AutoSaveEnabled = false;
+
+            Grasshopper.DataTree<Pachyderm_Acoustic.Environment.Receiver_Bank> RTS = new Grasshopper.DataTree<Pachyderm_Acoustic.Environment.Receiver_Bank>();
 
             int s_id = 0;
             try
@@ -146,7 +150,8 @@ namespace PachydermGH
                     Form.Text = string.Format("Ray-tracing source {0} of {1}", i, Src.Count);
                     Form.Display("Starting ray-tracing simulation...");
                     Form.Show();
-                    Pachyderm_Acoustic.SplitRayTracer RT = new Pachyderm_Acoustic.SplitRayTracer(Src[i], Rec[s_id], S, CO_Time, scope.ToArray(), IS_Order, RayCt);
+
+                    Pachyderm_Acoustic.SplitRayTracer RT = new Pachyderm_Acoustic.SplitRayTracer(Src[i], Rec.Count == Src.Count ? Rec[s_id]: Rec[0].Duplicate(Src[i], S), S, CO_Time, scope.ToArray(), IS_Order, RayCt);
                     RT.Begin();
                     do
                     {
@@ -178,21 +183,24 @@ namespace PachydermGH
                     s_id++;
                     if (RT.GetReceiver.GetType() == typeof(Pachyderm_Acoustic.PachMapReceiver))
                     {
-                        DA.SetData(0, RT.GetReceiver as Pachyderm_Acoustic.PachMapReceiver);
+                        RTS.Add(RT.GetReceiver as Pachyderm_Acoustic.PachMapReceiver);
                     }
                     else
                     {
-                        DA.SetData(0, RT.GetReceiver);
+                        RTS.Add(RT.GetReceiver);
                     }
                     Form.Hide();
                     Form.Dispose();
                 }
+
+                DA.SetDataTree(0,RTS);
             }
             catch
             (System.IndexOutOfRangeException)
             {
                 this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Raytracing operation failed. This can be due to an unsuitable scene object. For example, did you set materials on all layers referenced by Rhinoceros Geometry?");
             }
+            P.PriorityClass = System.Diagnostics.ProcessPriorityClass.Normal;
         }
 
         /// <summary>

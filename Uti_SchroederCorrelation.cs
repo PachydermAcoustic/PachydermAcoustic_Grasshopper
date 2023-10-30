@@ -18,20 +18,22 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
+using Pachyderm_Acoustic.Utilities;
 using Rhino.Geometry;
 
 namespace PachydermGH
 {
-    public class PTC2ETC : GH_Component
+    public class Schroeder_Correlation : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the MyComponent2 class.
         /// </summary>
-        public PTC2ETC()
-            : base("Energy-Time Curve from Impulse Response", "IR-2-ETC",
-                "Creates the Energy-Time Curve from an impulse response, measured or simulated",
+        public Schroeder_Correlation()
+            : base("Schroeder Correlation", "Schr_Corr",
+                "Calculates the Schroeder integral of two impulse responses, and then calculates the correlation between them.",
                 "Acoustics", "Utility")
         {
         }
@@ -41,7 +43,9 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Impulse Response", "IR", "Plug the audio signal impulse response in here.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Impulse Response 1", "IR1", "Plug the audio signal impulse response in here.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Impulse Response 2", "IR2", "Plug the audio signal impulse response in here.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Delay", "D", "Enter an offset in samples to help match the two integrals. A positive number will take samples off the front, of IR1. A negative numuber will take sampels off the front of IR2.", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -49,21 +53,7 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Energy-Time Curve", "ETC", "The energy-time-curve result of conversion...", GH_ParamAccess.item);
-        }
-
-        public override bool AppendMenuItems(ToolStripDropDown menu)
-        {
-            Menu_AppendItem(menu, "Sum all ETCs.", Combine_Click, true, Combine);
-            return base.AppendMenuItems(menu);
-        }
-
-        bool Combine = true;
-
-        private void Combine_Click(Object sender, EventArgs e)
-        {
-            Combine = !Combine;
-            ExpireSolution(true);
+            pManager.AddNumberParameter("Correlation R", "R_c", "Correlation R value for the two IRs Schroeder Integrals.", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -72,30 +62,38 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Audio_Signal IR = new Audio_Signal();
-            DA.GetData<Audio_Signal>(0, ref IR);
+            Audio_Signal IR1 = new Audio_Signal();
+            DA.GetData<Audio_Signal>(0, ref IR1);
+            Audio_Signal IR2 = new Audio_Signal();
+            DA.GetData<Audio_Signal>(1, ref IR2);
+            double delay = 0;
+            DA.GetData<double>(2, ref delay);
 
-            List<Audio_Signal> AS_final = new List<Audio_Signal>();
+            double[][] signal1 = new double[8][];
+            for (int i = 0; i < IR1.ChannelCount; i++) signal1[i] = new double[IR1.Count];
+            double[][] signal2 = new double[8][];
+            for (int i = 0; i < IR2.ChannelCount; i++) signal2[i] = new double[IR2.Count];
 
-            double[][] signal = new double[8][];
-            for (int i = 0; i < IR.ChannelCount; i++) signal[i] = new double[IR.Count];
+            List<double> R = new List<double>();
 
-            for (int j = 0; j < IR.ChannelCount; j++)
+            for (int j = 0; j < IR1.ChannelCount; j++)
             {
-                for (int oct = 0; oct < 8; oct++)
-                {
-                    double[] IR_oct = Pachyderm_Acoustic.Audio.Pach_SP.FIR_Bandpass(IR[j], oct, IR.SampleFrequency, 0);
-                    signal[oct] = new double[IR_oct.Length];
-                    for (int i = 0; i < IR_oct.Length; i++)
-                    {
-                        signal[oct][i] = IR_oct[i] * IR_oct[i];
-                    }
-                }
+                double[] ETC1 = AcousticalMath.SPL_Intensity_Signal(IR1.Value[j]);
+                double[] Schr1 = AcousticalMath.Schroeder_Integral(ETC1);
+                double[] ETC2 = AcousticalMath.SPL_Intensity_Signal(IR2.Value[j]);
+                double[] Schr2 = AcousticalMath.Schroeder_Integral(ETC2);
 
-                AS_final.Add(new Audio_Signal(signal, IR.SampleFrequency, IR.Direct_Sample));
+                if (delay > 0) { Schr1.Reverse(); Array.Resize(ref Schr1, Schr1.Length - (int)delay); Schr1.Reverse(); }
+                if (delay < 0) { Schr2.Reverse(); Array.Resize(ref Schr2, Schr2.Length + (int)delay); Schr2.Reverse(); }
+
+                if (Schr1.Length < Schr2.Length) Array.Resize(ref Schr1, Schr2.Length);
+                if (Schr2.Length < Schr1.Length) Array.Resize(ref Schr2, Schr1.Length);
+
+
+                R.Add(MathNet.Numerics.Statistics.Correlation.Spearman(Schr1, Schr2));
             }
 
-            DA.SetDataList(0, AS_final);
+            DA.SetDataList(0, R);
         }
 
         /// <summary>
@@ -116,7 +114,7 @@ namespace PachydermGH
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("{2F45F41C-3027-4FE1-8071-26495398C06B}"); }
+            get { return new Guid("{EFCA3675-B9C5-4428-B69C-7E1CA000C86B}"); }
         }
     }
 }

@@ -17,6 +17,7 @@
 //'Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
 
 using System;
+using System.Windows.Forms;
 using Grasshopper.Kernel.Types;
 
 namespace PachydermGH
@@ -24,27 +25,29 @@ namespace PachydermGH
     public class Audio_Signal:Grasshopper.Kernel.Types.GH_Goo<double[][]>
     {
         int SamplingFrequency;
-
+        int[] Sample_of_Direct = new int[1] { 0 };
         public Audio_Signal()
         {
         }
 
-        public Audio_Signal(float[] Aud_in, int Fs)
+        public Audio_Signal(float[] Aud_in, int Fs, int Direct_Sample = 0)
         {
             SamplingFrequency = Fs;
             Value = new double[1][];
             Value[0] = new double[Aud_in.Length];
             for(int i = 0; i < Aud_in.Length; i++) Value[0][i] = (double)Aud_in[i];
+            Sample_of_Direct = new int[1] { Direct_Sample };
         }
 
-        public Audio_Signal(double[] Aud_in, int Fs)
+        public Audio_Signal(double[] Aud_in, int Fs, int Direct_Sample = 0)
         {
             SamplingFrequency = Fs;
             Value = new double[1][];
             Value[0] = Aud_in;
+            Sample_of_Direct = new int[1] { Direct_Sample };
         }
 
-        public Audio_Signal(float[][] Aud_in, int Fs)
+        public Audio_Signal(float[][] Aud_in, int Fs, int[] Direct_Sample = null)
         {
             SamplingFrequency = Fs;
             base.Value = new double[Aud_in.Length][];
@@ -54,9 +57,18 @@ namespace PachydermGH
             int length = 0;
             foreach (float[] signal in Aud_in) if (signal.Length > length) length = signal.Length;
             for (int i = 0; i < base.Value.Length; i++) if (this[i].Length < length) Array.Resize<double>(ref base.Value[i], length);
+            if (Direct_Sample == null)
+            {
+                Sample_of_Direct = new int[Aud_in.Length];
+                for(int i = 0; i < Aud_in.Length; i++)
+                {
+                    Sample_of_Direct[i] = 0;
+                }
+            }
+            else { Sample_of_Direct = Direct_Sample; }
         }
 
-        public Audio_Signal(double[][] Aud_in, int Fs)
+        public Audio_Signal(double[][] Aud_in, int Fs, int[] Direct_Sample = null)
         {
             SamplingFrequency = Fs;
             base.Value = Aud_in;
@@ -64,6 +76,15 @@ namespace PachydermGH
             int length = 0;
             foreach (double[] signal in Aud_in) if (signal.Length > length) length = signal.Length;
             for (int i = 0; i < base.Value.Length; i++) if (this[i].Length < length) Array.Resize<double>(ref base.Value[i], length);
+            if (Direct_Sample == null)
+            {
+                Sample_of_Direct = new int[Aud_in.Length];
+                for (int i = 0; i < Aud_in.Length; i++)
+                {
+                    Sample_of_Direct[i] = 0;
+                }
+            }
+            else { Sample_of_Direct = Direct_Sample; }
         }
 
         public double[] this[int channel]
@@ -96,6 +117,17 @@ namespace PachydermGH
         public int SampleFrequency
         {
             get { return SamplingFrequency; }
+        }
+
+        public int[] Direct_Sample
+        {
+            get { return Sample_of_Direct; }
+            set { Sample_of_Direct = value; }
+        }
+
+        public double Direct_Time(int channel)
+        {
+            return (double)Sample_of_Direct[channel] / (double)SampleFrequency;
         }
 
         public int Count

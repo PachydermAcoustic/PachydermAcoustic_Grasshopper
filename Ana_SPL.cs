@@ -58,17 +58,18 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Audio_Signal ETC = null;
+            Audio_Signal ETC = new Audio_Signal();
             DA.GetData<Audio_Signal>(0, ref ETC);
 
             List<double> SPL = new List<double>();
-            foreach (double[] f in ETC.Value)
+
+
+            for (int i = 0; i < ETC.Value.Length; i++)
             {
                 double s = 0;
-                for (int i = 0; i < f.Length; i++) s += (double)f[i];
+                for (int j = 0; j < ETC.Value[i].Length; j++) s += (double)ETC.Value[i][j];
                 SPL.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.SPL_Intensity(s));
             }
-
             DA.SetDataList(0, SPL);
         }
 
