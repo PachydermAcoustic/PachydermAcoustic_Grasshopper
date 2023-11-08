@@ -45,7 +45,7 @@ namespace PachydermGH
             Grasshopper.Kernel.Parameters.Param_Integer param = (pManager[1] as Grasshopper.Kernel.Parameters.Param_Integer);
         }
 
-        bool Noise_Compensation = false;
+        //bool Noise_Compensation = false;
 
         /// <summary>
         /// Registers all the output parameters for this component.
