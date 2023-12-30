@@ -14,6 +14,8 @@
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug32|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -77,19 +79,22 @@
     <Reference Include="CLF_Read">
       <HintPath>..\PachydermAcoustic_Rhinoceros\Resources\CLF_Read.dll</HintPath>
     </Reference>
+    <Reference Include="Eto">
+      <HintPath>..\..\..\..\..\..\Program Files\Rhino 7\System\Eto.dll</HintPath>
+    </Reference>
     <Reference Include="GH_IO">
-      <HintPath>..\..\..\..\..\..\Program Files\Rhino 6\Plug-ins\Grasshopper\GH_IO.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files\Rhino 7\Plug-ins\Grasshopper\GH_IO.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Grasshopper">
-      <HintPath>..\..\..\..\..\..\Program Files\Rhino 6\Plug-ins\Grasshopper\Grasshopper.dll</HintPath>
+    <Reference Include="Grasshopper, Version=7.34.23267.11001, Culture=neutral, PublicKeyToken=dda4f5ec2cd80803, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\..\..\Program Files\Rhino 7\Plug-ins\Grasshopper\Grasshopper.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="MathNet.Numerics, Version=4.5.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\PachydermAcoustic_BigBang\Pachyderm_Whole\packages\MathNet.Numerics.4.5.1\lib\net461\MathNet.Numerics.dll</HintPath>
+    <Reference Include="MathNet.Numerics, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\PachydermAcoustic_BigBang\Pachyderm_Whole\packages\MathNet.Numerics.5.0.0\lib\net48\MathNet.Numerics.dll</HintPath>
     </Reference>
     <Reference Include="RhinoCommon">
-      <HintPath>..\..\..\..\..\..\Program Files\Rhino 6\System\RhinoCommon.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files\Rhino 7\System\RhinoCommon.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -184,9 +189,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Resources\ITDG.bmp" />
   </ItemGroup>
   <ItemGroup>

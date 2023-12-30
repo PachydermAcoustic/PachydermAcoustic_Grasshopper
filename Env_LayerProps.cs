@@ -40,9 +40,9 @@ namespace PachydermGH
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddIntegerParameter("Layer Index", "L ID", "The zero-based index of the layer. This is also how layer are identified in scene components.", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Absorption", "ABS", "The absorption coefficient of the material. (provide 8 - one for each octave.)", GH_ParamAccess.list);
-            pManager.AddIntegerParameter("Scattering", "SCT", "The scattering coefficient of the material. (provide 8 - one for each octave.)", GH_ParamAccess.list);
-            pManager.AddIntegerParameter("Transmission", "TRN", "The transmission coefficient of the material. (provide 8 - one for each octave.)", GH_ParamAccess.list);
+            pManager.AddIntegerParameter("Absorption", "ABS", "The absorption coefficient of the material in percent (%). (provide 8 - one for each octave.)", GH_ParamAccess.list);
+            pManager.AddIntegerParameter("Scattering", "SCT", "The scattering coefficient of the material in percent (%). (provide 8 - one for each octave.)", GH_ParamAccess.list);
+            pManager.AddIntegerParameter("Transmission", "TRN", "The transmission coefficient of the material in percent (%). (provide 8 - one for each octave.)", GH_ParamAccess.list);
             pManager[2].Optional = true;
             pManager[3].Optional = true;
         }

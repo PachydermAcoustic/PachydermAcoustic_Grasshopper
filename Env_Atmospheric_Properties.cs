@@ -38,9 +38,16 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddNumberParameter("Atmospheric Pressure", "AP", "Pressure of the medium. Default of 101.325 kPa (air)", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Atmospheric Pressure", "AP", "Pressure of the medium in kPa (not Pa). Default of 101.325 kPa (air)", GH_ParamAccess.item);
             pManager.AddNumberParameter("Temperature", "TC", "Temperature of the medium. Default of 20 degrees C (air)", GH_ParamAccess.item);
             pManager.AddNumberParameter("Relative Humidity", "H", "Humidity of the medium in percent. Default of 50% (air)", GH_ParamAccess.item);
+
+            Grasshopper.Kernel.Parameters.Param_Number param0 = (pManager[0] as Grasshopper.Kernel.Parameters.Param_Number);
+            if (param0 != null) param0.SetPersistentData(101.325);
+            Grasshopper.Kernel.Parameters.Param_Number param1 = (pManager[1] as Grasshopper.Kernel.Parameters.Param_Number);
+            if (param1 != null) param1.SetPersistentData(20);
+            Grasshopper.Kernel.Parameters.Param_Number param2 = (pManager[2] as Grasshopper.Kernel.Parameters.Param_Number);
+            if (param2 != null) param2.SetPersistentData(50);
         }
 
         /// <summary>
@@ -58,11 +65,11 @@ namespace PachydermGH
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             double Pa=0, Tc=0, Hr=0;
-            if (!DA.GetData<double>(0, ref Pa)) Pa = 1013.25;
+            if (!DA.GetData<double>(0, ref Pa)) Pa = 101.325;
             if (!DA.GetData<double>(1, ref Tc)) Tc = 20;
             if (!DA.GetData<double>(2, ref Hr)) Hr = 50;
 
-            Pachyderm_Acoustic.Environment.Medium_Properties MP = new Pachyderm_Acoustic.Environment.Uniform_Medium(0, Pa/100, Tc+273.15, Hr, false);
+            Pachyderm_Acoustic.Environment.Medium_Properties MP = new Pachyderm_Acoustic.Environment.Uniform_Medium(0, Pa*10, Tc+273.15, Hr, false);
             DA.SetData(0, MP);
         }
 

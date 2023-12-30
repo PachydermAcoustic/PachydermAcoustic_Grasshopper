@@ -19,6 +19,8 @@
 using System;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
+using Pachyderm_Acoustic.Environment;
+using Pachyderm_Acoustic.UI;
 using Rhino.Geometry;
 
 namespace PachydermGH
@@ -60,6 +62,7 @@ namespace PachydermGH
             pManager.AddCurveParameter("Ray Curves", "RC", "The rays, returned as polylines", GH_ParamAccess.list);
             pManager.AddPointParameter("End Points", "X.", "The point at which each ray terminated...", GH_ParamAccess.list);
             pManager.AddNumberParameter("Arrival Time Delay", "t", "The time delay of each ray, relative to it's termination point...", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Itensity", "I", "The remaining power of each ray at its termination point. Includes deduction for spherical propagation, assigned absorption and scattering coefficients, and air absorption...", GH_ParamAccess.tree);
         }
 
         /// <summary>
@@ -85,10 +88,14 @@ namespace PachydermGH
             List<Polyline> rays = new List<Polyline>();
             List<Point3d> Ends = new List<Point3d>();
             List<double> times = new List<double>();
+            Grasshopper.DataTree<double> power = new Grasshopper.DataTree<double>();
+
+            //List<double[]> power = new List<double[]>();
+            int sno = -1;
 
             foreach (Pachyderm_Acoustic.Environment.Source Pt in Src)
             {
-                
+                sno++;
                 foreach (Vector3d vector in Dir)
                 {
                     Hare.Geometry.Point Startpt = Pt.Origin();
@@ -98,6 +105,8 @@ namespace PachydermGH
                     Polyline poly = new Polyline();
                     poly.Add(RPT);
                     bool terminate = false;
+                    
+                    BroadRay ray = new BroadRay(Startpt, vct, Rnd.Next(), 0, Pt.DirPower(0, Rnd.Next(), vct), 0, 0);
 
                     for (int i = 0; i < bounces; i++)
                     {
@@ -107,13 +116,13 @@ namespace PachydermGH
                         List<Hare.Geometry.Point> X;
                         List<double> t;
 
-                        if (S.shoot(new Hare.Geometry.Ray(Startpt, vct, 0, Rnd.Next()), out u, out v, out poly_id, out X, out t, out code)) 
+                        if (S.shoot(ray, out u, out v, out poly_id, out X, out t, out code)) 
                         {
-                            Startpt = X[0];
+                            ray.origin = X[0];
                             Hare.Geometry.Vector N = S.Normal(poly_id, u, v);
-                            //Vector3d Local_N = new Vector3d(N.x, N.y, N.z);
-                            vct -= N * Hare.Geometry.Hare_math.Dot(vct, N) * 2;
-                            poly.Add(Startpt.x, Startpt.y, Startpt.z);
+                            ray.direction -= N * Hare.Geometry.Hare_math.Dot(ray.direction, N) * 2;
+                            ray.Surf_ID = poly_id;
+                            poly.Add(ray.origin.x, ray.origin.y, ray.origin.z);
                             foreach (Brep br in terminus)
                             {
                                 ComponentIndex c;
@@ -122,6 +131,13 @@ namespace PachydermGH
                                 Vector3d Norm;
 
                                 terminate |= br.ClosestPoint(RPT, out p, out c, out s, out time, 0.01, out Norm);
+                            }
+                            double cos_theta;
+                            if (i < bounces - 1)
+                            {
+                                S.Absorb(ref ray, out cos_theta, u, v);
+                                double[] scat = S.ScatteringValue[ray.Surf_ID].Coefficient();
+                                for (int oct = 0; oct < 8; oct++) ray.Energy[oct] *= (1 - scat[oct]);
                             }
                         }else{break;}
 
@@ -133,12 +149,22 @@ namespace PachydermGH
                         Ends.Add(RPT);
                         double dist = poly.Length - (Pt.Origin() - Startpt).Length();
                         times.Add(dist / S.Sound_speed(Startpt));
+                        double propmod = 4 * Math.PI * dist * dist;
+
+                        for(int oct = 0; oct < 8; oct++)
+                        {
+                            ray.Energy[oct] *= Math.Pow(10, -.1 * S.Attenuation(0)[oct] * dist);
+                            ray.Energy[oct] /= propmod;
+                        }
+
+                        for (int oct = 0; oct < 8; oct++) power.Add(ray.Energy[oct], new Grasshopper.Kernel.Data.GH_Path(new int[] { sno, rays.Count - 1, oct }));
                     }
                 }
 
                 DA.SetDataList(0, rays);
                 DA.SetDataList(1, Ends);
                 DA.SetDataList(2, times);
+                DA.SetDataTree(3, power);
             }
         }
 

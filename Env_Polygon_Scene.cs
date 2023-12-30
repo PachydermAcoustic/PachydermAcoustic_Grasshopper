@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
+using Pachyderm_Acoustic.Environment;
 using Rhino.Geometry;
 
 namespace PachydermGH
@@ -44,10 +45,11 @@ namespace PachydermGH
             pManager.AddGeometryParameter("Grasshopper Geometry", "GG", "Add any grasshopper geometry here", GH_ParamAccess.list);
             pManager.AddIntegerParameter("Grasshopper Layers", "GL", "For each Geometry in GG, indicate what layer (by integer id) to copy acoustical properties from.", GH_ParamAccess.list);
             pManager.AddIntegerParameter("Voxel Grid Depth", "VG", "Number of voxels in each dimentions. (0 for no optimisation)", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Medium Properties", "MP", "Atmospheric properties (see 'Medium Propeties') according to atmospheric pressure, termperature, and relative humidity.", GH_ParamAccess.item); 
 
             pManager[1].Optional = true;
             pManager[2].Optional = true;
-
+            pManager[4].Optional = true;
             Grasshopper.Kernel.Parameters.Param_Integer param = (pManager[3] as Grasshopper.Kernel.Parameters.Param_Integer);
             if (param != null) param.SetPersistentData(7);
         }
@@ -74,6 +76,8 @@ namespace PachydermGH
             DA.GetDataList<int>(2, GL);
             int VG = 2;
             DA.GetData<int>(3, ref VG);
+            Pachyderm_Acoustic.Environment.Medium_Properties MP = new Uniform_Medium(0, 1031.25, 293.15, 50, false);
+            DA.GetData<Medium_Properties>(4, ref MP);
 
             Rhino.DocObjects.ObjectEnumeratorSettings settings = new Rhino.DocObjects.ObjectEnumeratorSettings();
             settings.DeletedObjects = false;
@@ -110,7 +114,7 @@ namespace PachydermGH
                 RhG.Add(B);
             }
 
-            Pachyderm_Acoustic.Environment.RhCommon_PolygonScene PS = new Pachyderm_Acoustic.Environment.RhCommon_PolygonScene(RC_List, RhG, GL.ToArray(), false, 20, 50, 1031.25, 0, false, true);
+            Pachyderm_Acoustic.Environment.RhCommon_PolygonScene PS = new Pachyderm_Acoustic.Environment.RhCommon_PolygonScene(RC_List, RhG, GL.ToArray(), false, MP.Tk - 273.15, MP.hr, MP.Pa, 0, false, true);
             PS.partition(VG);
 
             if (PS.hasnulllayers)
