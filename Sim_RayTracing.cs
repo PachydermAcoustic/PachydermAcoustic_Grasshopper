@@ -2,7 +2,7 @@
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
-//'Copyright (c) 2008-2019, Arthur van der Harten 
+//'Copyright (c) 2008-2024, Arthur van der Harten 
 //'Pachyderm-Acoustic is free software; you can redistribute it and/or modify 
 //'it under the terms of the GNU General Public License as published 
 //'by the Free Software Foundation; either version 3 of the License, or 
@@ -147,8 +147,7 @@ namespace PachydermGH
                 for (int i = 0; i < Src.Count; i++)
                 {
                     User_Feedback Form = new User_Feedback();
-                    Form.Text = string.Format("Ray-tracing source {0} of {1}", i, Src.Count);
-                    Form.Display("Starting ray-tracing simulation...");
+                    Form.Display("Starting ray-tracing simulation...", string.Format("Ray-tracing source {0} of {1}", i, Src.Count) );
                     Form.Show();
 
                     Pachyderm_Acoustic.SplitRayTracer RT = new Pachyderm_Acoustic.SplitRayTracer(Src[i], Rec.Count == Src.Count ? Rec[s_id]: Rec[0].Duplicate(Src[i], S), S, CO_Time, scope.ToArray(), IS_Order, RayCt);
@@ -166,7 +165,7 @@ namespace PachydermGH
                             break;
                         }
                         System.Threading.Thread.Sleep(3000);
-                        Form.Display(RT.ProgressMsg());
+                        Form.Display(RT.ProgressMsg(), string.Format("Ray-tracing source {0} of {1}", i, Src.Count));
                     } while (true);
 
                     RT.Combine_ThreadLocal_Results();
@@ -177,7 +176,7 @@ namespace PachydermGH
                         {
                             break;
                         }
-                       Form.Display(RT.ProgressMsg());
+                       Form.Display(RT.ProgressMsg(), string.Format("Ray-tracing source {0} of {1}", i, Src.Count));
                     } while (true);
 
                     s_id++;
@@ -189,7 +188,7 @@ namespace PachydermGH
                     {
                         RTS.Add(RT.GetReceiver);
                     }
-                    Form.Hide();
+                    Form.Close();
                     Form.Dispose();
                 }
 

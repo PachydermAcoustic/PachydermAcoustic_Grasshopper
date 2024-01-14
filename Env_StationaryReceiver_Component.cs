@@ -2,7 +2,7 @@
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
-//'Copyright (c) 2008-2019, Arthur van der Harten 
+//'Copyright (c) 2008-2024, Arthur van der Harten 
 //'Pachyderm-Acoustic is free software; you can redistribute it and/or modify 
 //'it under the terms of the GNU General Public License as published 
 //'by the Free Software Foundation; either version 3 of the License, or 
@@ -81,7 +81,7 @@ namespace PachydermGH
 
             for(int i = 0; i < Srcs.Count; i++)
             {
-                Pachyderm_Acoustic.Environment.Receiver_Bank RB = new Pachyderm_Acoustic.Environment.Receiver_Bank(H_Origin, Srcs[i].Origin(), S, Fs, COTime, Pachyderm_Acoustic.Environment.Receiver_Bank.Type.Stationary);//, false); 
+                Pachyderm_Acoustic.Environment.Receiver_Bank RB = new Pachyderm_Acoustic.Environment.Receiver_Bank(H_Origin, Srcs[i], S, Fs, COTime, Pachyderm_Acoustic.Environment.Receiver_Bank.Type.Stationary);//, false); 
                 DA.SetData(0, RB);
             }
         }

@@ -136,12 +136,7 @@
     <Compile Include="Env_RhinoSource.cs" />
     <Compile Include="Aud_MLS_Tail.cs" />
     <Compile Include="Sim_FVM13.cs" />
-    <Compile Include="User_Feedback.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="User_Feedback.Designer.cs">
-      <DependentUpon>User_Feedback.cs</DependentUpon>
-    </Compile>
+    <Compile Include="User_Feedback.cs" />
     <Compile Include="PachGH_AssemblyPriority.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -178,9 +173,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="User_Feedback.resx">
-      <DependentUpon>User_Feedback.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

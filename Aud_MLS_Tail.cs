@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using Grasshopper.Kernel;
+using Pachyderm_Acoustic;
 using Rhino.Geometry;
 
 namespace PachydermGH
@@ -63,15 +64,21 @@ namespace PachydermGH
             DA.GetData<Pachyderm_Acoustic.ImageSourceData>(5, ref IS);
 
             Dir.Create_Filter();
-            
-            if(IS != null) IS.Create_Filter(Dir.SWL, 4096);
+
+            ProgressBox VB = new ProgressBox("Creating IR Filters for Deterministic Reflections...");
+            VB.ShowModal();
+            if (IS != null) IS.Create_Filter(Dir.SWL, 4096, VB);
+            VB.Close();
 
             Pachyderm_Acoustic.Environment.Receiver_Bank[] rec = new Pachyderm_Acoustic.Environment.Receiver_Bank[1];
 
             double[] magnitude = new double[8] {1,1,1,1,1,1,1,1};
             if (Dir != null) { for (int i = 0; i < magnitude.Length; i++) { magnitude[i] = Math.Sqrt(Dir.EnergyValue(i, 0).Sum() * Math.Pow(10, D2R[0] / 10)); } }
 
-            double[] AF = Pachyderm_Acoustic.Utilities.IR_Construction.Auralization_Filter(new Pachyderm_Acoustic.Direct_Sound[1] { Dir }, new Pachyderm_Acoustic.ImageSourceData[1] { IS }, null, Dur, (int)FS, 0, new List<int> { 0 }, false, true);
+            VB = new Pachyderm_Acoustic.ProgressBox("Extrapolating Filter...");
+            VB.ShowModal();
+            double[] AF = Pachyderm_Acoustic.Utilities.IR_Construction.Auralization_Filter(new Pachyderm_Acoustic.Direct_Sound[1] { Dir }, new Pachyderm_Acoustic.ImageSourceData[1] { IS }, null, Dur, (int)FS, 0, new List<int> { 0 }, false, true, VB);
+            VB.Close();
 
             double[] Tail = Pachyderm_Acoustic.Audio.Pach_SP.MLS_Reverb((double)Dur/1000d, RT.ToArray(), (int)FS, magnitude);
             double dt = Dir.Time(0);
