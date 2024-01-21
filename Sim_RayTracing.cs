@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Pachyderm_Acoustic.Environment;
+using Pachyderm_Acoustic.UI;
 using Rhino.Geometry;
 
 namespace PachydermGH
@@ -150,7 +151,10 @@ namespace PachydermGH
                     Form.Display("Starting ray-tracing simulation...", string.Format("Ray-tracing source {0} of {1}", i, Src.Count) );
                     Form.Show();
 
-                    Pachyderm_Acoustic.SplitRayTracer RT = new Pachyderm_Acoustic.SplitRayTracer(Src[i], Rec.Count == Src.Count ? Rec[s_id]: Rec[0].Duplicate(Src[i], S), S, CO_Time, scope.ToArray(), IS_Order, RayCt);
+                    Convergence_Progress CP = new Convergence_Progress();
+
+                    Pachyderm_Acoustic.SplitRayTracer RT = new Pachyderm_Acoustic.SplitRayTracer(Src[i], Rec.Count == Src.Count ? Rec[s_id]: Rec[0].Duplicate(Src[i], S), S, CO_Time, scope.ToArray(), IS_Order, RayCt, CP);
+                    if (!ByRayNo) CP.Show();
                     RT.Begin();
                     do
                     {
