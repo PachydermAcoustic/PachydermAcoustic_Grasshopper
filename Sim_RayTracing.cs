@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Pachyderm_Acoustic.Environment;
 using Pachyderm_Acoustic.UI;
@@ -60,13 +59,13 @@ namespace PachydermGH
             pManager[1].Optional = true;
         }
 
-        protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
-        {
-            Menu_AppendItem(menu, "Trace Specified Number of Rays", RayNo_Click, true, ByRayNo);
-            Menu_AppendItem(menu, "Minimum Convergence", MinCon_Click, true, MinConvergence);
-            Menu_AppendItem(menu, "Detailed Convergence", DetCon_Click, true, DetConvergence);
-            base.AppendAdditionalComponentMenuItems(menu);
-        }
+        //protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+        //{
+        //    Menu_AppendItem(menu, "Trace Specified Number of Rays", RayNo_Click, true, ByRayNo);
+        //    Menu_AppendItem(menu, "Minimum Convergence", MinCon_Click, true, MinConvergence);
+        //    Menu_AppendItem(menu, "Detailed Convergence", DetCon_Click, true, DetConvergence);
+        //    base.AppendAdditionalComponentMenuItems(menu);
+        //}
 
         private void RayNo_Click(object sender, EventArgs e)
         {
@@ -147,11 +146,11 @@ namespace PachydermGH
             {
                 for (int i = 0; i < Src.Count; i++)
                 {
-                    User_Feedback Form = new User_Feedback();
+                     User_Feedback Form = new User_Feedback();
                     Form.Display("Starting ray-tracing simulation...", string.Format("Ray-tracing source {0} of {1}", i, Src.Count) );
                     Form.Show();
 
-                    Convergence_Progress CP = new Convergence_Progress();
+                    ConvergenceProgress CP = new ConvergenceProgress();
 
                     Pachyderm_Acoustic.SplitRayTracer RT = new Pachyderm_Acoustic.SplitRayTracer(Src[i], Rec.Count == Src.Count ? Rec[s_id]: Rec[0].Duplicate(Src[i], S), S, CO_Time, scope.ToArray(), IS_Order, RayCt, CP);
                     if (!ByRayNo) CP.Show();
@@ -160,7 +159,8 @@ namespace PachydermGH
                     {
                         if (CancelCalc)
                         {
-                            RT.Abort_Calculation();
+                            //TODO - create terms for termination of simulation
+                            //RT.Abort_Calculation();
                             Rhino.ApplicationSettings.FileSettings.AutoSaveEnabled = true;
                             throw new Exception("Simulation Canceled");
                         }

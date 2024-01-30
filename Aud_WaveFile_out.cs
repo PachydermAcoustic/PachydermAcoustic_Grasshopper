@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using System.Linq;
@@ -53,18 +52,18 @@ namespace PachydermGH
         {
         }
 
-        public override bool AppendMenuItems(ToolStripDropDown menu)
-        {
-            if (base.AppendMenuItems(menu))
-            {
-                Menu_AppendItem(menu, "16-bit", bitrate_click, true, bitrate == 16);
-                //Menu_AppendItem(menu, "24-bit", bitrate_click, true, bitrate == 24);
-                Menu_AppendItem(menu, "32-bit", bitrate_click, true, bitrate == 32);
-                Menu_AppendItem(menu, "Normalize", normalize_click, true, Normalize);
-                return true;
-            }
-            return false;
-        }
+        //public override bool AppendMenuItems(ToolStripDropDown menu)
+        //{
+        //    if (base.AppendMenuItems(menu))
+        //    {
+        //        Menu_AppendItem(menu, "16-bit", bitrate_click, true, bitrate == 16);
+        //        //Menu_AppendItem(menu, "24-bit", bitrate_click, true, bitrate == 24);
+        //        Menu_AppendItem(menu, "32-bit", bitrate_click, true, bitrate == 32);
+        //        Menu_AppendItem(menu, "Normalize", normalize_click, true, Normalize);
+        //        return true;
+        //    }
+        //    return false;
+        //}
 
         int bitrate = 16;
         bool Normalize = false;

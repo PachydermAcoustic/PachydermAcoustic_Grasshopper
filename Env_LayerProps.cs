@@ -17,7 +17,6 @@
 //'Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
 
 using System;
-using System.Windows.Forms;
 using Grasshopper.Kernel;
 
 namespace PachydermGH
@@ -57,11 +56,11 @@ namespace PachydermGH
 
         bool recompute = true;
         bool expired = false;
-        protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
-        {
-            Menu_AppendItem(menu, "Trigger Recompute", ToggleRecompute, true, recompute);
-            base.AppendAdditionalComponentMenuItems(menu);
-        }
+        //protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+        //{
+        //    Menu_AppendItem(menu, "Trigger Recompute", ToggleRecompute, true, recompute);
+        //    base.AppendAdditionalComponentMenuItems(menu);
+        //}
 
         private void ToggleRecompute(object sender, EventArgs e)
         {
@@ -94,7 +93,7 @@ namespace PachydermGH
 
             for(int i = 0; i < ABS.Count; i++) { ABS[i] *= 10; }
 
-            Pachyderm_Acoustic.Utilities.RC_PachTools.Material_SetLayer(id, ABS.ToArray(), SCT.ToArray(), TRN.ToArray());
+            Pachyderm_Acoustic.Utilities.RCPachTools.Material_SetLayer(id, ABS.ToArray(), SCT.ToArray(), TRN.ToArray());
 
             DA.SetData(0, id);
 

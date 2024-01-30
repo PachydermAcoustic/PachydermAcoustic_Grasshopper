@@ -1,340 +1,115 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug32</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{77BD0F41-B22C-499B-847A-511A8423D158}</ProjectGuid>
+    <TargetFrameworks>net7.0;net48</TargetFrameworks>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PachydermGH</RootNamespace>
-    <AssemblyName>PachydermGH</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWindowsForms>false</UseWindowsForms>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <TargetExt>.gha</TargetExt>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug32|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug64|AnyCPU'">
+  <!--<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug64|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
     <OutputPath>bin\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug32|x64'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Debug32\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug64|x64'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Debug64\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+  </PropertyGroup>-->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <OutputPath>bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>x64</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CLF_Read">
-      <HintPath>..\PachydermAcoustic_Rhinoceros\Resources\CLF_Read.dll</HintPath>
+      <HintPath>..\CLF_Read_v2.n7\CLF_Read\bin\Release\net48\CLF_Read.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Eto">
-      <HintPath>..\..\..\..\..\..\Program Files\Rhino 7\System\Eto.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files\Rhino 8\System\Eto.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="GH_IO">
-      <HintPath>..\..\..\..\..\..\Program Files\Rhino 7\Plug-ins\Grasshopper\GH_IO.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files\Rhino 8\Plug-ins\Grasshopper\GH_IO.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Grasshopper, Version=7.34.23267.11001, Culture=neutral, PublicKeyToken=dda4f5ec2cd80803, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\..\..\Program Files\Rhino 7\Plug-ins\Grasshopper\Grasshopper.dll</HintPath>
+    <Reference Include="Grasshopper">
+      <HintPath>..\..\..\..\..\..\Program Files\Rhino 8\Plug-ins\Grasshopper\Grasshopper.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="MathNet.Numerics, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\PachydermAcoustic_BigBang\Pachyderm_Whole\packages\MathNet.Numerics.5.0.0\lib\net48\MathNet.Numerics.dll</HintPath>
+    <Reference Include="Rhino.UI">
+      <HintPath>..\..\..\..\..\..\Program Files\Rhino 8\System\Rhino.UI.dll</HintPath>
     </Reference>
     <Reference Include="RhinoCommon">
-      <HintPath>..\..\..\..\..\..\Program Files\Rhino 7\System\RhinoCommon.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files\Rhino 8\System\RhinoCommon.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Ana_AssessDirect.cs" />
-    <Compile Include="Ana_Sabine.cs" />
-    <Compile Include="Ana_SpeechTransmissionIndex.cs" />
-    <Compile Include="Ana_CenterTime.cs" />
-    <Compile Include="Ana_EDT.cs" />
-    <Compile Include="Ana_SPLA.cs" />
-    <Compile Include="Ana_Lombard.cs" />
-    <Compile Include="Ana_Strength.cs" />
-    <Compile Include="Ana_ITDG.cs" />
-    <Compile Include="Ana_Deutlich.cs" />
-    <Compile Include="Ana_Clarity.cs" />
-    <Compile Include="Ana_SPL.cs" />
-    <Compile Include="Aud_PlayContinuous.cs" />
-    <Compile Include="Aud_Play_Signal.cs" />
-    <Compile Include="Aud_Convolution.cs" />
-    <Compile Include="Aud_Signal2Chunks.cs" />
-    <Compile Include="Aud_Fourier_Transform.cs" />
-    <Compile Include="Aud_OctFilter.cs" />
-    <Compile Include="Aud_WaveFile_in.cs" />
-    <Compile Include="Aud_Objects.cs" />
-    <Compile Include="Aud_Signal2List.cs" />
-    <Compile Include="Aud_Spectrum2List.cs" />
-    <Compile Include="Env_Loudspeaker_Component.cs" />
-    <Compile Include="Mat_Airspace.cs" />
-    <Compile Include="Env_LayerProps.cs" />
-    <Compile Include="Env_NURBS_Scene .cs" />
-    <Compile Include="Env_RhinoSource.cs" />
-    <Compile Include="Aud_MLS_Tail.cs" />
-    <Compile Include="Sim_FVM13.cs" />
-    <Compile Include="User_Feedback.cs" />
-    <Compile Include="PachGH_AssemblyPriority.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Sim_PachFile.cs" />
-    <Compile Include="Sim_RhinoResult.cs" />
-    <Compile Include="Sim_Image_Source.cs" />
-    <Compile Include="Sim_DirectSound.cs" />
-    <Compile Include="Uti_EnergyTimeCurve.cs" />
-    <Compile Include="Uti_AuralizationFilter_Omni.cs" />
-    <Compile Include="Uti_PressureTimeCurve.cs" />
-    <Compile Include="Uti_Measurement.cs" />
-    <Compile Include="Uti_SignalCorrelation.cs" />
-    <Compile Include="Uti_SchroederCorrelation.cs" />
-    <Compile Include="Uti_RealPaToSPL.cs" />
-    <Compile Include="Vis_FVM_CustomMesh.cs" />
-    <Compile Include="Vis_RayShooter.cs" />
-    <Compile Include="Uti_Radiation_Absorption.cs" />
-    <Compile Include="Uti_Radiation_Impedance.cs" />
-    <Compile Include="Env_StationaryReceiver_Component.cs" />
-    <Compile Include="Env_TrafficSource_Component.cs" />
-    <Compile Include="Env_GeodesicSource_Component.cs" />
-    <Compile Include="Sim_DirectField.cs" />
-    <Compile Include="Env_Atmospheric_Properties.cs" />
-    <Compile Include="Vis_False_Colour_Mesh.cs" />
-    <Compile Include="Aud_Unweave_Signal.cs" />
-    <Compile Include="Env_Polygon_Scene.cs" />
-    <Compile Include="Ana_RT.cs" />
-    <Compile Include="Aud_WaveFile_out.cs" />
-    <Compile Include="Uti_PTC2ETC.cs" />
-    <Compile Include="Sim_RayTracing.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <ProjectReference Include="..\Hare\Hare.csproj" />
+    <ProjectReference Include="..\PachydermAcoustic_Core\Pachyderm_Acoustic_Universal\Pachyderm_Acoustic_Universal\Pachyderm_Acoustic_Universal.csproj" />
+    <ProjectReference Include="..\PachydermAcoustic_Rhinoceros\Pachyderm_Acoustic.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
+    <PackageReference Include="MathNet.Numerics" Version="6.0.0-beta1" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <Compile Remove="ComplexPaToSPL.cs" />
+    <Compile Remove="pachydermgh.cs" />
+    <Compile Remove="PachydermGHInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-    <None Include="Resources\ITDG.bmp" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+    <PackageReference Include="System.Windows.Extensions">
+      <Version>7.0.0</Version>
+    </PackageReference>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Auralization.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Center Time.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Clarity.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Definition.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Delay Gap.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Direct Sound.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Divide Signal.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\EDT.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Energy Time Curve.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\False Color Mesh Mapping.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\FFT.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Filter Octave Band.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Geodesic Source.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Image Source.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\LoudSpeaker.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Medium Properties.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Microphone.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Nurb Scene.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Pachyderm file.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Pachyderm for Rhino result.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Patch-Direct.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Polygon Scene.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Radiation Absorption.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Radiation Impedance.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Ray Tracing.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Real Pressure to SPL.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\RT.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Signal to List.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Spectrum to List.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Speech Transmission Index 1.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Speech Transmission Index 2.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\SPL.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Strength.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Unweave Signal.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Visualization.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Wave File.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Hare\Hare.csproj">
-      <Project>{681e37f0-fdb7-4d4d-b5dc-b6f5065170ff}</Project>
-      <Name>Hare</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PachydermAcoustic_Core\Pachyderm_Acoustic_Universal\Pachyderm_Acoustic_Universal\Pachyderm_Acoustic_Universal.csproj">
-      <Project>{95032bc9-057a-42e1-a698-82a64db1a360}</Project>
-      <Name>Pachyderm_Acoustic_Universal</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PachydermAcoustic_Rhinoceros\Pachyderm_Acoustic.csproj">
-      <Project>{3ee4fd69-312e-479c-b4e7-e807f711f7ea}</Project>
-      <Name>Pachyderm_Acoustic</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
-  <PropertyGroup>
+  <!--<PropertyGroup>
     <PostBuildEvent>Copy /y "$(TargetPath)" "$(TargetDir)$(ProjectName).gha"
 Copy /y "$(TargetDir)$(ProjectName).gha" "%25appdata%25\Grasshopper\6\Libraries\$(ProjectName).gha"</PostBuildEvent>
-  </PropertyGroup>
+  </PropertyGroup>-->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug32|AnyCPU' ">
     <StartArguments>
     </StartArguments>
     <StartAction>Program</StartAction>
     <StartProgram>C:\Program Files (x86)\Rhinoceros 5\System\Rhino4.exe</StartProgram>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <FallbackCulture>en-US</FallbackCulture>
+    <UserSecretsId>010efb36-7581-4003-8f99-467d647ebb94</UserSecretsId>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug64|AnyCPU'">
     <StartProgram>C:\Program Files\Rhinoceros 5 (64-bit)\System\Rhino.exe</StartProgram>
     <StartArguments>
     </StartArguments>
-    <StartAction>Program</StartAction>
-    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0|AnyCPU'">
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net48|AnyCPU'">
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net7.0|AnyCPU'">
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net48|AnyCPU'">
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 </Project>

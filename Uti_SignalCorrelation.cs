@@ -20,11 +20,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Pachyderm_Acoustic.Utilities;
-using Rhino.Geometry;
 
 namespace PachydermGH
 {

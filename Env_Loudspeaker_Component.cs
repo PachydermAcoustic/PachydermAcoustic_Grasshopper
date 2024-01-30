@@ -22,6 +22,10 @@ using Grasshopper.Kernel;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 using Pachyderm_Acoustic;
+using Rhino.DocObjects;
+using Rhino.UI;
+using Eto;
+using Eto.Forms;
 
 namespace PachydermGH
 {
@@ -104,7 +108,7 @@ namespace PachydermGH
 
                 if (S == null)
                 {
-                    CLF_Contents = CLF_Read.SecureAccess.Read();
+                    CLF_Contents = CLF_Read.SecureAccess.Read(Rhino.UI.RhinoEtoApp.MainWindow);
                     this.Description = CLF_Contents[0];
                     Sensitivity = CLF_Contents[2];
                     Max = CLF_Contents[3];
@@ -146,7 +150,7 @@ namespace PachydermGH
                 Balloon.Update_Aim();
 
                 S = new Pachyderm_Acoustic.Environment.DirectionalSource(Balloon, SWL, new Hare.Geometry.Point(Origin.X, Origin.Y, Origin.Z), new int[] { int.Parse(B[0]), int.Parse(B[1]) }, 0, false);
-                M = Pachyderm_Acoustic.Utilities.RC_PachTools.Hare_to_RhinoMesh(Balloon.m_DisplayMesh, false);
+                M = Pachyderm_Acoustic.Utilities.RCPachTools.HaretoRhinoMesh(Balloon.m_DisplayMesh, false);
                 M.Flip(true, true, true);
             //}
 

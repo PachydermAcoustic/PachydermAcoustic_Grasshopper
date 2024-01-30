@@ -19,7 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
+//using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 
@@ -60,11 +60,11 @@ namespace PachydermGH
             pManager.AddGenericParameter("Energy-Time Curve", "ETC", "The energy-time-curve result of the simulation...", GH_ParamAccess.tree);
         }
 
-        public override bool AppendMenuItems(ToolStripDropDown menu)
-        {
-            Menu_AppendItem(menu, "Sum all ETCs.", Combine_Click, true, Combine);
-            return base.AppendMenuItems(menu);
-        }
+        //public override bool AppendMenuItems(ToolStripDropDown menu)
+        //{
+        //    Menu_AppendItem(menu, "Sum all ETCs.", Combine_Click, true, Combine);
+        //    return base.AppendMenuItems(menu);
+        //}
 
         bool Combine = true;
 

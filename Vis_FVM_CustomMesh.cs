@@ -26,7 +26,7 @@ namespace PachydermGH
 {
     public class FVM_InsertMesh : GH_Component
     {
-        Pachyderm_Acoustic.UI.Pach_TD_Numeric_Control Sim;
+        Pachyderm_Acoustic.UI.PachTDNumericControl Sim;
 
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
@@ -36,7 +36,7 @@ namespace PachydermGH
                 "Allows you to specify a custom mesh for use with the display conduit of the Finite Volume Method in Pachyderm.",
                 "Acoustics", "Visualization")
         {
-            Sim = Pachyderm_Acoustic.UI.Pach_TD_Numeric_Control.Instance;
+            Sim = Pachyderm_Acoustic.UI.PachTDNumericControl.Instance;
             if (Sim != null) Sim.Incremented += Sim_Incremented;
         }
 
@@ -79,7 +79,7 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Pachyderm_Acoustic.UI.Pach_TD_Numeric_Control Sim = Pachyderm_Acoustic.UI.Pach_TD_Numeric_Control.Instance;
+            Pachyderm_Acoustic.UI.PachTDNumericControl Sim = Pachyderm_Acoustic.UI.PachTDNumericControl.Instance;
             if (Sim.FDTD == null) return;
             this.Message = "dX = " + Math.Round(Sim.FDTD.dx, 3) + ", dY = " + Math.Round(Sim.FDTD.dy, 3) + ", dZ = " + Math.Round(Sim.FDTD.dz, 3);
 

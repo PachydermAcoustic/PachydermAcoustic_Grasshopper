@@ -18,9 +18,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using Grasshopper.Kernel;
-using Rhino.Geometry;
 
 namespace PachydermGH
 {
@@ -50,11 +48,11 @@ namespace PachydermGH
 
         bool Noise_Compensation = false;
 
-        public override bool AppendMenuItems(ToolStripDropDown menu)
-        {
-            Menu_AppendItem(menu, "Noise Compensation (Not needed for Simulated IRs)", Comp_click, true, Noise_Compensation);
-            return base.AppendMenuItems(menu);
-        }
+        //public override bool AppendMenuItems(ToolStripDropDown menu)
+        //{
+        //    Menu_AppendItem(menu, "Noise Compensation (Not needed for Simulated IRs)", Comp_click, true, Noise_Compensation);
+        //    return base.AppendMenuItems(menu);
+        //}
 
         public void Comp_click(Object sender, EventArgs e)
         {

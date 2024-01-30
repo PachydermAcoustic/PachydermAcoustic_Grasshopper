@@ -18,7 +18,6 @@
 //'Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
 
 using System;
-using System.Windows.Forms;
 using Grasshopper.Kernel;
 
 namespace PachydermGH
@@ -75,15 +74,15 @@ namespace PachydermGH
             }
         }
         
-        public override bool AppendMenuItems(ToolStripDropDown menu)
-        {
-            Menu_AppendObjectNameEx(menu);
-            Menu_AppendEnableItem(menu);
-            Menu_AppendItem(menu, "Obtain data from Pach_Hybrid_Method", Hybrid_Click);
-            Menu_AppendItem(menu, "Obtain data from Pach_Mapping_Method", Mapping_Click);
-            Menu_AppendItem(menu, "Obtain data from Numeric_TimeDomain_Method", NTD_Click);
-            return true;
-        }
+        //public override bool AppendMenuItems(ToolStripDropDown menu)
+        //{
+        //    Menu_AppendObjectNameEx(menu);
+        //    Menu_AppendEnableItem(menu);
+        //    Menu_AppendItem(menu, "Obtain data from Pach_Hybrid_Method", Hybrid_Click);
+        //    Menu_AppendItem(menu, "Obtain data from Pach_Mapping_Method", Mapping_Click);
+        //    Menu_AppendItem(menu, "Obtain data from Numeric_TimeDomain_Method", NTD_Click);
+        //    return true;
+        //}
 
         private void Hybrid_Click(Object sender, EventArgs e)
         {
@@ -161,11 +160,11 @@ namespace PachydermGH
             Pachyderm_Acoustic.ImageSourceData[] IS = new Pachyderm_Acoustic.ImageSourceData[0];
             Pachyderm_Acoustic.Environment.Receiver_Bank[] RT = new Pachyderm_Acoustic.Environment.Receiver_Bank[0];
 
-            if (I == interface_selection.Pach_Hybrid_Method && Pachyderm_Acoustic.UI.Pach_Hybrid_Control.Instance.Auralisation_Ready())
+            if (I == interface_selection.Pach_Hybrid_Method && Pachyderm_Acoustic.UI.PachHybridControl.Instance.AuralisationReady())
             {
                 Hare.Geometry.Point[] SRC = new Hare.Geometry.Point[0];
                 Hare.Geometry.Point[] REC = new Hare.Geometry.Point[0];
-                Pachyderm_Acoustic.UI.Pach_Hybrid_Control.Instance.GetSims(ref SRC, ref REC, ref D, ref IS, ref RT);
+                Pachyderm_Acoustic.UI.PachHybridControl.Instance.GetSims(ref SRC, ref REC, ref D, ref IS, ref RT);
                 if (RT.Length == 0) RT = new Pachyderm_Acoustic.Environment.Receiver_Bank[D.Length];
                 if (IS.Length == 0) IS = new Pachyderm_Acoustic.ImageSourceData[D.Length];
                 DA.SetDataList(0, D);
@@ -189,11 +188,11 @@ namespace PachydermGH
                 DA.SetDataList(1, IS);
                 DA.SetDataList(2, RT);
             }
-            else if (I == interface_selection.Pach_Numeric_TimeDomain && Pachyderm_Acoustic.UI.Pach_TD_Numeric_Control.Instance.FDTD != null && Pachyderm_Acoustic.UI.Pach_TD_Numeric_Control.Instance.FDTD.Mic != null)
+            else if (I == interface_selection.Pach_Numeric_TimeDomain && Pachyderm_Acoustic.UI.PachTDNumericControl.Instance.FDTD != null && Pachyderm_Acoustic.UI.PachTDNumericControl.Instance.FDTD.Mic != null)
             {
-                double[][] Rec = Pachyderm_Acoustic.UI.Pach_TD_Numeric_Control.Instance.FDTD.Mic.Recordings_Current();
+                double[][] Rec = Pachyderm_Acoustic.UI.PachTDNumericControl.Instance.FDTD.Mic.Recordings_Current();
                 if (Rec == null || Rec.Length < 1) throw new Exception("Recordings not found. Are you sure you have receivers, and that you have run your FDTD simulation?");
-                double FS = Pachyderm_Acoustic.UI.Pach_TD_Numeric_Control.Instance.FDTD.SampleFrequency;
+                double FS = Pachyderm_Acoustic.UI.PachTDNumericControl.Instance.FDTD.SampleFrequency;
                 System.Collections.Generic.List<Audio_Signal> AS = new System.Collections.Generic.List<Audio_Signal>();
                 for (int i = 0; i < Rec.Length; i++) AS.Add(new Audio_Signal(Rec[i], (int)FS));
                 DA.SetDataList(0, AS);

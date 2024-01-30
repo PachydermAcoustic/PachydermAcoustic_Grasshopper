@@ -66,7 +66,7 @@ namespace PachydermGH
             {
                 Pachyderm_Acoustic.PachMapReceiver map = new Pachyderm_Acoustic.PachMapReceiver();
                 DA.GetData(0, ref map);
-                m = Pachyderm_Acoustic.Utilities.RC_PachTools.Hare_to_RhinoMesh(map.Map_Mesh, false);
+                m = Pachyderm_Acoustic.Utilities.RCPachTools.HaretoRhinoMesh(map.Map_Mesh, false);
                 if (m.Vertices.Count != 0) this.ClearRuntimeMessages();
             }
 

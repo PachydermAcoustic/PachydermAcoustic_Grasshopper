@@ -39,7 +39,7 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Pachyderm_Acoustic.Environment.Source[] S = Pachyderm_Acoustic.Utilities.RC_PachTools.GetSource(0);
+            Pachyderm_Acoustic.Environment.Source[] S = Pachyderm_Acoustic.Utilities.RCPachTools.GetSource(0);
             DA.SetDataList(0,S.ToList<Pachyderm_Acoustic.Environment.Source>());
         }
 
