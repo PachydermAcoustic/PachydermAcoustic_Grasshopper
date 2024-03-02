@@ -106,7 +106,7 @@ namespace PachydermGH
                 for (int r = 0; r < Rec[s].Rec_List.Length; r++)
                 {
                     ProgressBox VB = new ProgressBox("Creating Impulse Responses...");
-                    VB.ShowModal();
+                    VB.Show();
                     double[] PTC = Pachyderm_Acoustic.Utilities.IR_Construction.PressureTimeCurve(D.ToArray(), IS.ToArray(), Rec.ToArray(), Rec[s].CutOffTime, Rec[s].SampleRate, r, new List<int> { s }, false, true, VB);
                     VB.Close();
                     AS.Add(new Audio_Signal(PTC, Rec[0].SampleRate, (int)Math.Round(D[s].Time(r) * Rec[s].SampleRate)));

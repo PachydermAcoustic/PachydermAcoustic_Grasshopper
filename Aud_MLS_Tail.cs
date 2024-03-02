@@ -66,7 +66,7 @@ namespace PachydermGH
             Dir.Create_Filter();
 
             ProgressBox VB = new ProgressBox("Creating IR Filters for Deterministic Reflections...");
-            VB.ShowModal();
+            VB.Show();
             if (IS != null) IS.Create_Filter(Dir.SWL, 4096, VB);
             VB.Close();
 
@@ -76,7 +76,7 @@ namespace PachydermGH
             if (Dir != null) { for (int i = 0; i < magnitude.Length; i++) { magnitude[i] = Math.Sqrt(Dir.EnergyValue(i, 0).Sum() * Math.Pow(10, D2R[0] / 10)); } }
 
             VB = new Pachyderm_Acoustic.ProgressBox("Extrapolating Filter...");
-            VB.ShowModal();
+            VB.Show();
             double[] AF = Pachyderm_Acoustic.Utilities.IR_Construction.Auralization_Filter(new Pachyderm_Acoustic.Direct_Sound[1] { Dir }, new Pachyderm_Acoustic.ImageSourceData[1] { IS }, null, Dur, (int)FS, 0, new List<int> { 0 }, false, true, VB);
             VB.Close();
 
