@@ -95,7 +95,7 @@ namespace PachydermGH
                 double[] P_Real = new double[No_of_octaves], P_Imag = new double[No_of_octaves];
                 for (int S_id = 0; S_id < Src.Count; S_id++)
                 {
-                    Vector3d V = Pts[i] - new Point3d(Src[S_id].Origin().x, Src[S_id].Origin().y, Src[S_id].Origin().z);
+                    Vector3d V = Pts[i] - new Point3d(Src[S_id].Origin.x, Src[S_id].Origin.y, Src[S_id].Origin.z);
                     double Length = V.Length;
                     int id;
                     id = Rnd.Next();

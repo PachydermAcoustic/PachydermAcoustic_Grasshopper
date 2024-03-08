@@ -98,7 +98,7 @@ namespace PachydermGH
                 sno++;
                 foreach (Vector3d vector in Dir)
                 {
-                    Hare.Geometry.Point Startpt = Pt.Origin();
+                    Hare.Geometry.Point Startpt = Pt.Origin;
                     Point3d RPT = new Point3d(Startpt.x, Startpt.y, Startpt.z);
                     Hare.Geometry.Vector vct = new Hare.Geometry.Vector(vector.X, vector.Y, vector.Z);
                     vct.Normalize();
@@ -106,7 +106,7 @@ namespace PachydermGH
                     poly.Add(RPT);
                     bool terminate = false;
                     
-                    BroadRay ray = new BroadRay(Startpt, vct, Rnd.Next(), 0, Pt.DirPower(0, Rnd.Next(), vct), 0, 0);
+                    BroadRay ray = new BroadRay(Startpt.x, Startpt.y, Startpt.z, vct.dx, vct.dy, vct.dz, Rnd.Next(), 0, Pt.DirPower(0, Rnd.Next(), vct), 0, 0);
 
                     for (int i = 0; i < bounces; i++)
                     {
@@ -118,11 +118,16 @@ namespace PachydermGH
 
                         if (S.shoot(ray, out u, out v, out poly_id, out X, out t, out code)) 
                         {
-                            ray.origin = X[0];
+                            ray.x = X[0].x;
+                            ray.y = X[0].y;
+                            ray.z = X[0].z;
                             Hare.Geometry.Vector N = S.Normal(poly_id, u, v);
-                            ray.direction -= N * Hare.Geometry.Hare_math.Dot(ray.direction, N) * 2;
+                            double dot2 = Hare.Geometry.Hare_math.Dot(ray.dx, ray.dy, ray.dz, N.dx, N.dy, N.dz) * 2;
+                            ray.dx -= N.dx * dot2;
+                            ray.dy -= N.dy * dot2;
+                            ray.dz -= N.dz * dot2;
                             ray.Surf_ID = poly_id;
-                            poly.Add(ray.origin.x, ray.origin.y, ray.origin.z);
+                            poly.Add(ray.x, ray.y, ray.z);
                             foreach (Brep br in terminus)
                             {
                                 ComponentIndex c;
@@ -147,7 +152,7 @@ namespace PachydermGH
                     {
                         rays.Add(poly);
                         Ends.Add(RPT);
-                        double dist = poly.Length - (Pt.Origin() - Startpt).Length();
+                        double dist = poly.Length - (Pt.Origin - Startpt).Length();
                         times.Add(dist / S.Sound_speed(Startpt));
                         double propmod = 4 * Math.PI * dist * dist;
 
