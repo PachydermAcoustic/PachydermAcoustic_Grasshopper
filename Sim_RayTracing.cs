@@ -19,9 +19,14 @@
 using System;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
+using Pachyderm_Acoustic;
 using Pachyderm_Acoustic.Environment;
 using Pachyderm_Acoustic.UI;
 using Rhino.Geometry;
+using System.Windows.Forms;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace PachydermGH
 {
@@ -59,13 +64,13 @@ namespace PachydermGH
             pManager[1].Optional = true;
         }
 
-        //protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
-        //{
-        //    Menu_AppendItem(menu, "Trace Specified Number of Rays", RayNo_Click, true, ByRayNo);
-        //    Menu_AppendItem(menu, "Minimum Convergence", MinCon_Click, true, MinConvergence);
-        //    Menu_AppendItem(menu, "Detailed Convergence", DetCon_Click, true, DetConvergence);
-        //    base.AppendAdditionalComponentMenuItems(menu);
-        //}
+        protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+        {
+            Menu_AppendItem(menu, "Trace Specified Number of Rays", RayNo_Click, true, ByRayNo);
+            Menu_AppendItem(menu, "Minimum Convergence", MinCon_Click, true, MinConvergence);
+            Menu_AppendItem(menu, "Detailed Convergence", DetCon_Click, true, DetConvergence);
+            base.AppendAdditionalComponentMenuItems(menu);
+        }
 
         private void RayNo_Click(object sender, EventArgs e)
         {
@@ -109,7 +114,7 @@ namespace PachydermGH
         /// </summary>
         /// <param name="DA">The DA object can be used to retrieve data from input parameters and 
         /// to store data in output parameters.</param>
-        protected override void SolveInstance(IGH_DataAccess DA)
+        protected override async void SolveInstance(IGH_DataAccess DA)
         {
             System.Diagnostics.Process P = System.Diagnostics.Process.GetCurrentProcess();
             P.PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
@@ -154,34 +159,39 @@ namespace PachydermGH
 
                     Pachyderm_Acoustic.SplitRayTracer RT = new Pachyderm_Acoustic.SplitRayTracer(Src[i], Rec.Count == Src.Count ? Rec[s_id]: Rec[0].Duplicate(Src[i], S), S, CO_Time, scope.ToArray(), IS_Order, RayCt, CP);
                     if (!ByRayNo) CP.Show();
-                    RT.Begin();
-                    do
-                    {
-                        if (CancelCalc)
-                        {
-                            //TODO - create terms for termination of simulation
-                            //RT.Abort_Calculation();
-                            Rhino.ApplicationSettings.FileSettings.AutoSaveEnabled = true;
-                            throw new Exception("Simulation Canceled");
-                        }
-                        if (RT.ThreadState() != System.Threading.ThreadState.Running)
-                        {
-                            break;
-                        }
-                        System.Threading.Thread.Sleep(3000);
-                        Form.Display(RT.ProgressMsg(), string.Format("Ray-tracing source {0} of {1}", i, Src.Count));
-                    } while (true);
+                    TaskAwaiter<Simulation_Type> TRTA = Pachyderm_Acoustic.Utilities.RCPachTools.RunSimulation(RT).GetAwaiter();
+                    while (!TRTA.IsCompleted) await Task.Delay(3000);
 
-                    RT.Combine_ThreadLocal_Results();
-                    do
-                    {
-                        System.Threading.Thread.Sleep(3000);
-                        if (RT.ThreadState() != System.Threading.ThreadState.Running)
-                        {
-                            break;
-                        }
-                       Form.Display(RT.ProgressMsg(), string.Format("Ray-tracing source {0} of {1}", i, Src.Count));
-                    } while (true);
+                    RT = TRTA.GetResult() as SplitRayTracer;
+
+                    //RT.Begin();
+                    //do
+                    //{
+                    //    if (CancelCalc)
+                    //    {
+                    //        //TODO - create terms for termination of simulation
+                    //        //RT.Abort_Calculation();
+                    //        Rhino.ApplicationSettings.FileSettings.AutoSaveEnabled = true;
+                    //        throw new Exception("Simulation Canceled");
+                    //    }
+                    //    if (RT.ThreadState() != System.Threading.ThreadState.Running)
+                    //    {
+                    //        break;
+                    //    }
+                    //    System.Threading.Thread.Sleep(3000);
+                    //    Form.Display(RT.ProgressMsg(), string.Format("Ray-tracing source {0} of {1}", i, Src.Count));
+                    //} while (true);
+
+                    //RT.Combine_ThreadLocal_Results();
+                    //do
+                    //{
+                    //    System.Threading.Thread.Sleep(3000);
+                    //    if (RT.ThreadState() != System.Threading.ThreadState.Running)
+                    //    {
+                    //        break;
+                    //    }
+                    //   Form.Display(RT.ProgressMsg(), string.Format("Ray-tracing source {0} of {1}", i, Src.Count));
+                    //} while (true);
 
                     s_id++;
                     if (RT.GetReceiver.GetType() == typeof(Pachyderm_Acoustic.PachMapReceiver))
@@ -192,6 +202,9 @@ namespace PachydermGH
                     {
                         RTS.Add(RT.GetReceiver);
                     }
+
+                    this.Message = string.Format("{0} Rays ({1} sub-rays) cast in {2} hours, {3} minutes, {4} seconds.", RT._currentRay.Sum(), RT._rayTotal.Sum(), RT._ts.Hours, RT._ts.Minutes, RT._ts.Seconds);
+
                     Form.Close();
                     Form.Dispose();
                 }

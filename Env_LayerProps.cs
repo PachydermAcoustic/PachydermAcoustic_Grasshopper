@@ -18,6 +18,7 @@
 
 using System;
 using Grasshopper.Kernel;
+using System.Windows.Forms;
 
 namespace PachydermGH
 {
@@ -56,11 +57,11 @@ namespace PachydermGH
 
         bool recompute = true;
         bool expired = false;
-        //protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
-        //{
-        //    Menu_AppendItem(menu, "Trigger Recompute", ToggleRecompute, true, recompute);
-        //    base.AppendAdditionalComponentMenuItems(menu);
-        //}
+        protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
+        {
+            Menu_AppendItem(menu, "Trigger Recompute", ToggleRecompute, true, recompute);
+            base.AppendAdditionalComponentMenuItems(menu);
+        }
 
         private void ToggleRecompute(object sender, EventArgs e)
         {
