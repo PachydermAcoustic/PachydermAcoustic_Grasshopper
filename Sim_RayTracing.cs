@@ -159,8 +159,8 @@ namespace PachydermGH
 
                     Pachyderm_Acoustic.SplitRayTracer RT = new Pachyderm_Acoustic.SplitRayTracer(Src[i], Rec.Count == Src.Count ? Rec[s_id]: Rec[0].Duplicate(Src[i], S), S, CO_Time, scope.ToArray(), IS_Order, RayCt, CP);
                     if (!ByRayNo) CP.Show();
-                    TaskAwaiter<Simulation_Type> TRTA = Pachyderm_Acoustic.Utilities.RCPachTools.RunSimulation(RT).GetAwaiter();
-                    while (!TRTA.IsCompleted) await Task.Delay(3000);
+                    TaskAwaiter<Simulation_Type> TRTA = Pachyderm_Acoustic.Utilities.RCPachTools.RunSimulation(RT, false).GetAwaiter();
+                    while (!TRTA.IsCompleted) System.Threading.Thread.Sleep(3000);
 
                     RT = TRTA.GetResult() as SplitRayTracer;
 

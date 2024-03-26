@@ -57,6 +57,7 @@
     </Reference>
     <Reference Include="Rhino.UI">
       <HintPath>..\..\..\..\..\..\Program Files\Rhino 8\System\Rhino.UI.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="RhinoCommon">
       <HintPath>..\..\..\..\..\..\Program Files\Rhino 8\System\RhinoCommon.dll</HintPath>
@@ -112,4 +113,7 @@ Copy /y "$(TargetDir)$(ProjectName).gha" "%25appdata%25\Grasshopper\6\Libraries\
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net48|AnyCPU'">
     <DebugType>embedded</DebugType>
   </PropertyGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="Copy /y &quot;$(TargetDir)$(ProjectName).gha&quot; &quot;%25appdata%25\Grasshopper\Libraries\$(ProjectName).gha&quot;" />
+  </Target>
 </Project>
