@@ -116,9 +116,6 @@ namespace PachydermGH
         /// to store data in output parameters.</param>
         protected override async void SolveInstance(IGH_DataAccess DA)
         {
-            System.Diagnostics.Process P = System.Diagnostics.Process.GetCurrentProcess();
-            P.PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
-
             Pachyderm_Acoustic.Environment.Scene S = null;
             DA.GetData<Pachyderm_Acoustic.Environment.Scene>(0, ref S);
             int RayCt = 0;
@@ -151,47 +148,18 @@ namespace PachydermGH
             {
                 for (int i = 0; i < Src.Count; i++)
                 {
-                     User_Feedback Form = new User_Feedback();
-                    Form.Display("Starting ray-tracing simulation...", string.Format("Ray-tracing source {0} of {1}", i, Src.Count) );
-                    Form.Show();
+                    //User_Feedback Form = new User_Feedback();
+                    //Form.Display("Starting ray-tracing simulation...", string.Format("Ray-tracing source {0} of {1}", i, Src.Count) );
+                    //Form.Show();
 
-                    ConvergenceProgress CP = new ConvergenceProgress();
+                    //ConvergenceProgress CP = new ConvergenceProgress();
 
-                    Pachyderm_Acoustic.SplitRayTracer RT = new Pachyderm_Acoustic.SplitRayTracer(Src[i], Rec.Count == Src.Count ? Rec[s_id]: Rec[0].Duplicate(Src[i], S), S, CO_Time, scope.ToArray(), IS_Order, RayCt, CP);
-                    if (!ByRayNo) CP.Show();
+                    Pachyderm_Acoustic.SplitRayTracer RT = new Pachyderm_Acoustic.SplitRayTracer(Src[i], Rec.Count == Src.Count ? Rec[s_id] : Rec[0].Duplicate(Src[i], S), S, CO_Time, scope.ToArray(), IS_Order, RayCt, null);//CP);
+                    //if (!ByRayNo) CP.Show();
                     TaskAwaiter<Simulation_Type> TRTA = Pachyderm_Acoustic.Utilities.RCPachTools.RunSimulation(RT, false).GetAwaiter();
                     while (!TRTA.IsCompleted) System.Threading.Thread.Sleep(3000);
 
                     RT = TRTA.GetResult() as SplitRayTracer;
-
-                    //RT.Begin();
-                    //do
-                    //{
-                    //    if (CancelCalc)
-                    //    {
-                    //        //TODO - create terms for termination of simulation
-                    //        //RT.Abort_Calculation();
-                    //        Rhino.ApplicationSettings.FileSettings.AutoSaveEnabled = true;
-                    //        throw new Exception("Simulation Canceled");
-                    //    }
-                    //    if (RT.ThreadState() != System.Threading.ThreadState.Running)
-                    //    {
-                    //        break;
-                    //    }
-                    //    System.Threading.Thread.Sleep(3000);
-                    //    Form.Display(RT.ProgressMsg(), string.Format("Ray-tracing source {0} of {1}", i, Src.Count));
-                    //} while (true);
-
-                    //RT.Combine_ThreadLocal_Results();
-                    //do
-                    //{
-                    //    System.Threading.Thread.Sleep(3000);
-                    //    if (RT.ThreadState() != System.Threading.ThreadState.Running)
-                    //    {
-                    //        break;
-                    //    }
-                    //   Form.Display(RT.ProgressMsg(), string.Format("Ray-tracing source {0} of {1}", i, Src.Count));
-                    //} while (true);
 
                     s_id++;
                     if (RT.GetReceiver.GetType() == typeof(Pachyderm_Acoustic.PachMapReceiver))
@@ -205,8 +173,8 @@ namespace PachydermGH
 
                     this.Message = string.Format("{0} Rays ({1} sub-rays) cast in {2} hours, {3} minutes, {4} seconds.", RT._currentRay.Sum(), RT._rayTotal.Sum(), RT._ts.Hours, RT._ts.Minutes, RT._ts.Seconds);
 
-                    Form.Close();
-                    Form.Dispose();
+                    //Form.Close();
+                    //Form.Dispose();
                 }
 
                 DA.SetDataTree(0,RTS);
@@ -216,7 +184,6 @@ namespace PachydermGH
             {
                 this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Raytracing operation failed. This can be due to an unsuitable scene object. For example, did you set materials on all layers referenced by Rhinoceros Geometry?");
             }
-            P.PriorityClass = System.Diagnostics.ProcessPriorityClass.Normal;
         }
 
         /// <summary>

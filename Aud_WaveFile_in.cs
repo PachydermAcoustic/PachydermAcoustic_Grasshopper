@@ -63,7 +63,7 @@ namespace PachydermGH
             int fs;
             try
             {
-                S = Pachyderm_Acoustic.Audio.Pach_SP.Wave.ReadtoDouble(Path, false, out fs);
+                S = Pachyderm_Acoustic.Audio.Pach_SP.Wave.ReadtoDouble(Path, false, out fs, true);
             }
             catch { throw new Exception("Invalid Path..."); }
             Audio_Signal AS = new Audio_Signal(S, fs);

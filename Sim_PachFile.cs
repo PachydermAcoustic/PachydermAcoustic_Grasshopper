@@ -72,6 +72,9 @@ namespace PachydermGH
                 Pachyderm_Acoustic.ImageSourceData[] IS = new Pachyderm_Acoustic.ImageSourceData[0];
                 Pachyderm_Acoustic.Environment.Receiver_Bank[] RT = new Pachyderm_Acoustic.Environment.Receiver_Bank[0];
                 Pachyderm_Acoustic.Utilities.FileIO.Read_Pac1(p, ref D, ref IS, ref RT);
+
+                for (int i = 0; i < RT.Length; i++) RT[i].HasFilter();
+                
                 DA.SetDataList(0, D);
                 DA.SetDataList(1, IS);
                 DA.SetDataList(2, RT);
@@ -82,6 +85,9 @@ namespace PachydermGH
                 Pachyderm_Acoustic.Utilities.FileIO.Read_pachm(p, ref PMR);
                 DA.SetDataList(0, null);
                 DA.SetDataList(1, null);
+
+                for (int i = 0; i < PMR.Length; i++) PMR[i].HasFilter();
+
                 DA.SetDataList(2, PMR);
             }
             else

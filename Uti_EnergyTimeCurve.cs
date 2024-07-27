@@ -28,7 +28,7 @@ namespace PachydermGH
     public class EnergyTimeCurve : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the MyComponent2 class.
+        /// Initializes a new instance of the class.
         /// </summary>
         public EnergyTimeCurve()
             : base("Energy-Time Curve", "ETC",

@@ -65,7 +65,24 @@ namespace PachydermGH
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             System.Diagnostics.Process P = System.Diagnostics.Process.GetCurrentProcess();
-            P.PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
+            switch (Pachyderm_Acoustic.UI.PachydermAc_PlugIn.Instance.TaskPriority)
+            {
+                case 0:
+                    {
+                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
+                        break;
+                    }
+                case 1:
+                    {
+                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.AboveNormal;
+                        break;
+                    }
+                case 2:
+                    {
+                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.Normal;
+                        break;
+                    }
+            }
 
             Pachyderm_Acoustic.Environment.Polygon_Scene S = null;
             DA.GetData<Pachyderm_Acoustic.Environment.Polygon_Scene>(0, ref S);

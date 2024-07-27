@@ -7,7 +7,8 @@
 //'it under the terms of the GNU General Public License as published 
 //'by the Free Software Foundation; either version 3 of the License, or 
 //'(at your option) any later version. 
-//'Pachyderm-Acoustic is distributed in the hope that it will be useful, 
+//'Pachyderm-Acoustic is distributed in the hope that it will be
+//useful, 
 //'but WITHOUT ANY WARRANTY; without even the implied warranty of 
 //'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
 //'GNU General Public License for more details. 
@@ -19,21 +20,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-//using System.Windows.Forms;
 using Grasshopper.Kernel;
-using Pachyderm_Acoustic;
 using Rhino.Geometry;
+using SkiaSharp;
 
 namespace PachydermGH
 {
-    public class Omni_ImpulseResponse : GH_Component
+    public class Ambisonic_ImpulseResponse : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the MyComponent2 class.
         /// </summary>
-        public Omni_ImpulseResponse()
-            : base("Omni_ImpulseResponse", "OmniIR",
-                "Creates the Impulse Response from simulation results. Note that this version of the impulse response has a flat power spectrum, and can be used for auralizations, but should not be used for sound pressure level predictions.",
+        public Ambisonic_ImpulseResponse()
+            : base("Ambisonic_ImpulseResponse", "AbmisonicIR",
+                "Creates the Stereo Impulse Response from simulation results. Note that this version of the impulse response has a flat power spectrum, and can be used for auralizations, but should not be used for sound pressure level predictions.",
                 "Acoustics", "Utility")
         {
         }
@@ -46,6 +46,10 @@ namespace PachydermGH
             pManager.AddGenericParameter("Direct Sound", "D", "Plug the Direct Sound in here.", GH_ParamAccess.list);
             pManager.AddGenericParameter("Image Source", "IS", "Plug the Image Source in here.", GH_ParamAccess.list);
             pManager.AddGenericParameter("Ray Tracing", "Tr", "Plug the Receiver from Ray Tracing in here.", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Altitude", "Alt", "Euler altitude angle.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Azimuth", "Azi", "Euler azimuth angle.", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Ambisonics Order", "Ord", "Order of Spherical Harmonics... 0 is omni, 1 is b-format, 2 is second order, and 3 is third order.", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Standard", "Std", "Enumerated channel encoding standard. FUMA = 0, SID = 1, ACN = 2", GH_ParamAccess.item);
             pManager.AddIntervalParameter("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", GH_ParamAccess.item);
 
             pManager[1].Optional = true;
@@ -60,7 +64,6 @@ namespace PachydermGH
         {
             pManager.AddGenericParameter("Energy-Time Curve", "ETC", "The energy-time-curve result of the simulation...", GH_ParamAccess.tree);
         }
-
 
         //public override bool AppendMenuItems(ToolStripDropDown menu)
         //{
@@ -88,8 +91,42 @@ namespace PachydermGH
             DA.GetDataList<Pachyderm_Acoustic.ImageSourceData>(1, IS);
             List<Pachyderm_Acoustic.Environment.Receiver_Bank> Rec = new List<Pachyderm_Acoustic.Environment.Receiver_Bank>();
             DA.GetDataList<Pachyderm_Acoustic.Environment.Receiver_Bank>(2, Rec);
+            double alt = 0;
+            double azi = 0;
+
+            bool ealt, eazi;
+            ealt = DA.GetData<double>(3, ref alt);
+            eazi = DA.GetData<double>(4, ref azi);
+
+            if ( (!ealt | !eazi) )
+            {
+                if (ealt && eazi)
+                {
+                    throw new Exception("In order to specify an angle, both azimuth and altitude must be specified. Are you missing a parameter?");
+                }
+                else
+                {
+
+                }
+            }
+
+            int order = 0;
+            bool eorder = DA.GetData<int>(5, ref order);
+            if (!eorder) throw new Exception("What order of ambisonics output would you like?");
+
+            int standard = 0;
+            Pachyderm_Acoustic.Utilities.IR_Construction.Ambisonics_Component_Order std = Pachyderm_Acoustic.Utilities.IR_Construction.Ambisonics_Component_Order.FuMa;
+            DA.GetData<int>(6, ref standard);
+            if (standard == 2) 
+            {
+                this.Message = "Encoded to ACN";
+                std = Pachyderm_Acoustic.Utilities.IR_Construction.Ambisonics_Component_Order.ACN; 
+            }
+            else this.Message = "Encoded to FUMA (SID)";
+
+
             Interval Oct = new Interval(0, 7);
-            DA.GetData<Interval>(3, ref Oct);
+            DA.GetData<Interval>(7, ref Oct);
 
             int max = Math.Max(D.Count, Rec.Count);
             if (D.Count == 0) for(int i = 0; i < max; i++) D.Add(null);
@@ -102,22 +139,45 @@ namespace PachydermGH
             for (int s = 0; s < max; s++)
             {
                 //Need to create filters?
+                if (!Rec[s].HasFilter()) Rec[s].Create_Filter(null);
+                while (!Rec[s].HasFilter()) System.Threading.Thread.Sleep(500);
 
                 List<Audio_Signal> AS = new List<Audio_Signal>();
                 for (int r = 0; r < Rec[s].Rec_List.Length; r++)
                 {
-                    ProgressBox VB = new ProgressBox("Creating Impulse Responses...");
-                    VB.Show();
-                    double[] AFTC = Pachyderm_Acoustic.Utilities.IR_Construction.Auralization_Filter(D.ToArray(), IS.ToArray(), Rec.ToArray(), Rec[s].CutOffTime, Rec[s].SampleRate, r, new List<int> { s }, false, true, VB);
-                    VB.Close();
-                    AS.Add(new Audio_Signal(AFTC, Rec[0].SampleRate, (int)Math.Round(D[s].Time(r) * Rec[s].SampleRate)));
+                    //ProgressBox VB = new ProgressBox("Creating Impulse Responses...");
+                    //VB.Show();
+                    D[s].Get_Filter(r, 44100);
+
+                    int[] DT;
+
+                    double Alt = (double)alt;
+                    double Azi = (double)azi;
+                    if (alt > 90) alt -= 180;
+                    if (alt < -90) alt += 180;
+                    if (azi > 360) azi -= 360;
+                    if (azi < 0) azi += 360;
+
+                    double[][] Response = new double[0][];
+                    if (order == 0) Response = new double[][] { Pachyderm_Acoustic.Utilities.IR_Construction.Auralization_Filter(D.ToArray(), IS.ToArray(), Rec.ToArray(), Rec[s].CO_Time, 44100, r, new List<int> { s }, false, true) };
+                    else if (order == 1) Response = Pachyderm_Acoustic.Utilities.IR_Construction.PTC_Fig8_3Axis(D, IS, Rec, Rec[s].CO_Time, 44100, r, new List<int> { s }, false, Alt, Azi, true, true);//, VB);
+                    else if (order == 2) Response = Pachyderm_Acoustic.Utilities.IR_Construction.AurFilter_Ambisonics2(D, IS, Rec, Rec[s].CO_Time, 44100, r, new List<int> { s }, false, Alt, Azi, true, true);//, VB);
+                    else if (order == 3) Response = Pachyderm_Acoustic.Utilities.IR_Construction.AurFilter_Ambisonics3(D, IS, Rec, Rec[s].CO_Time, 44100, r, new List<int> { s }, false, Alt, Azi, true, true);
+
+                    DT = new int[Response.Length];
+
+                    for(int i = 0; i < DT.Length; i++) DT[i] = (int)Math.Round(D[s].Time(r) * Rec[s].SampleRate);
+
+                    //double[] AFTC = Pachyderm_Acoustic.Utilities.IR_Construction.Auralization_Filter(D.ToArray(), IS.ToArray(), Rec.ToArray(), Rec[s].CutOffTime, Rec[s].SampleRate, r, new List<int> { s }, false, true, VB);
+                    //VB.Close();
+                    AS.Add(new Audio_Signal(Response, Rec[0].SampleRate, DT));
                 }
 
                 if (s == 0)
                 {
                     if (Combine)
                     {
-                        AS_comb = AS;
+                        AS_comb = AS; 
                         AS_final = new Grasshopper.DataTree<Audio_Signal>(AS, new Grasshopper.Kernel.Data.GH_Path(0));
                     }
                     else
@@ -160,7 +220,7 @@ namespace PachydermGH
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("{B03885B7-AF2B-459C-AB3B-97B67C0A57BA}"); }
+            get { return new Guid("F0A2FBDC-BFD9-4206-BD73-8C33E203EA1A"); }
         }
     }
 }

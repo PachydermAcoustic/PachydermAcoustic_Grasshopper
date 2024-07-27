@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Pachyderm_Acoustic.Numeric.TimeDomain;
 using Pachyderm_Acoustic.Environment;
+using Pachyderm_Acoustic.UI;
 namespace PachydermGH
 {
     public class Sim_FVM13 : GH_Component
@@ -68,7 +69,24 @@ namespace PachydermGH
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             System.Diagnostics.Process P = System.Diagnostics.Process.GetCurrentProcess();
-            P.PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
+            switch (PachydermAc_PlugIn.Instance.TaskPriority)
+            {
+                case 0:
+                    {
+                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
+                        break;
+                    }
+                case 1:
+                    {
+                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.AboveNormal;
+                        break;
+                    }
+                case 2:
+                    {
+                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.Normal;
+                        break;
+                    }
+            }
 
             Polygon_Scene S = null;
             DA.GetData<Polygon_Scene>(0, ref S);
@@ -84,9 +102,11 @@ namespace PachydermGH
             Grasshopper.Kernel.Types.GH_Box BB = new Grasshopper.Kernel.Types.GH_Box();
             DA.GetData<Grasshopper.Kernel.Types.GH_Box>(5, ref BB);
 
+            Signal_Driver_Compact Sig = new Signal_Driver_Compact(Signal_Driver_Compact.Signal_Type.Sine_Pulse, freq, 1, Src.ToArray());
+
             for (int i = 0; i < Rec.Count; i++)
             {
-                Signal_Driver_Compact Sig = new Signal_Driver_Compact(Signal_Driver_Compact.Signal_Type.Sine_Pulse, freq, 1, Src.ToArray());
+                Sig.reset(freq, Signal_Driver_Compact.Signal_Type.Sine_Pulse);
                 Microphone_Compact Mic = new Microphone_Compact(Rec[i].Origins());
                 Acoustic_Compact_FDTD FVM = new Acoustic_Compact_FDTD(S, ref Sig, ref Mic, freq, tmaxms * 2, Acoustic_Compact_FDTD.GridType.TransparencyLab, Pachyderm_Acoustic.Utilities.RCPachTools.RPttoHPt(BB.Value.Center), BB.Value.X.Length, BB.Value.Y.Length, BB.Value.Z.Length, false);
                 FVM.RuntoCompletion();
