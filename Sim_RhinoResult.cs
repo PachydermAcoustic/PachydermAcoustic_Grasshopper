@@ -171,7 +171,7 @@ namespace PachydermGH
                 DA.SetDataList(1, IS);
                 DA.SetDataList(2, RT);
             }
-            else if (I == interface_selection.Pach_Mapping_Method && Pachyderm_Acoustic.UI.Pach_Mapping_Control.Instance.Auralisation_Ready())
+            else if (I == interface_selection.Pach_Mapping_Method && Pachyderm_Acoustic.UI.Pach_Mapping_Control.Instance.Simulations_Ready())
             {
                 Pachyderm_Acoustic.PachMapReceiver[] PMR = new Pachyderm_Acoustic.PachMapReceiver[0];
                 Pachyderm_Acoustic.UI.Pach_Mapping_Control.Instance.GetSims(ref PMR);

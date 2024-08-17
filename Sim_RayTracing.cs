@@ -20,12 +20,8 @@ using System;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
 using Pachyderm_Acoustic;
-using Pachyderm_Acoustic.Environment;
-using Pachyderm_Acoustic.UI;
 using Rhino.Geometry;
-using System.Windows.Forms;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using System.Linq;
 
 namespace PachydermGH
@@ -52,47 +48,19 @@ namespace PachydermGH
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddGenericParameter("Room Model", "Room", "The Pachyderm Room Model Reference", GH_ParamAccess.item);
-            pManager.AddIntegerParameter("Number of Rays", "RayCt", "The number of rays initially used.", GH_ParamAccess.item);
+            pManager.AddIntegerParameter("Number of Rays", "RayCt", "The number of rays initially used. Alternatively, a zero value will use minimum convergence, and a value less than zero will use detailed convergence.", GH_ParamAccess.item);
+            Grasshopper.Kernel.Parameters.Param_Integer param = (pManager[1] as Grasshopper.Kernel.Parameters.Param_Integer);
+            if (param != null) param.SetPersistentData(new Grasshopper.Kernel.Types.GH_Integer(0));
             pManager.AddNumberParameter("Cut off time", "CO_Time", "The number of miliseconds that will be calculated for.", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Image Source Order", "IS_Order", "Ray tracing will ignore specular reflections up to this order... in order to combine results with deterministic image source results.", GH_ParamAccess.item);
             pManager.AddGenericParameter("Source", "Src", "Sound Source Objects...", GH_ParamAccess.list);
             pManager.AddGenericParameter("Receiver", "Rec", "Listening Object (Receiver_Bank)...", GH_ParamAccess.list);
             pManager.AddIntervalParameter("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", GH_ParamAccess.item);
             
-            Grasshopper.Kernel.Parameters.Param_Interval param = (pManager[6] as Grasshopper.Kernel.Parameters.Param_Interval);
-            if (param != null) param.SetPersistentData(new Grasshopper.Kernel.Types.GH_Interval(new Interval(0,7)));
+            Grasshopper.Kernel.Parameters.Param_Interval param_I = (pManager[6] as Grasshopper.Kernel.Parameters.Param_Interval);
+            if (param_I != null) param_I.SetPersistentData(new Grasshopper.Kernel.Types.GH_Interval(new Interval(0,7)));
             pManager[1].Optional = true;
         }
-
-        protected override void AppendAdditionalComponentMenuItems(ToolStripDropDown menu)
-        {
-            Menu_AppendItem(menu, "Trace Specified Number of Rays", RayNo_Click, true, ByRayNo);
-            Menu_AppendItem(menu, "Minimum Convergence", MinCon_Click, true, MinConvergence);
-            Menu_AppendItem(menu, "Detailed Convergence", DetCon_Click, true, DetConvergence);
-            base.AppendAdditionalComponentMenuItems(menu);
-        }
-
-        private void RayNo_Click(object sender, EventArgs e)
-        {
-            ByRayNo = true;
-            MinConvergence = false;
-            DetConvergence = false;
-        }
-        private void MinCon_Click(object sender, EventArgs e)
-        {
-            ByRayNo = false;
-            MinConvergence = true;
-            DetConvergence = false;
-        }
-        private void DetCon_Click(object sender, EventArgs e)
-        {
-            ByRayNo = false;
-            MinConvergence = false;
-            DetConvergence = true;
-        }
-        public bool ByRayNo = false;
-        public bool MinConvergence = true;
-        public bool DetConvergence = false;
 
         /// <summary>
         /// Registers all the output parameters for this component.
@@ -122,10 +90,15 @@ namespace PachydermGH
             double CO_Time = 0;
             int IS_Order = 0;
 
-            if (ByRayNo) DA.GetData<int>(1, ref RayCt);
-            else if (MinConvergence) RayCt = -1;
-            else if (DetConvergence) RayCt = 0;
-            else throw new Exception("Ray count inappropriately specified. Try right clicking this component for options, or specify a ray count.");
+            DA.GetData<int>(1, ref RayCt);
+            //else if (MinConvergence) RayCt = -1;
+            //else if (DetConvergence) RayCt = 0;
+            //else throw new Exception("Ray count inappropriately specified. Try right clicking this component for options, or specify a ray count.");
+
+            //Set to conform to Pachyderm's conventions.
+            if (RayCt == 0) RayCt = -1;
+            else if (RayCt < 0) RayCt = 0;
+
             DA.GetData<double>(2, ref CO_Time);
             DA.GetData<int>(3, ref IS_Order);
             List<Pachyderm_Acoustic.Environment.Source> Src = new List<Pachyderm_Acoustic.Environment.Source>();
