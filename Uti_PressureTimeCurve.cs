@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-//using System.Windows.Forms;
 using Grasshopper.Kernel;
 using Pachyderm_Acoustic;
 using Rhino.Geometry;
@@ -61,12 +60,6 @@ namespace PachydermGH
             pManager.AddGenericParameter("Energy-Time Curve", "ETC", "The energy-time-curve result of the simulation...", GH_ParamAccess.tree);
         }
 
-        //public override bool AppendMenuItems(ToolStripDropDown menu)
-        //{
-        //    Menu_AppendItem(menu, "Sum all ETCs.", Combine_Click, true, Combine);
-        //    return base.AppendMenuItems(menu);
-        //}
-
         bool Combine = true;
 
         private void Combine_Click(Object sender, EventArgs e)
@@ -101,15 +94,21 @@ namespace PachydermGH
             for (int s = 0; s < max; s++)
             {
                 //Need to create filters?
+                //ProgressBox VB = new ProgressBox("Creating Impulse Responses...");
+
+                D[s].Create_Filter();
+                if (IS != null && s < IS.Count && IS[s] != null) IS[s].Create_Filter(D[s].SWL, 4096);
+                if (Rec != null && Rec[s] != null && !Rec[s].HasFilter()) Rec[s].Create_Filter();
 
                 List<Audio_Signal> AS = new List<Audio_Signal>();
-                for (int r = 0; r < Rec[s].Rec_List.Length; r++)
+                //for (int r = 0; r < Rec[s].Rec_List.Length; r++)
+                for (int r = 0; r < D[s].rec_count; r++)
                 {
-                    ProgressBox VB = new ProgressBox("Creating Impulse Responses...");
-                    VB.Show();
-                    double[] PTC = Pachyderm_Acoustic.Utilities.IR_Construction.PressureTimeCurve(D.ToArray(), IS.ToArray(), Rec.ToArray(), Rec[s].CutOffTime, Rec[s].SampleRate, r, new List<int> { s }, false, true, VB);
-                    VB.Close();
-                    AS.Add(new Audio_Signal(PTC, Rec[0].SampleRate, (int)Math.Round(D[s].Time(r) * Rec[s].SampleRate)));
+                    double COTime = Rec[s] != null ? Rec[s].CutOffTime : 1000;
+                    int FS = Rec[s] != null ? Rec[s].SampleRate : 44100;
+                    double[] PTC = Pachyderm_Acoustic.Utilities.IR_Construction.PressureTimeCurve(D.ToArray(), IS.ToArray(), Rec.ToArray(),  COTime, FS, r, new List<int> { s }, false, true);
+                    //VB.Close();
+                    AS.Add(new Audio_Signal(PTC, FS, (int)Math.Round(D[s].Time(r) * FS)));
                 }
 
                 if (s == 0)
