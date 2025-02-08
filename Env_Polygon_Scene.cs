@@ -2,7 +2,7 @@
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
-//'Copyright (c) 2008-2024, Arthur van der Harten 
+//'Copyright (c) 2008-2025, Arthur van der Harten 
 //'Pachyderm-Acoustic is free software; you can redistribute it and/or modify 
 //'it under the terms of the GNU General Public License as published 
 //'by the Free Software Foundation; either version 3 of the License, or 
@@ -115,7 +115,7 @@ namespace PachydermGH
             }
 
             Pachyderm_Acoustic.Environment.RhCommon_PolygonScene PS = new Pachyderm_Acoustic.Environment.RhCommon_PolygonScene(RC_List, RhG, GL.ToArray(), false, MP.Tk - 273.15, MP.hr, MP.Pa, 0, false, true);
-            PS.partition(VG);
+            PS.partition(VG, 4);
 
             if (PS.hasnulllayers)
             {

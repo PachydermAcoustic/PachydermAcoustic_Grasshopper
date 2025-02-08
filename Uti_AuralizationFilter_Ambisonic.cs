@@ -2,7 +2,7 @@
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
-//'Copyright (c) 2008-2024, Arthur van der Harten 
+//'Copyright (c) 2008-2025, Arthur van der Harten 
 //'Pachyderm-Acoustic is free software; you can redistribute it and/or modify 
 //'it under the terms of the GNU General Public License as published 
 //'by the Free Software Foundation; either version 3 of the License, or 
@@ -46,8 +46,8 @@ namespace PachydermGH
             pManager.AddGenericParameter("Direct Sound", "D", "Plug the Direct Sound in here.", GH_ParamAccess.list);
             pManager.AddGenericParameter("Image Source", "IS", "Plug the Image Source in here.", GH_ParamAccess.list);
             pManager.AddGenericParameter("Ray Tracing", "Tr", "Plug the Receiver from Ray Tracing in here.", GH_ParamAccess.list);
-            pManager.AddNumberParameter("Altitude", "Alt", "Euler altitude angle.", GH_ParamAccess.item);
-            pManager.AddNumberParameter("Azimuth", "Azi", "Euler azimuth angle.", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Altitude", "Alt", "Euler altitude angle.", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Azimuth", "Azi", "Euler azimuth angle.", GH_ParamAccess.list);
             pManager.AddIntegerParameter("Ambisonics Order", "Ord", "Order of Spherical Harmonics... 0 is omni, 1 is b-format, 2 is second order, and 3 is third order.", GH_ParamAccess.item);
             pManager.AddIntegerParameter("Standard", "Std", "Enumerated channel encoding standard. FUMA = 0, SID = 1, ACN = 2", GH_ParamAccess.item);
             pManager.AddIntervalParameter("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", GH_ParamAccess.item);
@@ -91,12 +91,12 @@ namespace PachydermGH
             DA.GetDataList<Pachyderm_Acoustic.ImageSourceData>(1, IS);
             List<Pachyderm_Acoustic.Environment.Receiver_Bank> Rec = new List<Pachyderm_Acoustic.Environment.Receiver_Bank>();
             DA.GetDataList<Pachyderm_Acoustic.Environment.Receiver_Bank>(2, Rec);
-            double alt = 0;
-            double azi = 0;
+            List<double> alt = new List<double>();
+            List<double> azi = new List<double>();
 
             bool ealt, eazi;
-            ealt = DA.GetData<double>(3, ref alt);
-            eazi = DA.GetData<double>(4, ref azi);
+            ealt = DA.GetDataList<double>(3, alt);
+            eazi = DA.GetDataList<double>(4, azi);
 
             if ( (!ealt | !eazi) )
             {
@@ -151,12 +151,12 @@ namespace PachydermGH
 
                     int[] DT;
 
-                    double Alt = (double)alt;
-                    double Azi = (double)azi;
-                    if (alt > 90) alt -= 180;
-                    if (alt < -90) alt += 180;
-                    if (azi > 360) azi -= 360;
-                    if (azi < 0) azi += 360;
+                    double Alt = (double)alt[r];
+                    double Azi = (double)azi[r];
+                    if (Alt > 90) Alt -= 180;
+                    if (Alt < -90) Alt += 180;
+                    if (Azi > 360) Azi -= 360;
+                    if (Azi < 0) Azi += 360;
 
                     double[][] Response = new double[0][];
                     if (order == 0) Response = new double[][] { Pachyderm_Acoustic.Utilities.IR_Construction.Auralization_Filter(D.ToArray(), IS.ToArray(), Rec.ToArray(), Rec[s].CO_Time, 44100, r, new List<int> { s }, false, true) };

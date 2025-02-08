@@ -18,23 +18,20 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-//using System.Windows.Forms;
 using Grasshopper.Kernel;
-using Pachyderm_Acoustic;
 using Rhino.Geometry;
 
 namespace PachydermGH
 {
-    public class Omni_ImpulseResponse : GH_Component
+    public class LF_ETC : GH_Component
     {
         /// <summary>
         /// Initializes a new instance of the MyComponent2 class.
         /// </summary>
-        public Omni_ImpulseResponse()
-            : base("Omni_ImpulseResponse", "OmniIR",
-                "Creates the Impulse Response from simulation results. Note that this version of the impulse response has a flat power spectrum, and can be used for auralizations, but should not be used for sound pressure level predictions.",
-                "Acoustics", "Utility")
+        public LF_ETC()
+            : base("Lateral Fraction", "LF",
+                "Computes Lateral Fraction from Energy Time Curve",
+                "Acoustics", "Analysis")
         {
         }
 
@@ -46,11 +43,15 @@ namespace PachydermGH
             pManager.AddGenericParameter("Direct Sound", "D", "Plug the Direct Sound in here.", GH_ParamAccess.list);
             pManager.AddGenericParameter("Image Source", "IS", "Plug the Image Source in here.", GH_ParamAccess.list);
             pManager.AddGenericParameter("Ray Tracing", "Tr", "Plug the Receiver from Ray Tracing in here.", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Altitude", "Alt", "Euler altitude angle.", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Azimuth", "Azi", "Euler azimuth angle.", GH_ParamAccess.list);
             pManager.AddIntervalParameter("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", GH_ParamAccess.item);
 
             pManager[1].Optional = true;
             pManager[2].Optional = true;
             pManager[3].Optional = true;
+            pManager[4].Optional = true;
+            pManager[5].Optional = true;
         }
 
         /// <summary>
@@ -58,22 +59,7 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Energy-Time Curve", "ETC", "The energy-time-curve result of the simulation...", GH_ParamAccess.tree);
-        }
-
-
-        //public override bool AppendMenuItems(ToolStripDropDown menu)
-        //{
-        //    Menu_AppendItem(menu, "Sum all ETCs.", Combine_Click, true, Combine);
-        //    return base.AppendMenuItems(menu);
-        //}
-
-        bool Combine = true;
-
-        private void Combine_Click(Object sender, EventArgs e)
-        {
-            Combine = !Combine;
-            ExpireSolution(true);
+            pManager.AddNumberParameter("Lateral Fraction", "LF", "Lateral Fraction", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -88,58 +74,70 @@ namespace PachydermGH
             DA.GetDataList<Pachyderm_Acoustic.ImageSourceData>(1, IS);
             List<Pachyderm_Acoustic.Environment.Receiver_Bank> Rec = new List<Pachyderm_Acoustic.Environment.Receiver_Bank>();
             DA.GetDataList<Pachyderm_Acoustic.Environment.Receiver_Bank>(2, Rec);
+            List<double> alt = new List<double>(), azi = new List<double>();
+            if (!(DA.GetDataList<double>(3, alt) && DA.GetDataList<double>(4, azi))) return;
+            if (alt.Count != 0)
+            {
+                if (alt.Count != azi.Count) throw new Exception("Incomplete altitude/azimuth pairs...");
+                if (alt.Count != Rec.Count) throw new Exception("Must specify an altitude/azimuth pair for each receiver...");
+            }
+            else 
+            {
+                for(int i = 0; i < Rec.Count; i++)
+                {
+                    double ALT, AZI;
+                    Pachyderm_Acoustic.Utilities.PachTools.World_Angles(D[0].Src.Origin, Rec[0].Origin(i), true, out ALT, out AZI);
+                    alt.Add(ALT);
+                    azi.Add(AZI);
+                }
+            }
+            if (D.Count != 1) throw new Exception("Altitude and Azimuth must be specified if using more than one source...");
             Interval Oct = new Interval(0, 7);
-            DA.GetData<Interval>(3, ref Oct);
+            DA.GetData<Interval>(5, ref Oct);
 
             int max = Math.Max(D.Count, Rec.Count);
-            if (D.Count == 0) for(int i = 0; i < max; i++) D.Add(null);
+            if (D.Count == 0) for (int i = 0; i < max; i++) D.Add(null);
             if (IS.Count == 0) for (int i = 0; i < max; i++) IS.Add(null);
             if (Rec.Count == 0) for (int i = 0; i < max; i++) Rec.Add(null);
-
-            Grasshopper.DataTree<Audio_Signal> AS_final = new Grasshopper.DataTree<Audio_Signal>();
-            List<Audio_Signal> AS_comb = new List<Audio_Signal>();
+            
+            Grasshopper.DataTree<double> LF_final = new Grasshopper.DataTree<double>();
 
             for (int s = 0; s < max; s++)
             {
-                //Need to create filters?
-
-                List<Audio_Signal> AS = new List<Audio_Signal>();
                 for (int r = 0; r < Rec[s].Rec_List.Length; r++)
                 {
-                    ProgressBox VB = new ProgressBox("Creating Impulse Responses...");
-                    VB.Show();
-                    double[] AFTC = Pachyderm_Acoustic.Utilities.IR_Construction.Auralization_Filter(D.ToArray(), IS.ToArray(), Rec.ToArray(), Rec[s].CutOffTime, Rec[s].SampleRate, r, new List<int> { s }, false, true, VB);
-                    VB.Close();
-                    AS.Add(new Audio_Signal(AFTC, Rec[0].SampleRate, (int)Math.Round(D[s].Time(r) * Rec[s].SampleRate)));
-                }
+                    List<double> LF = new List<double>();
+                    double Alt = (double)alt[r];
+                    double Azi = (double)azi[r];
+                    if (Alt > 90) Alt -= 180;
+                    if (Alt < -90) Alt += 180;
+                    if (Azi > 360) Azi -= 360;
+                    if (Azi < 0) Azi += 360;
 
-                if (s == 0)
-                {
-                    if (Combine)
+                    double[][] S = new double[(int)Math.Abs(Oct.T1 - Oct.T0 + 1)][];
+                    int[] direct = new int[(int)Oct.T1 - (int)Oct.T0 + 1];
+                    for (int o = (int)Oct.T0; o <= Oct.T1; o++)
                     {
-                        AS_comb = AS;
-                        AS_final = new Grasshopper.DataTree<Audio_Signal>(AS, new Grasshopper.Kernel.Data.GH_Path(0));
+                        double[] ETC = Pachyderm_Acoustic.Utilities.IR_Construction.ETCurve(D[s], IS[s], Rec[s], Rec[s].CutOffTime, Rec[s].SampleRate, o, r, false);
+                        double[] LETC = Pachyderm_Acoustic.Utilities.IR_Construction.ETCurve_1d_Tight(D[s], IS[s], Rec[s], Rec[s].CutOffTime, Rec[s].SampleRate, o, r, false, Alt, Azi, true)[1];
+                        S[(int)(o - Oct.T0)] = ETC;
+                        direct[(int)(o - Oct.T0)] = (int)Math.Round(D[s].Time(r) * Rec[s].SampleRate);
+                        LF.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Lateral_Fraction(ETC, LETC, Rec[s].SampleRate, (double)direct[(int)(o - Oct.T0)] / (double)Rec[s].SampleRate, false));
+                    }
+
+                    if (s == 0 && r == 0)
+                    {
+                        LF_final = new Grasshopper.DataTree<double>(LF, new Grasshopper.Kernel.Data.GH_Path(new int[2] { 0, 0 }));
                     }
                     else
                     {
-                        AS_final = new Grasshopper.DataTree<Audio_Signal>(AS, new Grasshopper.Kernel.Data.GH_Path(max));
+                        int[] path = new int[2] { s, r };
+                        LF_final.EnsurePath(path);
+                        LF_final.AddRange(LF, new Grasshopper.Kernel.Data.GH_Path(path));
                     }
-                }
-                else if (Combine)
-                {
-                    for (int r = 0; r < Rec[s].Rec_List.Length; r++)
-                    {
-                        AS_comb[r] += AS[r];
-                    }
-                    AS_final = new Grasshopper.DataTree<Audio_Signal>(AS, new Grasshopper.Kernel.Data.GH_Path(0));
-                }
-                else
-                {
-                    AS_final.EnsurePath(new int[1] { s });
-                    AS_final.AddRange(AS, new Grasshopper.Kernel.Data.GH_Path(s));
                 }
             }
-            DA.SetDataTree(0, AS_final);
+            DA.SetDataTree(0, LF_final);
         }
 
         /// <summary>
@@ -149,7 +147,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.Energy_Time_Curve;
+                System.Drawing.Bitmap b = Properties.Resources.Geodesic_Source;
                 b.MakeTransparent(System.Drawing.Color.White);
                 return b;
             }
@@ -160,7 +158,7 @@ namespace PachydermGH
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("{B03885B7-AF2B-459C-AB3B-97B67C0A57BA}"); }
+            get { return new Guid("EEF8BC75-1451-4486-975E-C6F3DE488FF4"); }
         }
     }
 }

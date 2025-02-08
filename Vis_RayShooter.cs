@@ -2,7 +2,7 @@
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
-//'Copyright (c) 2008-2024, Arthur van der Harten 
+//'Copyright (c) 2008-2025, Arthur van der Harten 
 //'Pachyderm-Acoustic is free software; you can redistribute it and/or modify 
 //'it under the terms of the GNU General Public License as published 
 //'by the Free Software Foundation; either version 3 of the License, or 
@@ -90,7 +90,6 @@ namespace PachydermGH
             List<double> times = new List<double>();
             Grasshopper.DataTree<double> power = new Grasshopper.DataTree<double>();
 
-            //List<double[]> power = new List<double[]>();
             int sno = -1;
 
             foreach (Pachyderm_Acoustic.Environment.Source Pt in Src)
@@ -152,8 +151,9 @@ namespace PachydermGH
                     {
                         rays.Add(poly);
                         Ends.Add(RPT);
-                        double dist = poly.Length - (Pt.Origin - Startpt).Length();
-                        times.Add(dist / S.Sound_speed(Startpt));
+                        double dist = poly.Length;
+                        //double dir = (Pt.Origin - Startpt).Length();
+                        times.Add(dist/ S.Sound_speed(Startpt));
                         double propmod = 4 * Math.PI * dist * dist;
 
                         for(int oct = 0; oct < 8; oct++)
