@@ -1,8 +1,8 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL) by Arthur van der Harten 
+﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
-//'Copyright (c) 2008-2025, Arthur van der Harten 
+//'Copyright (c) 2008-2025, Open Research in Acoustical Science and Education, Inc. - a 501(c)3 nonprofit 
 //'Pachyderm-Acoustic is free software; you can redistribute it and/or modify 
 //'it under the terms of the GNU General Public License as published 
 //'by the Free Software Foundation; either version 3 of the License, or 
@@ -106,11 +106,11 @@ namespace PachydermGH
 
             for (int i = 0; i < Rec.Count; i++)
             {
-                Sig.reset(freq, Signal_Driver_Compact.Signal_Type.Sine_Pulse);
                 Microphone_Compact Mic = new Microphone_Compact(Rec[i].Origins());
                 Acoustic_Compact_FDTD FVM = new Acoustic_Compact_FDTD(S, ref Sig, ref Mic, freq, tmaxms * 2, Acoustic_Compact_FDTD.GridType.TransparencyLab, Pachyderm_Acoustic.Utilities.RCPachTools.RPttoHPt(BB.Value.Center), BB.Value.X.Length, BB.Value.Y.Length, BB.Value.Z.Length, false);
                 FVM.RuntoCompletion();
                 Mic.reset();
+                Sig.reset(freq, Signal_Driver_Compact.Signal_Type.Sine_Pulse);
                 Audio_Signal AS = new Audio_Signal(Mic.Recordings()[0], (int)FVM.SampleFrequency);
                 DA.SetData(0, AS);
             }

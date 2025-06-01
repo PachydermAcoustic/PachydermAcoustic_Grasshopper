@@ -1,8 +1,8 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL) by Arthur van der Harten 
+﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
-//'Copyright (c) 2008-2025, Arthur van der Harten 
+//'Copyright (c) 2008-2025, Open Research in Acoustical Science and Education, Inc. - a 501(c)3 nonprofit 
 //'Pachyderm-Acoustic is free software; you can redistribute it and/or modify 
 //'it under the terms of the GNU General Public License as published 
 //'by the Free Software Foundation; either version 3 of the License, or 
@@ -115,7 +115,7 @@ namespace PachydermGH
                 DS.Begin();
                 do { System.Threading.Thread.Sleep(100); } while (DS.ThreadState() == System.Threading.ThreadState.Running);
                 DS.Combine_ThreadLocal_Results();
-                Pachyderm_Acoustic.ImageSourceData IS = new Pachyderm_Acoustic.ImageSourceData(Pt, Rec[0], DS, S, order, s_id);
+                Pachyderm_Acoustic.ImageSourceData IS = new Pachyderm_Acoustic.ImageSourceData(Pt, Rec[0], DS, S, order, Edges, s_id);
                 IS.Begin();
                 do { System.Threading.Thread.Sleep(100); } while (IS.ThreadState() == System.Threading.ThreadState.Running);
                 IS.Combine_ThreadLocal_Results();
@@ -128,21 +128,24 @@ namespace PachydermGH
                 {
                     for (int i = 0; i < Rec[0].Count; i++)
                     {
-                        for(int h = 0; h < IS.Paths[i].Count; h++)
+                        for (int h = 0; h < IS.Paths[i].Count; h++)
                         {
-                            Polyline[] path = new Polyline[IS.Paths[i][h].Path.Length];
-                            for (int j = 0; j < IS.Paths[i][h].Path.Length; j++)
+                            Polyline[] path = new Polyline[(int)Math.Floor((double)(IS.Paths[i][h].Path.Length/100))];//IS.Paths[i][h].Path.Length];
+
+                            int step = 100;// (int)Math.Ceiling((double)(IS.Paths[i][h].Path.Length / 50))-1;
+                            for (int j = 0; j < path.Length; j++)
                             {
                                 path[j] = new Polyline();
-                                foreach (Hare.Geometry.Point pt in IS.Paths[i][h].Path[j])
+                                foreach (Hare.Geometry.Point pt in IS.Paths[i][h].Path[j*step])
                                 {
                                     path[j].Add(pt.x, pt.y, pt.z);
                                 }
-                                List<double> I_oct = new List<double>();
-                                for (int oct = 0; oct < 8; oct++) I.Add(IS.Paths[i][h].Energy(oct, 44100)[0], new Grasshopper.Kernel.Data.GH_Path(new int[] {i, h, oct}));
-                                txt.Add(IS.Paths[i][h].ToString(), new Grasshopper.Kernel.Data.GH_Path(new int[] {i ,h}));
-                                for (int k = 0; k < path.Length; k++)if (path[k] != null) cvs.Add(new Grasshopper.Kernel.Types.GH_Curve(path[k].ToNurbsCurve()), new Grasshopper.Kernel.Data.GH_Path(new int[] { i, h }));
                             }
+                            List<double> I_oct = new List<double>();
+                            IS.Paths[i][h].Create_Filter(4096, 0);
+                            for (int oct = 0; oct < 8; oct++) I.Add(IS.Paths[i][h].Energy(oct, 44100)[0], new Grasshopper.Kernel.Data.GH_Path(new int[] { i, h, oct }));
+                            txt.Add(IS.Paths[i][h].ToString(), new Grasshopper.Kernel.Data.GH_Path(new int[] { i, h }));
+                            for (int k = 0; k < path.Length; k++) if (path[k] != null) cvs.Add(new Grasshopper.Kernel.Types.GH_Curve(path[k].ToNurbsCurve()), new Grasshopper.Kernel.Data.GH_Path(new int[] { i, h }));
                         }
                     }
                 }

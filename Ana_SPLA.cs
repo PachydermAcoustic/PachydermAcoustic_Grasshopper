@@ -1,8 +1,8 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL) by Arthur van der Harten 
+﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
-//'Copyright (c) 2008-2025, Arthur van der Harten 
+//'Copyright (c) 2008-2025, Open Research in Acoustical Science and Education, Inc. - a 501(c)3 nonprofit 
 //'Pachyderm-Acoustic is free software; you can redistribute it and/or modify 
 //'it under the terms of the GNU General Public License as published 
 //'by the Free Software Foundation; either version 3 of the License, or 
@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Data;
 using Grasshopper.Kernel.Types;
 using Rhino.Geometry;
 
@@ -42,7 +43,7 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Energy Time Curve", "ETC", "Energy Time Curve", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Energy Time Curve", "ETC", "Energy Time Curve", GH_ParamAccess.tree);
         }
 
         /// <summary>
@@ -59,19 +60,53 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Audio_Signal ETC = new Audio_Signal();
-            DA.GetData<Audio_Signal>(0, ref ETC);
+            GH_Structure<IGH_Goo> etcTree;
+            if (!DA.GetDataTree(0, out etcTree)) return; // if no input, just return.
+            List<double> SPLA = new List<double>();
 
-            List<double> SPL = new List<double>();
-
-            for (int i = 0; i < ETC.Value.Length; i++)
+            foreach (GH_Path path in etcTree.Paths)
             {
-                double s = 0;
-                for (int j = 0; j < ETC.Value[i].Length; j++) s += (double)ETC.Value[i][j];
-                SPL.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.SPL_Intensity(s));
+                IList<IGH_Goo> branchItems = etcTree[path];
+                List<Audio_Signal> signals = new List<Audio_Signal>();
+                List<double> Oct_SPL = new List<double>();
+                foreach (IGH_Goo goo in branchItems)
+                {
+                    double SPL = 0;
+                    Audio_Signal signal = goo as Audio_Signal;
+                    if (signal != null)
+                    {
+                        signals.Add(signal);
+                    }
+                    else if (goo.CastTo(out SPL))
+                    {
+                        Oct_SPL.Add(SPL);
+                    }
+                }
+
+                if (signals.Count > 0)
+                {
+                    foreach (var sig in signals)
+                    {
+                        Oct_SPL.Clear();
+                        for (int i = 0; i < sig.Value.Length; i++)
+                        {       
+                            double sum = 0;
+                            for (int j = 0; j < sig.Value[i].Length; j++)
+                                sum += sig.Value[i][j];
+                            Oct_SPL.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.SPL_Intensity(sum));
+                        }
+                        SPLA.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Sound_Pressure_Level_A(Oct_SPL.ToArray()));
+                    }
+                }
+                else if (Oct_SPL.Count > 0)
+                {
+                    for (int i = 0; i < Oct_SPL.Count; i += 8)
+                        SPLA.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Sound_Pressure_Level_A(Oct_SPL.GetRange(i, 8).ToArray()));
+                }
             }
 
-            DA.SetData(0, Pachyderm_Acoustic.Utilities.AcousticalMath.Sound_Pressure_Level_A(SPL.ToArray()));
+            DA.SetDataList(0, SPLA);
+            return;
         }
 
         /// <summary>

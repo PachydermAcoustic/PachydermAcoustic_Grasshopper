@@ -1,8 +1,8 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL) by Arthur van der Harten 
+﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
-//'Copyright (c) 2008-2025, Arthur van der Harten 
+//'Copyright (c) 2008-2025, Open Research in Acoustical Science and Education, Inc. - a 501(c)3 nonprofit 
 //'Pachyderm-Acoustic is free software; you can redistribute it and/or modify 
 //'it under the terms of the GNU General Public License as published 
 //'by the Free Software Foundation; either version 3 of the License, or 
@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
+using Grasshopper.Kernel.Types;
 using Pachyderm_Acoustic.Simulation;
 
 namespace PachydermGH
@@ -55,7 +56,7 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("Pressure Values", "P", "Sound pressuer at receiver points. Data is organized in the order of Source:Receiver:Frequency", GH_ParamAccess.tree);
+            pManager.AddComplexNumberParameter("Pressure Values", "P", "Sound pressure at receiver points. Data is organized in the order of Source:Receiver:Frequency", GH_ParamAccess.tree);
         }
 
         /// <summary>
@@ -95,23 +96,23 @@ namespace PachydermGH
             DA.GetDataList<double>(3, frequencies);
             
             int s_id = 0;
-            Grasshopper.DataTree<double> results = new Grasshopper.DataTree<Double>();
+            Grasshopper.DataTree<Complex> results = new Grasshopper.DataTree<Complex>();
             
             foreach (Pachyderm_Acoustic.Environment.Source Pt in Src)
             {
                 BoundaryElementSimulation_FreqDom BEM = new BoundaryElementSimulation_FreqDom(S, Pt, Rec[0], frequencies.ToArray());
                 BEM.Begin();
-                do { System.Threading.Thread.Sleep(100); } while (BEM.ThreadState() == System.Threading.ThreadState.Running);
+                do { System.Threading.Thread.Sleep(100); } while (BEM.ThreadState() != System.Threading.ThreadState.Stopped);
                 BEM.Combine_ThreadLocal_Results();
                 s_id++;
                 
                 if (BEM.Results.Length > 0 && BEM.Results[0].Length > 0)
                 {
-                    for (int i = 0; i < Rec.Count; i++)
+                    for (int i = 0; i < Rec[0].Count; i++)
                     {
                         for (int f = 0; f < frequencies.Count; f++)
                         {
-                            results.Add(BEM.Results[f][i], new Grasshopper.Kernel.Data.GH_Path(new int[] { i, f}));
+                            results.Add(new Complex(BEM.Results[f][i].Real, BEM.Results[f][i].Imaginary), new Grasshopper.Kernel.Data.GH_Path(new int[] { i, f}));
                         }
                     }
                 }

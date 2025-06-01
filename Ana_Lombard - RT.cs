@@ -18,20 +18,21 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Grasshopper.Kernel;
 
 namespace PachydermGH
 {
-    public class Lombard : GH_Component
+    public class Lombard_RT : GH_Component
     {
         MathNet.Numerics.Interpolation.CubicSpline[][] Speech = new MathNet.Numerics.Interpolation.CubicSpline[3][];
 
         /// <summary>
         /// Initializes a new instance of the MyComponent2 class.
         /// </summary>
-        public Lombard()
-            : base("Lombard Effect", "Lombard",
-                "Iteratively raises level in order to account for the Lombard Effect - the effect of human voice adjusting to background noise.",
+        public Lombard_RT()
+            : base("Lombard Effect (RT,V)", "Lombard/RT",
+                "Iteratively raises level in order to account for the Lombard Effect - the effect of human voice adjusting to background noise. This version gets total absorption out of ",
                 "Acoustics", "Analysis")
         {
             double[] femaleDBA = new double[5];
@@ -74,7 +75,8 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
-            pManager.AddGenericParameter("Room", "Rm", "The Scene Object", GH_ParamAccess.item);
+            pManager.AddNumberParameter("Reverb Time", "RT", "Reverberation Time", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Volume", "V", "Volume of the room", GH_ParamAccess.item);
             pManager.AddNumberParameter("Speaking People", "#P", "The number of speaking people in the room.", GH_ParamAccess.item);
             pManager.AddNumberParameter("Background Noise", "N", "The ambient noise level of the room at rest.", GH_ParamAccess.list);
         }
@@ -94,23 +96,32 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Pachyderm_Acoustic.Environment.Scene Room = null;
-            DA.GetData<Pachyderm_Acoustic.Environment.Scene>(0, ref Room);
+            List<double> RT = new List<double>();
+            DA.GetDataList<double>(0, RT);
+            double Volume = 0;
+            DA.GetData<double>(1, ref Volume);
             double No_of_People = 0;
-            DA.GetData<double>(1, ref No_of_People);
+            DA.GetData<double>(2, ref No_of_People);
             List<double> Noise = new List<double>();
-            DA.GetDataList<double>(2, Noise);
+            DA.GetDataList<double>(3, Noise);
             if (Noise.Count != 8) throw new Exception("Noise should be specified by octave band, 0 for 63 Hz. through 7 for 8000 Hz.");
 
-            double[] A = new double[8];
-            Pachyderm_Acoustic.Utilities.AcousticalMath.Absorption_Total(Room, out A);
+            double ChosenRT = 0;
+
+            for(int i = 0; i < RT.Count; i+=8)
+            {
+                ChosenRT = Math.Max(ChosenRT, Math.Max(RT[i + 3], Math.Max(RT[i + 4], RT[i + 5])));
+            }
+
             double[] Knoise = new double[8] { 26, 51, 79, 86, 90, 86, 78, 69 };
 
             double Lna0 = Pachyderm_Acoustic.Utilities.AcousticalMath.Sound_Pressure_Level_A(Noise.ToArray());
 
-            int People_Apparent = (int)Math.Round(Math.Pow(10, (Lna0 - 93 + 20 * Math.Log10(A[4])) / 20));
+            double A = 0.16 * Volume / ChosenRT;
 
-            double Lna = 93 - 20 * Math.Log10(A[4] / (No_of_People + People_Apparent));
+            int People_Apparent = (int)Math.Round(Math.Pow(10, (Lna0 - 93 + 20 * Math.Log10(A)) / 20));
+
+            double Lna = 93 - 20 * Math.Log10(A / (No_of_People + People_Apparent));
             double SPL1m = 55 + 0.5 * (Lna - 45);
 
             double diff = Lna - SPL1m;
@@ -145,7 +156,7 @@ namespace PachydermGH
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("{769386FB-9B85-45F7-90AC-03C194A39CAB}"); }
+            get { return new Guid("{903EC2CF-FD15-4A55-8A08-E34A0322A3EE}"); }
         }
     }
 }

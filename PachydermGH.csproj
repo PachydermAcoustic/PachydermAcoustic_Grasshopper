@@ -70,9 +70,6 @@
     <ProjectReference Include="..\PachydermAcoustic_Rhinoceros\Pachyderm_Acoustic.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Remove="ComplexPaToSPL.cs" />
     <Compile Remove="pachydermgh.cs" />
     <Compile Remove="PachydermGHInfo.cs" />
@@ -81,6 +78,9 @@
     <PackageReference Include="System.Windows.Extensions">
       <Version>7.0.0</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
   </ItemGroup>
   <!--<PropertyGroup>
     <PostBuildEvent>Copy /y "$(TargetPath)" "$(TargetDir)$(ProjectName).gha"
@@ -95,8 +95,8 @@ Copy /y "$(TargetDir)$(ProjectName).gha" "%25appdata%25\Grasshopper\6\Libraries\
   <PropertyGroup>
     <FallbackCulture>en-US</FallbackCulture>
     <UserSecretsId>010efb36-7581-4003-8f99-467d647ebb94</UserSecretsId>
-    <AssemblyVersion>2.6.0.9</AssemblyVersion>
-    <FileVersion>2.6.0.9</FileVersion>
+    <AssemblyVersion>2.6.0.14</AssemblyVersion>
+    <FileVersion>2.6.0.14</FileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug64|AnyCPU'">
     <StartProgram>C:\Program Files\Rhinoceros 5 (64-bit)\System\Rhino.exe</StartProgram>
