@@ -95,8 +95,8 @@ Copy /y "$(TargetDir)$(ProjectName).gha" "%25appdata%25\Grasshopper\6\Libraries\
   <PropertyGroup>
     <FallbackCulture>en-US</FallbackCulture>
     <UserSecretsId>010efb36-7581-4003-8f99-467d647ebb94</UserSecretsId>
-    <AssemblyVersion>2.6.0.14</AssemblyVersion>
-    <FileVersion>2.6.0.14</FileVersion>
+    <AssemblyVersion>2.6.0.20</AssemblyVersion>
+    <FileVersion>2.6.0.20</FileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug64|AnyCPU'">
     <StartProgram>C:\Program Files\Rhinoceros 5 (64-bit)\System\Rhino.exe</StartProgram>
