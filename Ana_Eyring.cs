@@ -21,14 +21,14 @@ using Grasshopper.Kernel;
 
 namespace PachydermGH
 {
-    public class RT_Sabine : GH_Component
+    public class RT_Eyring : GH_Component
     {
         /// <summary>
-        /// Initializes a new instance of the MyComponent2 class.
+        /// Initializes a new instance of the RT_Eyring class.
         /// </summary>
-        public RT_Sabine()
-            : base("Sabine Reverberation", "Sabine",
-                "Computes reverberation time from the model using the Sabine method",
+        public RT_Eyring()
+            : base("Eyring Reverberation", "Eyring",
+                "Computes reverberation time from the model using the Eyring method",
                 "Acoustics", "Analysis")
         {
         }
@@ -50,7 +50,7 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddNumberParameter("Rerberation Time", "RT", "Reverberation Time", GH_ParamAccess.list);
+            pManager.AddNumberParameter("Reverberation Time", "RT", "Reverberation Time", GH_ParamAccess.list);
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace PachydermGH
             DA.GetData<double>(1, ref Volume);
 
             double[] RT = new double[8];
-            Pachyderm_Acoustic.Utilities.AcousticalMath.Sabine(Room, Volume, ref RT);
+            Pachyderm_Acoustic.Utilities.AcousticalMath.Eyring(Room, Volume, ref RT);
 
             DA.SetDataList(0, RT);
         }
@@ -88,7 +88,7 @@ namespace PachydermGH
         /// </summary>
         public override Guid ComponentGuid
         {
-            get { return new Guid("{61CF0D82-4D78-4575-996B-4162E9362E0B}"); }
+            get { return new Guid("{2E62F853-A1FB-4A56-9A28-DEF485E9B722}"); }
         }
     }
 }

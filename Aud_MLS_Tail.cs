@@ -67,7 +67,7 @@ namespace PachydermGH
 
             ProgressBox VB = new ProgressBox("Creating IR Filters for Deterministic Reflections...");
             VB.Show();
-            if (IS != null) IS.Create_Filter(Dir.SWL, 4096, VB);
+            if (IS != null) IS.Create_Filter(Dir.SWL, 16384, VB);
             VB.Close();
 
             Pachyderm_Acoustic.Environment.Receiver_Bank[] rec = new Pachyderm_Acoustic.Environment.Receiver_Bank[1];

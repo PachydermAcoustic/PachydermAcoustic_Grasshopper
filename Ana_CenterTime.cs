@@ -75,7 +75,7 @@ namespace PachydermGH
                 }
                 else start = ETC.Direct_Sample[0];
                 it++;
-                CT.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Center_Time(f, ETC.SampleFrequency, (double)start/(double)ETC.SampleFrequency));
+                CT.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Center_Time(f, ETC.SampleFrequency, (double)start/(double)ETC.SampleFrequency, false));
             }
 
             DA.SetDataList(0, CT);

@@ -121,13 +121,7 @@ namespace PachydermGH
             {
                 for (int i = 0; i < Src.Count; i++)
                 {
-                    //User_Feedback Form = new User_Feedback();
-                    //Form.Display("Starting ray-tracing simulation...", string.Format("Ray-tracing source {0} of {1}", i, Src.Count) );
-                    //Form.Show();
-
-                    //ConvergenceProgress CP = new ConvergenceProgress();
-
-                    Pachyderm_Acoustic.SplitRayTracer RT = new Pachyderm_Acoustic.SplitRayTracer(Src[i], Rec.Count == Src.Count ? Rec[s_id] : Rec[0].Duplicate(Src[i], S), S, CO_Time, scope.ToArray(), IS_Order, RayCt, null);//CP);
+                    Pachyderm_Acoustic.SplitRayTracer RT = new Pachyderm_Acoustic.SplitRayTracer(Src[i], Rec.Count == Src.Count ? Rec[s_id] : Rec[0].Duplicate(Src[i], S), S, CO_Time, scope.ToArray(), IS_Order, RayCt, null);
                     //if (!ByRayNo) CP.Show();
                     TaskAwaiter<Simulation_Type> TRTA = Pachyderm_Acoustic.Utilities.RCPachTools.RunSimulation(RT, false).GetAwaiter();
                     while (!TRTA.IsCompleted) System.Threading.Thread.Sleep(3000);

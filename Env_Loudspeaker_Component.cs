@@ -108,7 +108,7 @@ namespace PachydermGH
 
                 if (S == null)
                 {
-                    CLF_Contents = CLF_Read.SecureAccess.Read(Rhino.UI.RhinoEtoApp.MainWindow);
+                    CLF_Contents = CLF_Read.SecureAccess.ReadAny(Rhino.UI.RhinoEtoApp.MainWindow);
                     this.Description = CLF_Contents[0];
                     Sensitivity = CLF_Contents[2];
                     Max = CLF_Contents[3];

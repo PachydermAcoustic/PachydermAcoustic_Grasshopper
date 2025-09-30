@@ -97,7 +97,7 @@ namespace PachydermGH
                 //ProgressBox VB = new ProgressBox("Creating Impulse Responses...");
 
                 D[s].Create_Filter();
-                if (IS != null && s < IS.Count && IS[s] != null) IS[s].Create_Filter(D[s].SWL, 4096);
+                if (IS != null && s < IS.Count && IS[s] != null) IS[s].Create_Filter(D[s].SWL, 16384);
                 if (Rec != null && Rec[s] != null && !Rec[s].HasFilter()) Rec[s].Create_Filter();
 
                 List<Audio_Signal> AS = new List<Audio_Signal>();

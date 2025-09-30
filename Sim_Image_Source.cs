@@ -142,7 +142,7 @@ namespace PachydermGH
                                 }
                             }
                             List<double> I_oct = new List<double>();
-                            IS.Paths[i][h].Create_Filter(4096, 0);
+                            IS.Paths[i][h].Create_Filter(16384, 0);
                             for (int oct = 0; oct < 8; oct++) I.Add(IS.Paths[i][h].Energy(oct, 44100)[0], new Grasshopper.Kernel.Data.GH_Path(new int[] { i, h, oct }));
                             txt.Add(IS.Paths[i][h].ToString(), new Grasshopper.Kernel.Data.GH_Path(new int[] { i, h }));
                             for (int k = 0; k < path.Length; k++) if (path[k] != null) cvs.Add(new Grasshopper.Kernel.Types.GH_Curve(path[k].ToNurbsCurve()), new Grasshopper.Kernel.Data.GH_Path(new int[] { i, h }));
