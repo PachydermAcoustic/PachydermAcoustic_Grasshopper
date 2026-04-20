@@ -105,7 +105,7 @@ namespace PachydermGH
             DA.GetData<Boolean>(8, ref throttle);
             DA.GetData<double>(9, ref el_m);
 
-            double[] SWL = Pachyderm_Acoustic.Utilities.StandardConstructions.FHWA_TNM10_SoundPower(speed, pavement, auto, mt, ht, b, m, throttle);
+            double[] SWL = Pachyderm_Acoustic.Utilities.StandardConstructions.Vehicle_Noise.FHWA_TNM10_SoundPower(speed, pavement, auto, mt, ht, b, m, throttle);
 
             Rhino.Geometry.Point3d[] pts = Origin.Value.DivideEquidistant(1d / el_m);
             if (pts == null || pts.Length == 0) pts = new Point3d[1] { (Origin.Value as Curve).PointAtNormalizedLength(0.5) };

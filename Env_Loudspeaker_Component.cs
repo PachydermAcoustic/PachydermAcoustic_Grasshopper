@@ -125,7 +125,7 @@ namespace PachydermGH
                     {
                         SWL = Pachyderm_Acoustic.Utilities.PachTools.DecodeSourcePower(Sensitivity);
                     }
-                    if (Level[0] == 1)
+                    else if (Level[0] == 1)
                     {
                         SWL = Pachyderm_Acoustic.Utilities.PachTools.DecodeSourcePower(Max);
                     }
@@ -149,7 +149,7 @@ namespace PachydermGH
                 Balloon.CurrentAxi = (float)rot;
                 Balloon.Update_Aim();
 
-                S = new Pachyderm_Acoustic.Environment.DirectionalSource(Balloon, SWL, new Hare.Geometry.Point(Origin.X, Origin.Y, Origin.Z), new int[] { int.Parse(B[0]), int.Parse(B[1]) }, 0, false);
+                S = new Pachyderm_Acoustic.Environment.DirectionalSource(Balloon, SWL, new Hare.Geometry.Point(Origin.X, Origin.Y, Origin.Z), new int[] { 0, 7 }, 0, false);
                 M = Pachyderm_Acoustic.Utilities.RCPachTools.HaretoRhinoMesh(Balloon.m_DisplayMesh, false);
                 M.Flip(true, true, true);
             //}
