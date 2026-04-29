@@ -33,7 +33,7 @@ namespace PachydermGH
     {
         Mesh M;
         string[] CLF_Contents;
-        Speaker_Balloon Balloon;
+        Pachyderm_Acoustic.Environment.Speaker_Balloon Balloon;
         string Sensitivity;
         string Max;
         Pachyderm_Acoustic.Environment.DirectionalSource S;
@@ -113,7 +113,7 @@ namespace PachydermGH
                     Sensitivity = CLF_Contents[2];
                     Max = CLF_Contents[3];
                     string[] Code = new string[] { CLF_Contents[4], CLF_Contents[5], CLF_Contents[6], CLF_Contents[7], CLF_Contents[8], CLF_Contents[9], CLF_Contents[10], CLF_Contents[11] };
-                    Balloon = new Speaker_Balloon(Code, Sensitivity, int.Parse(CLF_Contents[1]), new Hare.Geometry.Point(0, 0, 0));
+                    Balloon = new Pachyderm_Acoustic.Environment.Speaker_Balloon(Code, Sensitivity, int.Parse(CLF_Contents[1]), new Hare.Geometry.Point(0, 0, 0));
                 }
 
                  string[] B = CLF_Contents[12].Split(';');
