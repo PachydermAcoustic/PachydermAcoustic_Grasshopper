@@ -198,3 +198,6 @@ ModelManifest.xml
 # Repository-wide IDE state and generated regression references
 .vs/
 **/tests/refs/
+
+# Local repair candidate; keep out of the repository
+/PachydermAcoustic_Grasshopper2/Pachyderm_GH2_Repaired/
