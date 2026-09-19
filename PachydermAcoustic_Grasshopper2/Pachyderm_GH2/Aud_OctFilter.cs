@@ -1,4 +1,6 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using Grasshopper2.Data;
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -40,9 +42,10 @@ namespace PachydermGH
                 "Filters incoming signal by an octave band (0 for 63 Hz, 7 for 8000 hz)",
                 "Acoustics", "Audio"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public OctFilter(IReader reader) : base(reader) { }
+        public OctFilter(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -60,7 +63,7 @@ namespace PachydermGH
         /// </summary>
         protected override void AddOutputs(OutputAdder outputs)
         {
-            outputs.AddGeneric("AudioSignal", "Signal", "The filtered signal.", Access.Tree);
+            outputs.AddGeneric("AudioSignal", "Signal", "The filtered signal.", Access.Item);
         }
 
         /// <summary>
@@ -71,8 +74,9 @@ namespace PachydermGH
         {
             Audio_Signal Buffer = new Audio_Signal();
             int oct_id = 0;
-            access.GetItem<Audio_Signal>(0, out Buffer);
+            Buffer = ComponentSupport.Signal(access, 0);
             access.GetItem<int>(1, out oct_id);
+            if (oct_id < 0 || oct_id > 7) throw new ArgumentException("Octave band must be 0 through 7.");
             int[] direct_samples = new int[Buffer.ChannelCount];
 
             double[][] sig = new double[Buffer.ChannelCount][];
@@ -111,16 +115,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Filter_Octave_Band.png";
+                var resourceName = "PachydermGH2.Resources.Filter Octave Band.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

@@ -1,4 +1,4 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -46,9 +46,10 @@ namespace PachydermGH
                 "Calculates the Schroeder integral of two impulse responses, and then calculates the correlation between them.",
                 "Acoustics", "Utility"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public Schroeder_Correlation(IReader reader) : base(reader) { }
+        public Schroeder_Correlation(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -57,7 +58,7 @@ namespace PachydermGH
         {
             inputs.AddGeneric("Impulse Response 1", "IR1", "Plug the audio signal impulse response in here.", Access.Item);
             inputs.AddGeneric("Impulse Response 2", "IR2", "Plug the audio signal impulse response in here.", Access.Item);
-            inputs.AddNumber("Delay", "D", "Enter an offset in samples to help match the two integrals. A positive number will take samples off the front, of IR1. A negative numuber will take sampels off the front of IR2.", Access.Item);
+            inputs.AddNumber("Delay", "D", "Enter an offset in samples to help match the two integrals. A positive number will take samples off the front, of IR1. A negative numuber will take sampels off the front of IR2.", Access.Item).Set(0.0);
         }
 
         /// <summary>
@@ -65,7 +66,7 @@ namespace PachydermGH
         /// </summary>
         protected override void AddOutputs(OutputAdder outputs)
         {
-            outputs.AddNumber("Correlation R", "R_c", "Correlation R value for the two IRs Schroeder Integrals.", Access.Item);
+            outputs.AddNumber("Correlation R", "R_c", "Correlation R value for the two IRs Schroeder Integrals.", Access.Tree);
         }
 
         /// <summary>
@@ -74,54 +75,37 @@ namespace PachydermGH
         /// <param name="access">The access object is used to retrieve from inputs and store in outputs.</param>
         protected override void Process(IDataAccess access)
         {
-            Audio_Signal IR1;
-            access.GetItem<Audio_Signal>(0, out IR1);
-            Audio_Signal IR2 = new Audio_Signal();
-            access.GetItem<Audio_Signal>(1, out IR2);
-            double delay = 0;
-            access.GetItem<double>(2, out delay);
-
-            double[][] signal1 = new double[8][];
-            for (int i = 0; i < IR1.ChannelCount; i++) signal1[i] = new double[IR1.Count];
-            double[][] signal2 = new double[8][];
-            for (int i = 0; i < IR2.ChannelCount; i++) signal2[i] = new double[IR2.Count];
-
-            List<double> R = new List<double>();
-
-            for (int j = 0; j < IR1.ChannelCount; j++)
-            {
-                double[] ETC1 = AcousticalMath.SPL_Intensity_Signal(IR1[j]);
-                double[] Schr1 = AcousticalMath.Schroeder_Integral(ETC1);
-                double[] ETC2 = AcousticalMath.SPL_Intensity_Signal(IR2[j]);
-                double[] Schr2 = AcousticalMath.Schroeder_Integral(ETC2);
-
-                if (delay > 0) { Schr1.Reverse(); Array.Resize(ref Schr1, Schr1.Length - (int)delay); Schr1.Reverse(); }
-                if (delay < 0) { Schr2.Reverse(); Array.Resize(ref Schr2, Schr2.Length + (int)delay); Schr2.Reverse(); }
-
-                if (Schr1.Length < Schr2.Length) Array.Resize(ref Schr1, Schr2.Length);
-                if (Schr2.Length < Schr1.Length) Array.Resize(ref Schr2, Schr1.Length);
-
-
-                R.Add(MathNet.Numerics.Statistics.Correlation.Spearman(Schr1, Schr2));
+            var a = ComponentSupport.Signal(access, 0); var b = ComponentSupport.Signal(access, 1);
+            access.GetItem<double>(2, out var delayValue);
+            if (a.ChannelCount != b.ChannelCount || a.SampleFrequency != b.SampleFrequency) throw new ArgumentException("Signals must have equal channel counts and sample rates.");
+            int delay = checked((int)Math.Round(delayValue));
+            int startA = Math.Max(0, delay), startB = Math.Max(0, -delay);
+            int length = Math.Min(a.Count-startA, b.Count-startB);
+            if (length < 2) throw new ArgumentException("Delay leaves fewer than two overlapping samples.");
+            var results = new List<double>();
+            for (int c = 0; c < a.ChannelCount; c++) {
+                var x = new double[length]; var y = new double[length];
+                Array.Copy(a[c], startA, x, 0, length); Array.Copy(b[c], startB, y, 0, length);
+                for (int i = 0; i < length; i++) { x[i] *= x[i]; y[i] *= y[i]; }
+                x = AcousticalMath.Schroeder_Integral(x); y = AcousticalMath.Schroeder_Integral(y);
+                results.Add(MathNet.Numerics.Statistics.Correlation.Spearman(x, y));
             }
-
-            access.SetItem(0, R);
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(results));
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Energy_Time_Curve.png";
+                var resourceName = "PachydermGH2.Resources.Energy Time Curve.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

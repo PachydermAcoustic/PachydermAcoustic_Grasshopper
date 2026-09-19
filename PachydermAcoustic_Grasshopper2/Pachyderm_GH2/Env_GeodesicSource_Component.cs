@@ -1,4 +1,4 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -42,9 +42,10 @@ namespace PachydermGH
                 "Geodesic Omnidirectional Source Object",
                 "Acoustics", "Model"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public GeodesicSource_Component(IReader reader) : base(reader) { }
+        public GeodesicSource_Component(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -53,7 +54,7 @@ namespace PachydermGH
         {
             List<double> SWL_Default = new List<double> { 120, 120, 120, 120, 120, 120, 120, 120 };
             inputs.AddPoint("Origin", "Or", "Acoustic Center of the Sound Source", Access.Item);
-            inputs.AddNumber("Power", "P", "The power spectrum for the source(0 = 62.5, 1 = 125 ... 7 = 8000)", Access.Tree, Requirement.MustExist);
+            inputs.AddNumber("Power", "P", "The power spectrum for the source(0 = 62.5, 1 = 125 ... 7 = 8000)", Access.Tree, Requirement.MustExist).Set(SWL_Default.ToArray());
             inputs.AddNumber("Delay", "D", "Signal delay", new Grasshopper2.UI.UiNumber(0,0), Access.Item, Requirement.MustExist);
             //Grasshopper.Kernel.Parameters.Param_Number param = (inputs[1] as Grasshopper.Kernel.Parameters.Param_Number);
             //if (param != null) param.SetPersistentData(new List<GH_Number> { new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120) });
@@ -82,7 +83,9 @@ namespace PachydermGH
             access.GetTree<double>(1, out Level_T);
             access.GetItem<double>(2, out delay);
 
+            if (Level_T.ItemCount != 8 && Level_T.ItemCount != 24) throw new ArgumentException("Provide eight octave or 24 third-octave source levels.");
             Pachyderm_Acoustic.Environment.GeodesicSource S = new Pachyderm_Acoustic.Environment.GeodesicSource(Level_T.AllItems.ToArray(), new Hare.Geometry.Point(Origin.X, Origin.Y, Origin.Z), 0, Level_T.ItemCount > 8);
+            ComponentSupport.SetDelay(S, delay);
             access.SetItem(0, S);
         }
         protected override IIcon IconInternal
@@ -90,16 +93,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Geodesic_Source.png";
+                var resourceName = "PachydermGH2.Resources.Geodesic Source.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -41,9 +42,10 @@ namespace PachydermGH
                 "Divides a signal into equal sized chunks",
                 "Acoustics", "Audio"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public Signal2Chunks(IReader reader) : base(reader) { }
+        public Signal2Chunks(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -68,66 +70,35 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void Process(IDataAccess access)
         {
-            int chunksize = 0;
-            object test = new object();
-            Audio_Signal Buffer = new Audio_Signal();
-            access.GetItem<Audio_Signal>(0, out Buffer);            
-            //access.GetItem<object>(0, out test);
-            access.GetItem<int>(1, out chunksize);
-
-            //if (test is Audio_Signal)
-            //{
-            //    Buffer = (test as Audio_Signal);
-            //}
-            //else throw new Exception("Invalid Signal input");
-
-            int no_of_chunks = (int)Math.Ceiling((double)Buffer.Count / (double)chunksize);
-
-            List<Audio_Signal> SL = new List<Audio_Signal>();
-
-            for (int i = 0; i < no_of_chunks; i++)
-            {
-                float[][] chunks = new float[Buffer.ChannelCount][];
-                for (int c = 0; c < Buffer.ChannelCount; c++)
-                {
-                    chunks[c] = new float[chunksize];
-                    //Grasshopper2.Data.Tree<double> chunk = new Grasshopper2.Data.Tree<double>();
-                    if (i < no_of_chunks - 1)
-                    {
-                        for (int j = 0; j < chunksize; j++)
-                        {
-                            chunks[c][j] = ((float)Buffer[c][i * chunksize + j]);
-                        }
-                    }
-                    else 
-                    {
-                        int j = 0, end = (Buffer.Count - i * chunksize);
-                        for (j = 0; j < end; j++)
-                        {
-                            chunks[c][j] = ((float)Buffer[c][i * chunksize + j]);
-                        }
-                        for (int k = j; k < chunksize; k++) chunks[c][j] = 0;
-                    }
+            var signal = ComponentSupport.Signal(access, 0);
+            access.GetItem<int>(1, out var size);
+            if (size <= 0) throw new ArgumentException("Chunk size must be positive.");
+            var result = new List<Audio_Signal>();
+            for (int offset = 0; offset < signal.Count; offset += size) {
+                var channels = new double[signal.ChannelCount][]; var direct = new int[signal.ChannelCount];
+                for (int c = 0; c < channels.Length; c++) {
+                    channels[c] = new double[size];
+                    Array.Copy(signal[c], offset, channels[c], 0, Math.Min(size, signal.Count-offset));
+                    direct[c] = Math.Max(0, Math.Min(size-1, signal.Direct_Sample[c]-offset));
                 }
-                for (int c = 0; c < Buffer.ChannelCount; c++) SL.Add(new Audio_Signal(chunks, Buffer.SampleFrequency));
+                result.Add(new Audio_Signal(channels, signal.SampleFrequency, direct));
             }
-            access.SetTree(0, Garden.ITreeFromList(SL));
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(result));
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Divide_Signal.png";
+                var resourceName = "PachydermGH2.Resources.Divide Signal.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

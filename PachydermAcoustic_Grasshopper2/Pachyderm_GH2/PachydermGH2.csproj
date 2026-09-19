@@ -1,94 +1,33 @@
 <Project Sdk="Microsoft.NET.Sdk">
-	
-  <PropertyGroup>
-    <!-- Select the framework(s) you wish to target.
-        Rhino 8 Windows: net48, net7.0, net7.0-windows, net7.0-windows10.0.22000.0, etc
-        Rhino 8 Mac: net7.0, net7.0-macos, net7.0-macos12.0, etc
-    -->
-    <TargetFrameworks>net7.0</TargetFrameworks> <!--;net48-->
-    <EnableDynamicLoading>true</EnableDynamicLoading>
-    <TargetExt>.rhp</TargetExt>
-    <NoWarn>NU1701</NoWarn>
-  </PropertyGroup>
-  
-  <PropertyGroup>
-    <!-- Specifies information for Assembly, Yak, and GH2 PlugIn Info -->
-    <Version>1.0</Version>
-    <Title>Pachyderm_Acoustic_Simulation</Title>
-    <Company>Open Research in Acoustical Science and Education, Inc.</Company>
-    <Description>Pachyderm Acoustic Simulation interface for Grasshopper 2. High-End, fundamentals-first, Open-Source GPL3.0 Acoustics Simulation.</Description>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Icons\*.ghicon" />
-    <EmbeddedResource Include="Icons\*.png" />
-    <EmbeddedResource Include="Icons\*.ico" />
-  </ItemGroup>
-
-  <ItemGroup>
-  <EmbeddedResource
-    Include="..\..\Resources\*.png;..\..\Resources\*.bmp">
-    <Link>Resources\%(Filename)%(Extension)</Link>
-    <LogicalName>PachydermGH2.Resources.%(Filename)%(Extension)</LogicalName>
+ <PropertyGroup><TargetFramework>net7.0</TargetFramework><EnableDynamicLoading>true</EnableDynamicLoading><TargetExt>.rhp</TargetExt><Version>1.0.1</Version><Title>Pachyderm Acoustic Simulation</Title><Company>Open Research in Acoustical Science and Education, Inc.</Company><Description>Repaired GH2 component library</Description><RootNamespace>PachydermGH2</RootNamespace><EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems><NuGetAudit>false</NuGetAudit><CheckEolTargetFramework>false</CheckEolTargetFramework></PropertyGroup>
+ <PropertyGroup>
+  <PlatformTarget>x64</PlatformTarget>
+ </PropertyGroup>
+ <ItemGroup><Compile Remove="tests/**/*.cs" /></ItemGroup>
+ <ItemGroup>
+  <EmbeddedResource Include="../../Resources/*.png;../../Resources/*.bmp">
+   <Link>Resources/%(Filename)%(Extension)</Link>
+   <LogicalName>PachydermGH2.Resources.%(Filename)%(Extension)</LogicalName>
   </EmbeddedResource>
-  </ItemGroup>
-    
-  <ItemGroup>
-    <ProjectReference Include="..\..\Hare\Hare.csproj" />
-    <ProjectReference Include="..\..\PachydermAcoustic_Core\Pachyderm_Acoustic_Universal\Pachyderm_Acoustic_Universal\Pachyderm_Acoustic_Universal.csproj" />
-    <ProjectReference Include="..\..\PachydermAcoustic_Rhinoceros\Pachyderm_Acoustic.csproj" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Reference Include="Eto">
-      <HintPath>..\..\..\..\..\..\..\Program Files\Rhino 8\System\Eto.dll</HintPath>
-    </Reference>
-    <Reference Include="Grasshopper2">
-      <HintPath>..\..\..\..\..\AppData\Roaming\McNeel\Rhinoceros\packages\8.0\Grasshopper2\2.0.9231-wip.35834\net7.0\Grasshopper2.dll</HintPath>
-    </Reference>
-    <Reference Include="GrasshopperIO">
-      <HintPath>..\..\..\..\..\AppData\Roaming\McNeel\Rhinoceros\packages\8.0\Grasshopper2\2.0.9231-wip.35834\net7.0\GrasshopperIO.dll</HintPath>
-    </Reference>
-    <Reference Include="Rhino.UI">
-      <HintPath>..\..\..\..\..\..\..\Program Files\Rhino 8\System\Rhino.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="RhinoCommon">
-      <HintPath>..\..\..\..\..\..\..\Program Files\Rhino 8\System\RhinoCommon.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <Target Name="BuildYakPackage" AfterTargets="DispatchToInnerBuilds">
-    <PropertyGroup>
-      <YakExecutable Condition="$(YakExecutable) == '' and $([MSBuild]::IsOSPlatform(windows)) and Exists('C:\Program Files\Rhino 8\System\Yak.exe')">C:\Program Files\Rhino 8\System\Yak.exe</YakExecutable>
-      <YakExecutable Condition="$(YakExecutable) == '' and $([MSBuild]::IsOSPlatform(macos)) and Exists('/Applications/Rhino 8.app/Contents/Resources/bin/yak')">/Applications/Rhino 8.app/Contents/Resources/bin/yak</YakExecutable>
-      
-      <BuildYakPackage Condition="$(BuildYakPackage) == '' and $(YakExecutable) != '' and Exists($(YakExecutable))">True</BuildYakPackage>
-    </PropertyGroup>
-    
-    <Warning Text="Could not find Yak executable" Condition="$(YakExecutable) == ''" />
-
-    <ItemGroup>
-      <YakPackagesToDelete Include="$(OutputPath)\*.yak;$(OutputPath)\**\manifest.yml" />
-    </ItemGroup>
-    
-    <Delete Files="@(YakPackagesToDelete)" />
-
-    <Exec Command="&quot;$(YakExecutable)&quot; spec" WorkingDirectory="$(OutputPath)" Condition="$(BuildYakPackage) == 'True'" />
-    <Exec Command="&quot;$(YakExecutable)&quot; build" WorkingDirectory="$(OutputPath)" Condition="$(BuildYakPackage) == 'True'" />
-  </Target>
-
+  <EmbeddedResource Include="Icons/*.ghicon"/>
+  <EmbeddedResource Include="Icons/*.ico"/>
+ </ItemGroup>
+ <ItemGroup>
+<Reference Include="Grasshopper2"><HintPath>lib/Grasshopper2.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="GrasshopperIO"><HintPath>lib/GrasshopperIO.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="RhinoCommon"><HintPath>lib/RhinoCommon.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="Rhino.UI"><HintPath>lib/Rhino.UI.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="Eto"><HintPath>lib/Eto.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="Hare"><HintPath>lib/Hare.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="Pachyderm_Acoustic_Universal"><HintPath>lib/Pachyderm_Acoustic_Universal.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="CLF_Read"><HintPath>lib/CLF_Read.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="MathNet.Numerics"><HintPath>lib/MathNet.Numerics.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="MathNet.Numerics.FSharp"><HintPath>lib/MathNet.Numerics.FSharp.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="MathNet.Symbolics"><HintPath>lib/MathNet.Symbolics.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="FSharp.Core"><HintPath>lib/FSharp.Core.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="ScottPlot"><HintPath>lib/ScottPlot.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="ScottPlot.Eto"><HintPath>lib/ScottPlot.Eto.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="System.Drawing.Common"><HintPath>lib/System.Drawing.Common.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="System.Windows.Extensions"><HintPath>lib/System.Windows.Extensions.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="Pachyderm_Acoustic"><HintPath>lib/Pachyderm_Acoustic.rhp</HintPath><Private>false</Private></Reference></ItemGroup>
 </Project>

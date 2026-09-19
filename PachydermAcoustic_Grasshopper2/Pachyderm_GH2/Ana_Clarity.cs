@@ -1,4 +1,6 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using Grasshopper2.Data;
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -41,9 +43,10 @@ namespace PachydermGH
             : base(new Nomen("Clarity-80", "Computes Energy Ratio (Clarity style) from Energy Time Curve",
                 "Acoustics", "Analysis"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public C_X_ETC(IReader reader) : base(reader) { }
+        public C_X_ETC(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -51,7 +54,7 @@ namespace PachydermGH
         protected override void AddInputs(InputAdder inputs)
         {
             inputs.AddGeneric("Energy Time Curve", "ETC", "Energy Time Curve", Access.Item);
-            inputs.AddInteger("Early_Duration", "E_ms", "Number of milliseconds the early part is held to last for...", Access.Item);
+            inputs.AddInteger("Early_Duration", "E_ms", "Number of milliseconds the early part is held to last for...", Access.Item).Set(80);
         }
 
         /// <summary>
@@ -69,13 +72,14 @@ namespace PachydermGH
         protected override void Process(IDataAccess access)
         {
             Audio_Signal ETC = null;
-            access.GetItem<Audio_Signal>(0, out ETC);
+            ETC = ComponentSupport.Signal(access, 0);
             int Cx = 80;
             access.GetItem<int>(1, out Cx);
 
             List<double> C = new List<double>();
-            foreach (double[] f in ETC.Value)
+            for (int channel = 0; channel < ETC.ChannelCount; channel++)
             {
+                double[] f = ETC[channel];
                 double[] s = new double[f.Length];
                 int start = 0;
                 if (ETC.Direct_Sample == null)
@@ -85,11 +89,11 @@ namespace PachydermGH
                         if (start == 0) if (f[i] != 0) start = i;
                     }
                 }
-                else start = ETC.Direct_Sample[0];
+                else start = ETC.Direct_Sample[channel];
                 C.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Clarity(f, ETC.SampleFrequency, (double)Cx/1000, (double)start / ETC.SampleFrequency, false));
             }
 
-            access.SetItem(0, C);
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(C));
         }
 
         protected override IIcon IconInternal
@@ -97,16 +101,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Clarity.png";
+                var resourceName = "PachydermGH2.Resources.Clarity.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

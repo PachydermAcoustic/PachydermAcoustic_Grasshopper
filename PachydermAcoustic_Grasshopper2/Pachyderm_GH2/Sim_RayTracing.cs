@@ -1,4 +1,4 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -50,9 +50,10 @@ namespace PachydermGH
                 "Performs Ray Tracing (Specular and Diffuse) calculations on the geometry specified.",
                 "Acoustics", "Computation"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public RayTracing(IReader reader) : base(reader) { }
+        public RayTracing(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -65,7 +66,7 @@ namespace PachydermGH
             inputs.AddInteger("Image Source Order", "IS_Order", "Ray tracing will ignore specular reflections up to this order... in order to combine results with deterministic image source results.", Access.Item);
             inputs.AddGeneric("Source", "Src", "Sound Source Objects...", Access.Tree);
             inputs.AddGeneric("Receiver", "Rec", "Listening Object (Receiver_Bank)...", Access.Tree);
-            inputs.AddInterval("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", Access.Item);
+            inputs.AddInterval("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", Access.Item).Set(new Rhino.Geometry.Interval(0,7));
             
             //Grasshopper.Kernel.Parameters.Param_Interval param_I = (inputs[6] as Grasshopper.Kernel.Parameters.Param_Interval);
             //if (param_I != null) param_I.SetPersistentdata(new Grasshopper.Kernel.Types.GH_Interval(new Interval(0,7)));
@@ -80,86 +81,37 @@ namespace PachydermGH
             outputs.AddGeneric("Ray Tracing data", "Tr", "The pachyderm ray tracing data object (a receiver object)", Access.Tree);
         }
 
-        CancellationTokenSource CTS = new CancellationTokenSource();
-
-        bool CancelCalc = false;
-
-        private void Escape(object sender, System.EventArgs e)
-        {
-            CancelCalc = true;
-        }
-
-        /// <summary>
-        /// This is the method that actually does the work.
-        /// </summary>
-        /// <param name="access">The access object can be used to retrieve data from input parameters and 
-        /// to store data in output parameters.</param>
         protected override void Process(IDataAccess access)
         {
-            Pachyderm_Acoustic.Environment.Scene S = null;
-            access.GetItem<Pachyderm_Acoustic.Environment.Scene>(0, out S);
-            int RayCt = 0;
-            double CO_Time = 0;
-            int IS_Order = 0;
-
-            access.GetItem<int>(1, out RayCt);
-
-            //Set to conform to Pachyderm's conventions.
-            if (RayCt == 0) RayCt = 0;
-            else if (RayCt < 0) RayCt = -1;
-
-            access.GetItem<double>(2, out CO_Time);
-            access.GetItem<int>(3, out IS_Order);
-            Tree<Pachyderm_Acoustic.Environment.Source> Src;
-            access.GetTree<Pachyderm_Acoustic.Environment.Source>(4, out Src);
-            Tree<Pachyderm_Acoustic.Environment.Receiver_Bank> Rec;
-            access.GetTree<Pachyderm_Acoustic.Environment.Receiver_Bank>(5, out Rec);
-            Rhino.Geometry.Interval I = new Interval();
-            access.GetItem<Rhino.Geometry.Interval>(6, out I);
-            List<int> scope = new List<int>();
-            scope.Add((int)I.T0);
-            scope.Add((int)I.T1);
-            Rhino.RhinoApp.EscapeKeyPressed += Escape;
-            CancelCalc = false;
-            Rhino.ApplicationSettings.FileSettings.AutoSaveEnabled = false;
-
-            List<Pachyderm_Acoustic.Environment.Receiver_Bank> RTS = new List<Receiver_Bank>();
-
-            ConvergenceProgress CPS = null;
-
-            Rhino.RhinoApp.InvokeAndWait(() => { CPS = new ConvergenceProgress(CTS, Rec.Items[0].SampleRate); CPS.Show();});
-
-
-            int s_id = 0;
-            try
-            {
-                for (int i = 0; i < Src.ItemCount; i++)
-                {
-                    Pachyderm_Acoustic.SplitRayTracer RT = new Pachyderm_Acoustic.SplitRayTracer(Src.Items[i], Rec.ItemCount == Src.ItemCount ? Rec.Items[s_id] : Rec.Items[0].Duplicate(Src.Items[i], S), S, CO_Time, scope.ToArray(), IS_Order, RayCt, CPS);
-                    TaskAwaiter<Simulation_Type> TRTA = Pachyderm_Acoustic.Utilities.RCPachTools.RunSimulation(RT, false).GetAwaiter();
-                    while (!TRTA.IsCompleted) System.Threading.Thread.Sleep(3000);
-
-                    RT = TRTA.GetResult() as SplitRayTracer;
-
-                    s_id++;
-                    if (RT.GetReceiver.GetType() == typeof(Pachyderm_Acoustic.PachMapReceiver))
-                    {
-                        RTS.Add(RT.GetReceiver as Pachyderm_Acoustic.PachMapReceiver);
+            if(!access.GetItem<Pachyderm_Acoustic.Environment.Scene>(0,out var scene) || scene==null) throw new ArgumentException("Provide a room scene.");
+            access.GetItem<int>(1,out int rays); access.GetItem<double>(2,out double cutoff); access.GetItem<int>(3,out int order);
+            var sources=ComponentSupport.Items<Pachyderm_Acoustic.Environment.Source>(access,4);
+            var banks=ComponentSupport.Items<Receiver_Bank>(access,5);
+            access.GetItem<Interval>(6,out var interval); ComponentSupport.Octaves(interval,out int first,out int last);
+            if(sources.Length==0 || banks.Length==0 || cutoff<=0 || order<0) throw new ArgumentException("Provide sources, receivers, positive cutoff and nonnegative image order.");
+            var result=new List<Receiver_Bank>();
+            using(var cancellation=CancellationTokenSource.CreateLinkedTokenSource(access.Solution.Token)) {
+                EventHandler escape=(sender,args)=>cancellation.Cancel();
+                ConvergenceProgress progress=null;
+                Rhino.RhinoApp.EscapeKeyPressed+=escape;
+                try {
+                    Rhino.RhinoApp.InvokeAndWait(()=>{progress=new ConvergenceProgress(cancellation,banks[0].SampleRate); progress.Show();});
+                    for(int s=0;s<sources.Length;s++) {
+                        cancellation.Token.ThrowIfCancellationRequested();
+                        var bank=ComponentSupport.Bank(banks,sources[s],scene,s,sources.Length);
+                        var tracer=new Pachyderm_Acoustic.SplitRayTracer(sources[s],bank,scene,cutoff,new[]{first,last},order,rays<0?-1:rays,progress);
+                        var task=Pachyderm_Acoustic.Utilities.RCPachTools.RunSimulation(tracer,false);
+                        // The core owns its worker threads; do not dispose its progress UI until it exits.
+                        var completed=task.GetAwaiter().GetResult() as Pachyderm_Acoustic.SplitRayTracer;
+                        cancellation.Token.ThrowIfCancellationRequested();
+                        if(completed==null) throw new InvalidOperationException("Ray tracing returned no result.");
+                        result.Add(completed.GetReceiver);
                     }
-                    else
-                    {
-                        RTS.Add(RT.GetReceiver);
-                    }
-
-                    access.AddMessage(Grasshopper2.Doc.Message.Remark(string.Format("{0} Rays ({1} sub-rays) cast in {2} hours, {3} minutes, {4} seconds.", RT._currentRay.Sum(), RT._rayTotal.Sum(), RT._ts.Hours, RT._ts.Minutes, RT._ts.Seconds), ""));
-               }
-
-                access.SetTree(0,Garden.TreeFromList(RTS));
-            }
-            catch
-            (System.IndexOutOfRangeException)
-            {
-                access.AddMessage(Grasshopper2.Doc.Message.Error("Raytracing operation failed. This can be due to an unsuitable scene object. For example, did you set materials on all layers referenced by Rhinoceros Geometry?", ""));
+                    ComponentSupport.SetTree(access, 0,Garden.TreeFromList(result));
+                } finally {
+                    Rhino.RhinoApp.EscapeKeyPressed-=escape;
+                    if(progress!=null) Rhino.RhinoApp.InvokeAndWait(()=>{progress.Close();progress.Dispose();});
+                }
             }
         }
         protected override IIcon IconInternal
@@ -167,16 +119,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Ray_Tracing.png";
+                var resourceName = "PachydermGH2.Resources.Ray Tracing.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

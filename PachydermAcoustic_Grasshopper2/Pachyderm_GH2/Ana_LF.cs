@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -42,8 +43,9 @@ namespace PachydermGH
                 "Computes Lateral Fraction from Energy Time Curve",
                 "Acoustics", "Analysis"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
-        public LF_ETC(IReader reader) : base(reader) { }
+        public LF_ETC(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -51,11 +53,11 @@ namespace PachydermGH
         protected override void AddInputs(InputAdder inputs)
         {
             inputs.AddGeneric("Direct Sound", "D", "Plug the Direct Sound in here.", Access.Tree);
-            inputs.AddGeneric("Image Source", "IS", "Plug the Image Source in here.", Access.Tree);
-            inputs.AddGeneric("Ray Tracing", "Tr", "Plug the Receiver from Ray Tracing in here.", Access.Tree);
-            inputs.AddNumber("Altitude", "Alt", "Euler altitude angle.", Access.Tree);
-            inputs.AddNumber("Azimuth", "Azi", "Euler azimuth angle.", Access.Tree);
-            inputs.AddInterval("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", Access.Item);
+            inputs.AddGeneric("Image Source", "IS", "Plug the Image Source in here.", Access.Tree, Requirement.MayBeMissing);
+            inputs.AddGeneric("Ray Tracing", "Tr", "Plug the Receiver from Ray Tracing in here.", Access.Tree, Requirement.MayBeMissing);
+            inputs.AddNumber("Altitude", "Alt", "Euler altitude angle.", Access.Tree, Requirement.MayBeMissing);
+            inputs.AddNumber("Azimuth", "Azi", "Euler azimuth angle.", Access.Tree, Requirement.MayBeMissing);
+            inputs.AddInterval("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", Access.Item).Set(new Rhino.Geometry.Interval(0,7));
 
             inputs[1].Requirement = Requirement.MayBeMissing | Requirement.MayBeNull;
             inputs[2].Requirement = Requirement.MayBeMissing | Requirement.MayBeNull;
@@ -78,82 +80,29 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void Process(IDataAccess access)
         {
-            Grasshopper2.Data.Tree<Pachyderm_Acoustic.Direct_Sound> D_T;
-            access.GetTree<Pachyderm_Acoustic.Direct_Sound>(0, out D_T);
-            Grasshopper2.Data.Tree<Pachyderm_Acoustic.ImageSourceData> IS_T;
-            access.GetTree<Pachyderm_Acoustic.ImageSourceData>(1, out IS_T);
-            Grasshopper2.Data.Tree<Pachyderm_Acoustic.Environment.Receiver_Bank> Rec_T;
-            access.GetTree<Pachyderm_Acoustic.Environment.Receiver_Bank>(2, out Rec_T);
-            Grasshopper2.Data.Tree<double> t_alt, t_azi;
-            if (!(access.GetTree<double>(3, out t_alt) && access.GetTree<double>(4, out t_azi))) return;
-
-            List<double> alt = new List<double>(t_alt.AllItems);
-            List<double> azi = new List<double>(t_azi.AllItems);
-            List<Receiver_Bank> Rec = new List<Receiver_Bank>(Rec_T.AllItems);
-            List<ImageSourceData> IS = new List<ImageSourceData>(IS_T.AllItems);
-            List<Pachyderm_Acoustic.Direct_Sound> D = new List<Pachyderm_Acoustic.Direct_Sound>(D_T.AllItems);
-
-            if (alt.Count != 0)
-            {
-                if (alt.Count != azi.Count) throw new Exception("Incomplete altitude/azimuth pairs...");
-                if (alt.Count != Rec.Count) throw new Exception("Must specify an altitude/azimuth pair for each receiver...");
-            }
-            else
-            {
-                for (int i = 0; i < Rec.Count; i++)
-                {
-                    double ALT, AZI;
-                    Pachyderm_Acoustic.Utilities.PachTools.World_Angles(D[0].Src.Origin, Rec[0].Origin(i), true, out ALT, out AZI);
-                    alt.Add(ALT);
-                    azi.Add(AZI);
+            var sims=new ComponentSupport.Simulations(access);
+            var altitude=ComponentSupport.Items<double>(access,3); var azimuth=ComponentSupport.Items<double>(access,4);
+            if((altitude.Length==0)!=(azimuth.Length==0)) throw new ArgumentException("Provide both altitude and azimuth.");
+            var octave=new Interval(0,7); if(!access.GetItem<Interval>(5,out octave)) octave=new Interval(0,7);
+            ComponentSupport.Octaves(octave,out int first,out int last);
+            var rows=new List<double[]>(); var paths=new List<Grasshopper2.Data.Path>();
+            for(int source=0;source<sims.Count;source++) {
+                for(int receiver=0;receiver<sims.ReceiverCount(source);receiver++) {
+                    double alt,azi;
+                    if(altitude.Length==0) {
+                        if(sims.Direct[source]==null || sims.Receivers[source]==null) throw new ArgumentException("Automatic orientation requires direct sound and receiver data.");
+                        Pachyderm_Acoustic.Utilities.PachTools.World_Angles(sims.Direct[source].Src.Origin,sims.Receivers[source].Origin(receiver),true,out alt,out azi);
+                    } else { alt=ComponentSupport.Angle(altitude,receiver,sims.ReceiverCount(source)); azi=ComponentSupport.Angle(azimuth,receiver,sims.ReceiverCount(source)); }
+                    var values=new double[last-first+1]; int fs=sims.SampleRate(source);
+                    for(int oct=first;oct<=last;oct++) {
+                        var etc=Pachyderm_Acoustic.Utilities.IR_Construction.ETCurve(sims.Direct[source],sims.Images[source],sims.Receivers[source],sims.Cutoff(source),fs,oct,receiver,false);
+                        var lateral=Pachyderm_Acoustic.Utilities.IR_Construction.ETCurve_1d_Tight(sims.Direct[source],sims.Images[source],sims.Receivers[source],sims.Cutoff(source),fs,oct,receiver,false,alt,azi,true)[1];
+                        values[oct-first]=Pachyderm_Acoustic.Utilities.AcousticalMath.Lateral_Fraction(etc,lateral,fs,(double)sims.Arrival(source,receiver,fs)/fs,false);
+                    }
+                    rows.Add(values); paths.Add(new Grasshopper2.Data.Path(source,receiver));
                 }
             }
-            if (D.Count != 1) throw new Exception("Altitude and Azimuth must be specified if using more than one source...");
-            Interval Oct = new Interval(0, 7);
-            access.GetItem<Interval>(5, out Oct);
-
-            int max = Math.Max(D.Count, Rec.Count);
-            if (D.Count == 0) for (int i = 0; i < max; i++) D.Add(null);
-            if (IS.Count == 0) for (int i = 0; i < max; i++) IS.Add(null);
-            if (Rec.Count == 0) for (int i = 0; i < max; i++) Rec.Add(null);
-
-            double[][][] LF_final = new double[max][][];
-
-            for (int s = 0; s < max; s++)
-            {
-                for (int r = 0; r < Rec[s].Rec_List.Length; r++)
-                {
-                    List<double> LF = new List<double>();
-                    double Alt = (double)alt[r];
-                    double Azi = (double)azi[r];
-                    if (Alt > 90) Alt -= 180;
-                    if (Alt < -90) Alt += 180;
-                    if (Azi > 360) Azi -= 360;
-                    if (Azi < 0) Azi += 360;
-
-                    double[][] S = new double[(int)Math.Abs(Oct.T1 - Oct.T0 + 1)][];
-                    int[] direct = new int[(int)Oct.T1 - (int)Oct.T0 + 1];
-                    for (int o = (int)Oct.T0; o <= Oct.T1; o++)
-                    {
-                        double[] ETC = Pachyderm_Acoustic.Utilities.IR_Construction.ETCurve(D[s], IS[s], Rec[s], Rec[s].CutOffTime, Rec[s].SampleRate, o, r, false);
-                        double[] LETC = Pachyderm_Acoustic.Utilities.IR_Construction.ETCurve_1d_Tight(D[s], IS[s], Rec[s], Rec[s].CutOffTime, Rec[s].SampleRate, o, r, false, Alt, Azi, true)[1];
-                        S[(int)(o - Oct.T0)] = ETC;
-                        direct[(int)(o - Oct.T0)] = (int)Math.Round(D[s].Time(r) * Rec[s].SampleRate);
-                        LF.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Lateral_Fraction(ETC, LETC, Rec[s].SampleRate, (double)direct[(int)(o - Oct.T0)] / (double)Rec[s].SampleRate, false));
-                    }
-
-                    if (s == 0 && r == 0)
-                    {
-                        LF_final[s] = new double[Rec[s].Rec_List.Length][];
-                        LF_final[s][r] = LF.ToArray();
-                    }
-                    else
-                    {
-                        LF_final[s][r] = LF.ToArray();
-                    }
-                }
-            }
-            access.SetTree(0, Garden.TreeFromArrays<double[]>(LF_final));
+            ComponentSupport.SetTree(access, 0,Garden.TreeFromArrays(new Grasshopper2.Data.Paths(paths),rows.ToArray()));
         }
 
         protected override IIcon IconInternal
@@ -161,16 +110,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Geodesic_Source.png";
+                var resourceName = "PachydermGH2.Resources.Geodesic Source.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

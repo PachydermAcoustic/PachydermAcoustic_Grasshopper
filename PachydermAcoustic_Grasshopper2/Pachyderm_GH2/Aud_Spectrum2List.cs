@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -41,9 +42,10 @@ namespace PachydermGH
                 "Casts a signal to a list readable in Grasshopper",
                 "Acoustics", "Audio"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public Spectrum2List(IReader reader) : base(reader) { }
+        public Spectrum2List(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -69,37 +71,25 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void Process(IDataAccess access)
         {
-            //int chan = 0;
-            Frequency_Spectrum Buffer = new Frequency_Spectrum();
-            access.GetItem<Frequency_Spectrum>(0, out Buffer);
-            //access.GetItem<int>(1, out chan);
-
-            List<double[]> signal = new List<double[]>();
-            List<System.Numerics.Complex> spectrum = new List<System.Numerics.Complex>();
-            List<double[]> Freq = new List<double[]>();
-            for (int s = 0; s < Buffer.Magnitude.Length; s++) signal.Add(new double[] { Buffer.Magnitude[s] });
-            for (int s = 0; s < Buffer.Value.Count; s++ ) spectrum.Add(new System.Numerics.Complex(Buffer.Value[s].Real, Buffer.Value[s].Imaginary));
-            for (int s = 0; s < Buffer.Frequency.Length; s++ ) Freq.Add(new double[] { Buffer.Frequency[s] });
-
-            access.SetTree(0, Garden.TreeFromList(signal));
-            access.SetTree(1, Garden.TreeFromList(spectrum));
-            access.SetTree(2, Garden.TreeFromList(Freq));
+            if (!access.GetItem<Frequency_Spectrum>(0, out var spectrum) || spectrum == null) return;
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(System.Linq.Enumerable.Select(spectrum.Magnitude, x => (double)x)));
+            ComponentSupport.SetTree(access, 1, Garden.TreeFromList(spectrum.Value));
+            ComponentSupport.SetTree(access, 2, Garden.TreeFromList(System.Linq.Enumerable.Select(spectrum.Frequency, x => (double)x)));
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Signal_to_List.png";
+                var resourceName = "PachydermGH2.Resources.Signal to List.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

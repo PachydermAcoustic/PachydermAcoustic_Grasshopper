@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -41,9 +42,10 @@ namespace PachydermGH
                 "Constructs a scene with the existing geometry in the model and/or geometry from grasshopper definitions",
                 "Acoustics", "Model"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.UiSingleThreaded;
         }
 
-        public NURBSScene_Component(IReader reader) : base(reader) { }
+        public NURBSScene_Component(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.UiSingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -51,8 +53,8 @@ namespace PachydermGH
         protected override void AddInputs(InputAdder inputs)
         {
             inputs.AddBoolean("Rhino Geometry", "RG", "Does the component obtain the geometry from the Rhinoceros Model?", Access.Item);
-            inputs.AddSurface("Grasshopper Geometry", "GG", "Add any grasshopper geometry here", Access.Tree);
-            inputs.AddInteger("Grasshopper Layers", "GL", "For each Geometry in GG, indicate what layer (by integer id) to copy acoustical properties from.", Access.Tree);
+            inputs.AddGeneric("Grasshopper Geometry", "GG", "Add any grasshopper geometry here", Access.Tree, Requirement.MayBeMissing);
+            inputs.AddInteger("Grasshopper Layers", "GL", "For each Geometry in GG, indicate what layer (by integer id) to copy acoustical properties from.", Access.Tree, Requirement.MayBeMissing);
             inputs.AddInteger("Voxel Grid Depth", "VG", "Number of voxels in each dimentions. (0 for no optimisation)", new Grasshopper2.UI.UiInteger(7), Access.Item);
 
             inputs[1].Requirement = Requirement.MayBeMissing;
@@ -82,6 +84,8 @@ namespace PachydermGH
             access.GetTree<GeometryBase>(1, out GG_T);
             Tree<int> GL_T;
             access.GetTree<int>(2, out GL_T);
+            GG_T = GG_T ?? Garden.TreeFromList(Array.Empty<GeometryBase>());
+            GL_T = GL_T ?? Garden.TreeFromList(Array.Empty<int>());
             int VG = 2;
             access.GetItem<int>(3, out VG);
 
@@ -91,7 +95,7 @@ namespace PachydermGH
             settings.LockedObjects = true;
             settings.NormalObjects = true;
             settings.VisibleFilter = true;
-            settings.ObjectTypeFilter = Rhino.DocObjects.ObjectType.Brep & Rhino.DocObjects.ObjectType.Surface & Rhino.DocObjects.ObjectType.Extrusion;
+            settings.ObjectTypeFilter = Rhino.DocObjects.ObjectType.Brep | Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.Extrusion;
             List<Rhino.DocObjects.RhinoObject> RC_List = new List<Rhino.DocObjects.RhinoObject>();
 
             if (RG)
@@ -110,8 +114,8 @@ namespace PachydermGH
             }
             else
             {
-                GG_T = null;
-                GL_T = null;
+                // Keep supplied GH geometry.
+                // Keep its layer assignments.
             }
 
             if (RC_List.Count == 0 && GG_T.ItemCount == 0) throw new Exception("Scene could jnot be constructed because there is no geometry...");
@@ -134,16 +138,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Nurb_Scene.png";
+                var resourceName = "PachydermGH2.Resources.Nurb Scene.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

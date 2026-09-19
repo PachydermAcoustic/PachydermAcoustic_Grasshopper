@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -33,7 +34,6 @@ namespace PachydermGH
     [IoId("01759E33-9D87-42D2-AA87-48A9A086E4C9")]
     public class Trafficsource_Component : Component
     {
-        Pachyderm_Acoustic.Environment.LineSource S;
 
         /// <summary>
         /// Initializes a new instance of the MyComponent1 class.
@@ -43,9 +43,10 @@ namespace PachydermGH
                 "Line/Curve source defined similarly to the FHWA Traffic Noise Model",
                 "Acoustics", "Model"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public Trafficsource_Component(IReader reader) : base(reader) { }
+        public Trafficsource_Component(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -111,6 +112,7 @@ namespace PachydermGH
             access.GetItem<Boolean>(8, out throttle);
             access.GetItem<double>(9, out el_m);
 
+            if (el_m <= 0 || speed <= 0 || pavement < 0 || pavement > 3 || auto < 0 || mt < 0 || ht < 0 || b < 0 || m < 0) throw new ArgumentException("Provide positive sampling density and speed, pavement 0–3, and nonnegative traffic counts.");
             double[] SWL = Pachyderm_Acoustic.Utilities.StandardConstructions.FHWA_TNM10_SoundPower(speed, pavement, auto, mt, ht, b, m, throttle);
 
             Rhino.Geometry.Point3d[] pts = Origin.DivideEquidistant(1d / el_m);
@@ -121,7 +123,7 @@ namespace PachydermGH
             {
                 Samples[i] = Pachyderm_Acoustic.Utilities.RCPachTools.RPttoHPt(pts[i]);
             }
-            S = new Pachyderm_Acoustic.Environment.LineSource(Samples, (Origin as Curve).GetLength(), Pachyderm_Acoustic.Utilities.PachTools.EncodeSourcePower(SWL), el_m, 0, false);
+            var S = new Pachyderm_Acoustic.Environment.LineSource(Samples, (Origin as Curve).GetLength(), Pachyderm_Acoustic.Utilities.PachTools.EncodeSourcePower(SWL), el_m, 0, false);
 
             access.SetItem(0, S);
         }
@@ -130,16 +132,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Loudspeaker.png";
+                var resourceName = "PachydermGH2.Resources.LoudSpeaker.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

@@ -1,4 +1,4 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -42,9 +42,10 @@ namespace PachydermGH
               "Dr. Ning Xiang sent AvH a paper concerning constructing a reverberant tail using MLS based signals. This node is the result.",
               "Acoustics", "Audio"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public MLS_Tail(IReader reader) : base(reader) { }
+        public MLS_Tail(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -53,10 +54,10 @@ namespace PachydermGH
         {
             inputs.AddNumber("Reverberation Time", "RT", "Reverberation time in seconds. Specify 8 values (for octave bands 63 - 8k).", Access.Tree);
             inputs.AddNumber("Direct to Reverberant Ratio", "D2R", "Dictates the reverberant level of the output response, as a function of the direct sound power. Specify 8 values (for octave bands 63 - 8k).", Access.Tree);
-            inputs.AddNumber("Sampling Frequency", "FS", "The number of samples per second (sampling frequency). 44100 hz. default.", Access.Item);
-            inputs.AddNumber("Duration (milliseconds)", "D_ms", "Impulse Response length in milliseconds. 1000 ms. default", Access.Item);
-            inputs.AddGeneric("Direct Sound", "D", "Input the direct sound simulation. (optional) If no direct sound is added, a value of 1 is assumed for the direct intensity.", Access.Item);
-            inputs.AddGeneric("Image Source", "IS", "Input the image-source simulation. (optional)", Access.Item);
+            inputs.AddNumber("Sampling Frequency", "FS", "The number of samples per second (sampling frequency). 44100 hz. default.", Access.Item).Set(44100.0);
+            inputs.AddNumber("Duration (milliseconds)", "D_ms", "Impulse Response length in milliseconds. 1000 ms. default", Access.Item).Set(1000.0);
+            inputs.AddGeneric("Direct Sound", "D", "Input the direct sound simulation. (optional) If no direct sound is added, a value of 1 is assumed for the direct intensity.", Access.Item, Requirement.MayBeMissing);
+            inputs.AddGeneric("Image Source", "IS", "Input the image-source simulation. (optional)", Access.Item, Requirement.MayBeMissing);
             inputs[4].Requirement = Requirement.MayBeMissing;
             inputs[5].Requirement = Requirement.MayBeMissing;
         }
@@ -66,7 +67,7 @@ namespace PachydermGH
         /// </summary>
         protected override void AddOutputs(OutputAdder outputs)
         {
-            outputs.AddGeneric("Impulse Response", "IR", "The artificial reverberant tail based on MLS noise...", Access.Tree);
+            outputs.AddGeneric("Impulse Response", "IR", "The artificial reverberant tail based on MLS noise...", Access.Item);
         }
 
         /// <summary>
@@ -75,66 +76,31 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void Process(IDataAccess access)
         {
-            Tree<double> RT_T;
-            access.GetTree<double>(0, out RT_T);
-            List<double> RT = new List<double>(RT_T.AllItems);
-            Tree<double> D2R_T;
-            access.GetTree<double>(1, out D2R_T);
-            List<double> D2R = new List<double>(D2R_T.AllItems);
-            double FS = 0;
-            access.GetItem<double>(2, out FS);
-            double Dur = 0;
-            access.GetItem<double>(3, out Dur);
-            Pachyderm_Acoustic.Direct_Sound Dir = default;
-            access.GetItem<Pachyderm_Acoustic.Direct_Sound>(4, out Dir);
-            Pachyderm_Acoustic.ImageSourceData IS = default;
-            access.GetItem<Pachyderm_Acoustic.ImageSourceData>(5, out IS);
-
-            Dir.Create_Filter();
-
-            ProgressBox VB = new ProgressBox("Creating IR Filters for Deterministic Reflections...");
-            VB.Show();
-            if (IS != null) IS.Create_Filter(Dir.SWL, 16384, VB);
-            VB.Close();
-
-            Pachyderm_Acoustic.Environment.Receiver_Bank[] rec = new Pachyderm_Acoustic.Environment.Receiver_Bank[1];
-
-            double[] magnitude = new double[8] {1,1,1,1,1,1,1,1};
-            if (Dir != null) { for (int i = 0; i < magnitude.Length; i++) { magnitude[i] = Math.Sqrt(Dir.EnergyValue(i, 0).Sum() * Math.Pow(10, D2R[0] / 10)); } }
-
-            VB = new Pachyderm_Acoustic.ProgressBox("Extrapolating Filter...");
-            VB.Show();
-            double[] AF = Pachyderm_Acoustic.Utilities.IR_Construction.Auralization_Filter(new Pachyderm_Acoustic.Direct_Sound[1] { Dir }, new Pachyderm_Acoustic.ImageSourceData[1] { IS }, null, Dur, (int)FS, 0, new List<int> { 0 }, false, true, VB);
-            VB.Close();
-
-            double[] Tail = Pachyderm_Acoustic.Audio.Pach_SP.MLS_Reverb((double)Dur/1000d, RT.ToArray(), (int)FS, magnitude);
-            double dt = Dir.Time(0);
-
-            double t = 0.1 + dt;
-
-            if (IS != null && IS.Paths.Length > 0)
-            {
-                //Find the first 1st order sidewall reflection...
-                for (int i = 0; i < IS.Paths.Length; i++)
-                {
-                    if (IS.Paths[0][i].Path[0].Length > 3) { continue; }
-                    if (IS.Paths[0][i].TravelTime > 0.010 && IS.Paths[0][i].TravelTime < t) t = IS.Paths[0][i].TravelTime;
-                }
-                if (t == 0.1 + dt) t = dt + 0.007;
+            var rt=ComponentSupport.Items<double>(access,0); var ratio=ComponentSupport.Items<double>(access,1);
+            access.GetItem<double>(2,out double fsValue); access.GetItem<double>(3,out double duration);
+            if(rt.Length!=8 || ratio.Length!=8 || rt.Any(x=>x<=0) || fsValue<=0 || duration<=0) throw new ArgumentException("Provide eight positive decay times, eight ratios, and positive sample rate/duration.");
+            int fs=checked((int)fsValue);
+            access.GetItem<Pachyderm_Acoustic.Direct_Sound>(4,out var direct);
+            access.GetItem<Pachyderm_Acoustic.ImageSourceData>(5,out var images);
+            if(images!=null && direct==null) throw new ArgumentException("Image-source input requires direct sound.");
+            var magnitude=new double[8];
+            for(int oct=0;oct<8;oct++) magnitude[oct]=Math.Sqrt((direct==null?1.0:direct.EnergyValue(oct,0).Sum())*Math.Pow(10,ratio[oct]/10));
+            double dt=direct?.Time(0) ?? 0;
+            var response=new double[(int)Math.Ceiling(duration*fs/1000.0)+16384];
+            if(direct!=null) {
+                direct.Create_Filter(); images?.Create_Filter(direct.SWL,16384);
+                response=Pachyderm_Acoustic.Utilities.IR_Construction.Auralization_Filter(new[]{direct},new[]{images},null,duration,fs,0,new List<int>{0},false,true);
             }
-            else
-            {
-                t = dt + 0.007;
+            var tail=Pachyderm_Acoustic.Audio.Pach_SP.MLS_Reverb(duration/1000.0,rt,fs,magnitude);
+            double onset=dt+0.007;
+            if(images!=null && images.Paths.Length>0) {
+                var early=images.Paths[0].Where(path=>path.Path[0].Length<=3 && path.TravelTime>0.010).Select(path=>path.TravelTime).ToArray();
+                if(early.Length>0) onset=Math.Min(dt+0.1,early.Min());
             }
-
-            int start = (int)(t * FS);
-            int end = Math.Min(Tail.Length, AF.Length - start);
-            for (int i = start; i < end; i++)
-            {
-                AF[start + i] += Tail[i];
-            }
-
-            access.SetItem(0, new Audio_Signal(AF, (int)FS, (int)(dt * FS)));
+            int start=Math.Max(0,(int)Math.Round(onset*fs));
+            if(start>response.Length) throw new ArgumentException("Reverberant onset exceeds response duration.");
+            for(int i=0;i<Math.Min(tail.Length,response.Length-start);i++) response[start+i]+=tail[i];
+            access.SetItem(0,new Audio_Signal(response,fs,(int)Math.Round(dt*fs)));
         }
     }
 }

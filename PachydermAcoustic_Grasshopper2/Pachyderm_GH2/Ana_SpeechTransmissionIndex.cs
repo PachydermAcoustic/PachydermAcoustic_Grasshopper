@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -42,8 +43,9 @@ namespace PachydermGH
                 "Computes Center Time from Energy Time Curve",
                 "Acoustics", "Analysis"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
-        public STI_ETC(IReader reader) : base(reader) { }
+        public STI_ETC(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -69,34 +71,34 @@ namespace PachydermGH
         protected override void Process(IDataAccess access)
         {
             Audio_Signal ETC = null;
-            access.GetItem<Audio_Signal>(0, out ETC);
+            ETC = ComponentSupport.Signal(access, 0);
             Tree<double> Noise_T;
             access.GetTree<double>(1, out Noise_T);
             List<double> Noise = new List<double>(Noise_T.AllItems);
             if (Noise.Count != 8) throw new Exception("Noise should be specified by octave band, 0 for 63 Hz. through 7 for 8000 Hz.");
 
+            if (ETC.ChannelCount != 8) throw new ArgumentException("STI requires all eight octave bands, 63 Hz through 8 kHz.");
             double[][] etc = new double[8][];
             for (int oct = 0; oct < 8; oct++) etc[oct] = ETC[oct];
 
             double[] STI = Pachyderm_Acoustic.Utilities.AcousticalMath.Speech_Transmission_Index(etc, 343*1.22, Noise.ToArray(), ETC.SampleFrequency);
 
-            access.SetTree(0, Garden.TreeFromList(STI));
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(STI));
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Speech_Transmission_Index_2.png";
+                var resourceName = "PachydermGH2.Resources.Speech Transmission Index 2.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

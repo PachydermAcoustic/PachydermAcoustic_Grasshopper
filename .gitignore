@@ -201,3 +201,6 @@ ModelManifest.xml
 
 # Local repair candidate; keep out of the repository
 /PachydermAcoustic_Grasshopper2/Pachyderm_GH2_Repaired/
+
+# Local GH2 build dependency binaries
+/PachydermAcoustic_Grasshopper2/Pachyderm_GH2/lib/

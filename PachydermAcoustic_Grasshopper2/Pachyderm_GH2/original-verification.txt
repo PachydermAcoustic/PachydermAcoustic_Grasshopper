@@ -1,0 +1,3 @@
+Original snapshot files checked: 122
+Changed or missing: 0
+All original snapshot hashes match.

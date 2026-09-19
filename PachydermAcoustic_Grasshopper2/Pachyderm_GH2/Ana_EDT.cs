@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -43,9 +44,10 @@ namespace PachydermGH
                 "Computes early decay time from Energy Time Curve",
                 "Acoustics", "Analysis"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public EDT_ETC(IReader reader) : base(reader) { }
+        public EDT_ETC(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -70,7 +72,7 @@ namespace PachydermGH
         protected override void Process(IDataAccess access)
         {
             Audio_Signal ETC = null;
-            access.GetItem<Audio_Signal>(0, out ETC);
+            ETC = ComponentSupport.Signal(access, 0);
 
             List<double> EDT = new List<double>();
             foreach (double[] f in ETC.Value)
@@ -81,7 +83,7 @@ namespace PachydermGH
                 EDT.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.EarlyDecayTime(si, ETC.SampleFrequency));
             }
 
-            access.SetTree(0, Garden.TreeFromList(EDT));
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(EDT));
         }
 
         protected override IIcon IconInternal
@@ -89,16 +91,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.EDT.png";
+                var resourceName = "PachydermGH2.Resources.EDT.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

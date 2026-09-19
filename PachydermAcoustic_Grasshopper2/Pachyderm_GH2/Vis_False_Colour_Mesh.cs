@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -45,9 +46,10 @@ namespace PachydermGH
                 "Mapping of false colors onto vertices of meshes.",
                 "Acoustics", "Visualization"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public False_Colour_Mesh(IReader reader) : base(reader) { }
+        public False_Colour_Mesh(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -72,67 +74,41 @@ namespace PachydermGH
         /// <param name="access">The access object is used to retrieve from inputs and store in outputs.</param>
         protected override void Process(IDataAccess access)
         {
-            m = new Mesh();
-            access.GetItem<Mesh>(0, out m);
-            if (m.Faces.Count == 0)
-            {
-                Pachyderm_Acoustic.PachMapReceiver map = new Pachyderm_Acoustic.PachMapReceiver();
-                access.GetItem(0, out map);
-                m = Pachyderm_Acoustic.Utilities.RCPachTools.HaretoRhinoMesh(map.Map_Mesh, false);
-                //if (m.Vertices.Count != 0) this.ClearRuntimeMessages();
-            }
-
-            Tree<System.Drawing.Color> C;
-            //try
-            //{
-            access.GetTree<System.Drawing.Color>(1, out C);
-            //}
-            //catch 
-            //{
-            //    Tree<double[]> Cd;
-            //    access.GetTree<double[]>(1, out Cd);
-            //}
-
-            if (m.Vertices.Count == C.ItemCount)
-            {
-                for (int i = 0; i < m.Vertices.Count; i++)
-                {
-                    m.VertexColors.SetColor(i, C.Items[i]);
+            if (!access.GetItem<object>(0, out var input)) return;
+            Mesh mesh;
+            if (input is Mesh supplied) mesh=supplied.DuplicateMesh();
+            else if (input is Pachyderm_Acoustic.PachMapReceiver map) mesh=Pachyderm_Acoustic.Utilities.RCPachTools.HaretoRhinoMesh(map.Map_Mesh,false);
+            else throw new ArgumentException("Provide a mesh or mapping receiver.");
+            var colors=ComponentSupport.Items<System.Drawing.Color>(access,1);
+            if(colors.Length==mesh.Vertices.Count) {
+                mesh.VertexColors.Clear(); foreach(var color in colors) mesh.VertexColors.Add(color);
+            } else if(colors.Length==mesh.Faces.Count) {
+                var faces=new Mesh();
+                for(int i=0;i<mesh.Faces.Count;i++) {
+                    var face=mesh.Faces[i]; int offset=faces.Vertices.Count;
+                    faces.Vertices.Add(mesh.Vertices[face.A]); faces.Vertices.Add(mesh.Vertices[face.B]); faces.Vertices.Add(mesh.Vertices[face.C]);
+                    if(face.IsQuad) { faces.Vertices.Add(mesh.Vertices[face.D]); faces.Faces.AddFace(offset,offset+1,offset+2,offset+3); }
+                    else faces.Faces.AddFace(offset,offset+1,offset+2);
+                    for(int j=0;j<(face.IsQuad?4:3);j++) faces.VertexColors.Add(colors[i]);
                 }
-            }
-            else if (m.Faces.Count == C.ItemCount)
-            {
-                Mesh m_faces = new Mesh();
-                for (int i = 0; i < m.Faces.Count; i++)
-                {
-                    Mesh face = new Mesh();
-                    Point3f a, b, c, d;
-                    m.Faces.GetFaceVertices(i, out a, out b, out c, out d);
-                    m_faces.Vertices.AddVertices(new Point3f[4] { a, b, c, d });
-                    m_faces.Faces.AddFace(i * 4 + 0, i * 4 + 1, i * 4 + 2, i * 4 + 3);
-                    for(int j = 0; j < 4; j++) m_faces.VertexColors.Add(C.Items[i]);
-                }
-                m = m_faces;
-            }
-            else throw new Exception("Count of colours must equal to count of vertices");
-
-            access.SetItem(0, m); 
+                mesh=faces;
+            } else throw new ArgumentException("Provide one colour per vertex or per face.");
+            m=mesh; access.SetItem(0,mesh);
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.False_Color_Mesh_Mapping.png";
+                var resourceName = "PachydermGH2.Resources.False Color Mesh Mapping.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

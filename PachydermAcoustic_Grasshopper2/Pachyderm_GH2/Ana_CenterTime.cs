@@ -1,4 +1,6 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+using System;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -38,9 +40,10 @@ namespace PachydermGH
                 "Computes Center Time from Energy Time Curve",
                 "Acoustics", "Analysis"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public CT_ETC(IReader reader) : base(reader) { }
+        public CT_ETC(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -65,12 +68,13 @@ namespace PachydermGH
         protected override void Process(IDataAccess access)
         {
             Audio_Signal ETC = null;
-            access.GetItem<Audio_Signal>(0, out ETC);
+            ETC = ComponentSupport.Signal(access, 0);
             int it = 0;
             List<double> CT = new List<double>();
             
-            foreach (double[] f in ETC.Value)
+            for (int channel = 0; channel < ETC.ChannelCount; channel++)
             {
+                double[] f = ETC[channel];
                 double[] s = new double[f.Length];
                 int start = 0;
                 if (ETC.Direct_Sample == null)
@@ -80,12 +84,12 @@ namespace PachydermGH
                         if (start == 0) if (f[i] != 0) start = i;
                     }
                 }
-                else start = ETC.Direct_Sample[0];
+                else start = ETC.Direct_Sample[channel];
                 it++;
                 CT.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Center_Time(f, ETC.SampleFrequency, (double)start/(double)ETC.SampleFrequency, false));
             }
 
-            access.SetTree(0, Garden.TreeFromList(CT));
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(CT));
         }
 
         protected override IIcon IconInternal
@@ -93,16 +97,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Center_Time.png";
+                var resourceName = "PachydermGH2.Resources.Center Time.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -41,9 +42,10 @@ namespace PachydermGH
               "Pulls the source objects that have been defined in the Rhino Model",
               "Acoustics", "Model"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.UiSingleThreaded;
         }
 
-        public RhinoSource_Component(IReader reader) : base(reader) { }
+        public RhinoSource_Component(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.UiSingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -67,7 +69,7 @@ namespace PachydermGH
         protected override void Process(IDataAccess access)
         {
             Pachyderm_Acoustic.Environment.Source[] S = Pachyderm_Acoustic.Utilities.RCPachTools.GetSource(0);
-            access.SetTree(0,Garden.TreeFromList(S));
+            ComponentSupport.SetTree(access, 0,Garden.TreeFromList(S));
         }
     }
 }

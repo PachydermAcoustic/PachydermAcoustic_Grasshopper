@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -41,9 +42,10 @@ namespace PachydermGH
                 "Casts a signal to a list readable in Grasshopper",
                 "Acoustics", "Audio"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public Signal2List(IReader reader) : base(reader) { }
+        public Signal2List(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -51,7 +53,7 @@ namespace PachydermGH
         protected override void AddInputs(InputAdder inputs)
         {
             inputs.AddGeneric("Audio Signal", "Signal", "The data to divide...", Access.Item);
-            inputs.AddInterval("Samples", "Domain", "Which samples to return", Access.Item);
+            inputs.AddInterval("Samples", "Domain", "Which samples to return", Access.Item, Requirement.MayBeMissing);
             inputs.AddInteger("Channel", "Ch", "Which channel to convert...", Access.Item);
 
             inputs[1].Requirement = Requirement.MayBeMissing;
@@ -76,19 +78,21 @@ namespace PachydermGH
             int chan = 0;
             Audio_Signal Buffer = new Audio_Signal();
             Interval domain = new Interval();
-            access.GetItem<Audio_Signal>(0, out Buffer);
+            Buffer = ComponentSupport.Signal(access, 0);
             access.GetItem<Interval>(1, out domain);
             access.GetItem<int>(2, out chan);
 
+            if (chan < 0 || chan >= Buffer.ChannelCount) throw new ArgumentException("Channel is out of range.");
             double[] SignalBuffer = Buffer[chan];
 
             if (domain[1] - domain[0] < 1) domain[1] = Buffer.Count;
 
+            if (domain.Min < 0 || domain.Max > Buffer.Count) throw new ArgumentException("Sample interval is outside the signal.");
             List<double> signal = new List<double>();
             for (int i = (int)domain.Min; i < (int)domain.Max; i++) { signal.Add(SignalBuffer[i]); }
             //foreach (float s in SignalBuffer) signal.Add(s);
 
-            access.SetItem(0, signal);
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(signal));
             access.SetItem(1, Buffer.SampleFrequency);
         }
         protected override IIcon IconInternal
@@ -96,16 +100,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Signal_to_List.png";
+                var resourceName = "PachydermGH2.Resources.Signal to List.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

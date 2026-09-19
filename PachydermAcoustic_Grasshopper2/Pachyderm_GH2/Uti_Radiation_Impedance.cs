@@ -1,4 +1,4 @@
-﻿////'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+////'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 ////' 
 ////'This file is part of Pachyderm-Acoustic. 
 ////' 
@@ -78,8 +78,8 @@
 //                Za.Add(Zwhole.Imaginary);
 //            }
 
-//            access.SetTree(0, Zr);
-//            access.SetTree(1, Za);
+//            ComponentSupport.SetTree(access, 0, Zr);
+//            ComponentSupport.SetTree(access, 1, Za);
 
 //        }
 

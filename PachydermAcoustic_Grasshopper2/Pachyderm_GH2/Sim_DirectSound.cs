@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -45,9 +46,10 @@ namespace PachydermGH
                 "Calculates direct sound",
                 "Acoustics", "Computation"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public Direct_Sound(IReader reader) : base(reader) { }
+        public Direct_Sound(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -57,7 +59,7 @@ namespace PachydermGH
             inputs.AddGeneric("Room Model", "Room", "The Pachyderm Room Model Reference", Access.Item);
             inputs.AddGeneric("Source", "Src", "Sound Source Objects...", Access.Tree);
             inputs.AddGeneric("Receiver", "Rec", "Listening Object (Receiver_Bank)...", Access.Tree);
-            inputs.AddBoolean("Screen Attenuation", "SCR", "Toggles the screen attenuation option. Obstructed receivers will receive energy based on the shortest clear path around obstructions.", Access.Item);
+            inputs.AddBoolean("Screen Attenuation", "SCR", "Toggles the screen attenuation option. Obstructed receivers will receive energy based on the shortest clear path around obstructions.", Access.Item).Set(false);
         }
 
         /// <summary>
@@ -75,26 +77,6 @@ namespace PachydermGH
         /// to store data in output parameters.</param>
         protected override void Process(IDataAccess access)
         {
-            System.Diagnostics.Process P = System.Diagnostics.Process.GetCurrentProcess();
-            switch (Pachyderm_Acoustic.UI.PachydermAc_PlugIn.Instance.TaskPriority)
-            {
-                case 0:
-                    {
-                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
-                        break;
-                    }
-                case 1:
-                    {
-                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.AboveNormal;
-                        break;
-                    }
-                case 2:
-                    {
-                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.Normal;
-                        break;
-                    }
-            }
-
             Pachyderm_Acoustic.Environment.Polygon_Scene S = null;
             access.GetItem<Pachyderm_Acoustic.Environment.Polygon_Scene>(0, out S);
             Tree<Pachyderm_Acoustic.Environment.Source> Src;
@@ -105,35 +87,36 @@ namespace PachydermGH
             access.GetItem<bool>(3, out screen);
             List<Pachyderm_Acoustic.Direct_Sound> DSS = new List<Pachyderm_Acoustic.Direct_Sound>();
 
-            int ct = 0;
+            
             int s_id = 0;
             foreach (Pachyderm_Acoustic.Environment.Source Pt in Src.AllItems)
             {
-                Pachyderm_Acoustic.Direct_Sound DS = new Pachyderm_Acoustic.Direct_Sound(Pt, Rec.Items[ct], S, new int[] { 0, 1, 2, 3, 4, 5, 6, 7 }, screen);
+                var receiverBank = ComponentSupport.Bank(System.Linq.Enumerable.ToArray(Rec.AllItems), Pt, S, s_id, Src.ItemCount);
+                Pachyderm_Acoustic.Direct_Sound DS = new Pachyderm_Acoustic.Direct_Sound(Pt, receiverBank, S, new int[] { 0, 1, 2, 3, 4, 5, 6, 7 }, screen);
+                DS.Delay_ms = ComponentSupport.GetDelay(Pt);
                 DS.Begin();
                 do { System.Threading.Thread.Sleep(100); } while (DS.ThreadState() == System.Threading.ThreadState.Running);
                 DS.Combine_ThreadLocal_Results();
                 s_id++;
                 DSS.Add(DS);
             }
-            access.SetTree(0, Garden.TreeFromList(DSS));
-            P.PriorityClass = System.Diagnostics.ProcessPriorityClass.Normal;
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(DSS));
+            
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Direct_Sound.png";
+                var resourceName = "PachydermGH2.Resources.Direct Sound.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

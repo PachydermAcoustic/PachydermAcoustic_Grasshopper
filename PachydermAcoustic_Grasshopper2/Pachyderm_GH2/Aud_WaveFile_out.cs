@@ -1,4 +1,6 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using Grasshopper2.Data;
+using System.Collections.Generic;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -38,17 +40,20 @@ namespace PachydermGH
                 "Writes a signal to a wave file.",
                 "Acoustics", "Audio"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public ExportWaveFile(IReader reader) : base(reader) { }
+        public ExportWaveFile(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; use16Bit=reader.TryRead<bool>("use16Bit",true); normalize=reader.TryRead<bool>("normalize",true);}
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
+        public override void Store(IWriter writer) { base.Store(writer); writer.Boolean("use16Bit",use16Bit); writer.Boolean("normalize",normalize); }
         protected override void AddInputs(InputAdder inputs)
         {
             inputs.AddGeneric("Signal Buffer", "Signal", "All input signals to be written to wave file. Signals will be written in channels according to their order at input.", Access.Item);
             inputs.AddText("Wave File Path", "Path", "The location of the wave file.", Access.Item);
+            inputs.AddBoolean("Write", "Write", "Enable write for this solution.", Access.Item).Set(false);
         }
 
         /// <summary>
@@ -58,36 +63,36 @@ namespace PachydermGH
         {
         }
 
-        Eto.Forms.CheckBox bitrate16, bitrate32, Normalize;
+        bool use16Bit = true, normalize = true;
 
         public override void AppendToInputPanel(InputPanel panel)
         {
-            panel.AddCheck("16 bit audio", true, bitrate16_click);
-            panel.AddCheck("32 bit audio", false, bitrate32_click);
-            panel.AddCheck("Normalize", true, Normalize_click);
+            panel.AddCheck("16 bit audio", use16Bit, bitrate16_click);
+            panel.AddCheck("32 bit audio", !use16Bit, bitrate32_click);
+            panel.AddCheck("Normalize", normalize, Normalize_click);
             base.AppendToInputPanel(panel);
         }
 
         public void bitrate16_click(bool set)
         {
-            bitrate32.Checked = false;
-            Document.Solution.ReleaseExpirationBlock();
+            use16Bit = set;
+            // Expire schedules a fresh solution after changing a setting.
             this.Expire();
             Document.Solution.Start();
         }
 
         public void bitrate32_click(bool set)
         {
-            bitrate16.Checked = false;
-            Document.Solution.ReleaseExpirationBlock();
+            use16Bit = !set;
+            // Expire schedules a fresh solution after changing a setting.
             this.Expire();
             Document.Solution.Start();
         }
 
         public void Normalize_click(bool set)
         {
-            Normalize.Checked = set;
-            Document.Solution.ReleaseExpirationBlock();
+            normalize = set;
+            // Expire schedules a fresh solution after changing a setting.
             this.Expire();
             Document.Solution.Start();
         }
@@ -97,43 +102,31 @@ namespace PachydermGH
         /// </summary>
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void Process(IDataAccess access)
-        {   
-            Audio_Signal S = new Audio_Signal();
-            access.GetItem<Audio_Signal>(0, out S);
-            if (S.Count < 1) throw new Exception("Signals should be type of Audio Signal.");
-
-            string path = "";
-            access.GetItem(1, out path);
-            if (!path.EndsWith(".wav")) throw new Exception("Path invalid. Make sure that directory exists, and that the ");
-
-            if (Normalize.Checked == true)
-            {
-                for (int a = 0; a < S.Count; a++)
-                {
-                    double m = S[a].Max();
-                    for (int i = 0; i < S[a].Length; i++) S[a][i] /= m;
-                }
+        {
+            if(!access.GetItem<bool>(2,out var enabled) || !enabled) return;
+            var signal = ComponentSupport.Signal(access, 0).Duplicate();
+            if (!access.GetItem<string>(1, out var path) || !path.EndsWith(".wav", StringComparison.OrdinalIgnoreCase)) throw new ArgumentException("Provide a .wav output path.");
+            if (normalize) {
+                double peak = 0;
+                foreach (var channel in signal.Value) foreach (double sample in channel) peak = Math.Max(peak, Math.Abs(sample));
+                if (peak > 0) foreach (var channel in signal.Value) for (int i = 0; i < channel.Length; i++) channel[i] /= peak;
             }
-
-            float[][] data = new float[S.ChannelCount][];
-            for (int i = 0; i < S.ChannelCount; i++) data[i] = S.toFloat(i);
-            Pachyderm_Acoustic.Audio.Pach_SP.Wave.Write(data, S.SampleFrequency, path, bitrate16.Checked.Value ? 16 : 32);
+            Pachyderm_Acoustic.Audio.Pach_SP.Wave.Write(signal.toFloat(), signal.SampleFrequency, path, use16Bit ? 16 : 32);
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Wave_File.png";
+                var resourceName = "PachydermGH2.Resources.Wave File.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

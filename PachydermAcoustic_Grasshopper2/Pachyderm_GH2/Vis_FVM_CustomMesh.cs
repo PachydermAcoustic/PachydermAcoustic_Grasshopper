@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -44,11 +45,12 @@ namespace PachydermGH
                 "Allows you to specify a custom mesh for use with the display conduit of the Finite Volume Method in Pachyderm.",
                 "Acoustics", "Visualization"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.UiSingleThreaded;
             Sim = Pachyderm_Acoustic.UI.PachTDNumericControl.Instance;
             if (Sim != null) Sim.Incremented += Sim_Incremented;
         }
 
-        public FVM_InsertMesh(IReader reader) : base(reader) { }
+        public FVM_InsertMesh(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.UiSingleThreaded; }
 
         private void Sim_Incremented(object sender, EventArgs e)
         {
@@ -90,7 +92,7 @@ namespace PachydermGH
         protected override void Process(IDataAccess access)
         {
             Pachyderm_Acoustic.UI.PachTDNumericControl Sim = Pachyderm_Acoustic.UI.PachTDNumericControl.Instance;
-            if (Sim.FDTD == null) return;
+            if (Sim == null || Sim.FDTD == null) return;
             //access.AddMessage("dX = " + Math.Round(Sim.FDTD.dx, 3) + ", dY = " + Math.Round(Sim.FDTD.dy, 3) + ", dZ = " + Math.Round(Sim.FDTD.dz, 3));
 
             Grasshopper2.Data.Tree<Mesh> m;
@@ -100,7 +102,7 @@ namespace PachydermGH
             
             List<Mesh> AllMesh = new List<Mesh>();
 
-            Sim.FDTD.Insert_Mesh_Sections(AllMesh.ToArray());
+            Sim.FDTD.Insert_Mesh_Sections(MItems.ToArray());
 
             access.SetItem(0, Sim.FDTD.m_templateC);
             
@@ -110,7 +112,7 @@ namespace PachydermGH
             List<double[]> pressureTree = new List<double[]>();
             pressureTree.Add(p);
 
-            access.SetTree(1, Garden.TreeFromArrays(pressureTree.ToArray()));
+            ComponentSupport.SetTree(access, 1, Garden.TreeFromArrays(pressureTree.ToArray()));
         }
 
         protected override IIcon IconInternal
@@ -118,16 +120,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.False_Color_Mesh_Mapping.png";
+                var resourceName = "PachydermGH2.Resources.False Color Mesh Mapping.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

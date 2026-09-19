@@ -1,4 +1,6 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Collections.Generic;
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -41,9 +43,10 @@ namespace PachydermGH
                 "Obtains result from Rhinoceros implementation of Pachyderm, provided you have run a simulation there...",
                 "Acoustics", "Computation"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.UiSingleThreaded;
         }
 
-        public Sim_RhinoResult(IReader reader) : base(reader) { }
+        public Sim_RhinoResult(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.UiSingleThreaded; }
 
         interface_selection I = interface_selection.Pach_Hybrid_Method;
 
@@ -57,6 +60,7 @@ namespace PachydermGH
         /// </summary>
         protected override void AddInputs(InputAdder inputs)
         {
+            inputs.AddInteger("Mode","M","0: Hybrid, 1: Mapping, 2: Numeric time domain",Access.Item).Set(0);
         }
 
         /// <summary>
@@ -64,20 +68,10 @@ namespace PachydermGH
         /// </summary>
         protected override void AddOutputs(OutputAdder outputs)
         {
-            switch (I)
-            {
-                case interface_selection.Pach_Hybrid_Method:
-                    outputs.AddGeneric("Direct Sound data", "DS", "The pachyderm direct sound data", Access.Tree);
-                    outputs.AddGeneric("Image Source data", "IS", "The pachyderm image source data", Access.Tree);
-                    outputs.AddGeneric("Ray Tracing data", "RT", "The pachyderm ray tracing data", Access.Tree);
-                    break;
-                case interface_selection.Pach_Mapping_Method:
-                    outputs.AddGeneric("Ray Tracing data", "RT", "The pachyderm ray tracing data", Access.Tree);
-                    break;
-                case interface_selection.Pach_Numeric_TimeDomain:
-                    outputs.AddGeneric("Numeric Time Domain data", "NTD", "Recorded signal at receivers.", Access.Item);
-                    break;
-            }
+            outputs.AddGeneric("Direct Sound","DS","Direct results",Access.Tree);
+            outputs.AddGeneric("Image Source","IS","Image-source results",Access.Tree);
+            outputs.AddGeneric("Ray Tracing","RT","Receiver results",Access.Tree);
+            outputs.AddGeneric("Numeric Signals","NTD","Recorded numeric signals",Access.Tree);
         }
         
         //public override bool AppendMenuItems(ToolStripDropDown menu)
@@ -162,22 +156,25 @@ namespace PachydermGH
         /// to store data in output parameters.</param>
         protected override void Process(IDataAccess access)
         {
+            access.GetItem<int>(0,out int mode);
+            if(mode<0 || mode>2) throw new ArgumentException("Mode must be 0, 1 or 2.");
+            I=(interface_selection)mode;
             Pachyderm_Acoustic.Direct_Sound[] D = new Pachyderm_Acoustic.Direct_Sound[0];
             Pachyderm_Acoustic.ImageSourceData[] IS = new Pachyderm_Acoustic.ImageSourceData[0];
             Pachyderm_Acoustic.Environment.Receiver_Bank[] RT = new Pachyderm_Acoustic.Environment.Receiver_Bank[0];
 
-            if (I == interface_selection.Pach_Hybrid_Method && Pachyderm_Acoustic.UI.PachHybridControl.Instance.AuralisationReady())
+            if (I == interface_selection.Pach_Hybrid_Method && Pachyderm_Acoustic.UI.PachHybridControl.Instance != null && Pachyderm_Acoustic.UI.PachHybridControl.Instance.AuralisationReady())
             {
                 Hare.Geometry.Point[] SRC = new Hare.Geometry.Point[0];
                 Hare.Geometry.Point[] REC = new Hare.Geometry.Point[0];
                 Pachyderm_Acoustic.UI.PachHybridControl.Instance.GetSims(ref SRC, ref REC, ref D, ref IS, ref RT);
                 if (RT.Length == 0) RT = new Pachyderm_Acoustic.Environment.Receiver_Bank[D.Length];
                 if (IS.Length == 0) IS = new Pachyderm_Acoustic.ImageSourceData[D.Length];
-                access.SetTree(0, Garden.TreeFromList(D));
-                access.SetTree(1, Garden.TreeFromList(IS));
-                access.SetTree(2, Garden.TreeFromList(RT));
+                ComponentSupport.SetTree(access, 0, Garden.TreeFromList(D));
+                ComponentSupport.SetTree(access, 1, Garden.TreeFromList(IS));
+                ComponentSupport.SetTree(access, 2, Garden.TreeFromList(RT));
             }
-            else if (I == interface_selection.Pach_Mapping_Method && Pachyderm_Acoustic.UI.Pach_Mapping_Control.Instance.Simulations_Ready())
+            else if (I == interface_selection.Pach_Mapping_Method && Pachyderm_Acoustic.UI.Pach_Mapping_Control.Instance != null && Pachyderm_Acoustic.UI.Pach_Mapping_Control.Instance.Simulations_Ready())
             {
                 Pachyderm_Acoustic.PachMapReceiver[] PMR = new Pachyderm_Acoustic.PachMapReceiver[0];
                 Pachyderm_Acoustic.UI.Pach_Mapping_Control.Instance.GetSims(ref PMR);
@@ -190,18 +187,18 @@ namespace PachydermGH
                     IS[i] = null;
                     RT[i] = PMR[i];
                 }
-                access.SetTree(0, Garden.TreeFromList(D));
-                access.SetTree(1, Garden.TreeFromList(IS));
-                access.SetTree(2, Garden.TreeFromList(RT));
+                ComponentSupport.SetTree(access, 0, Garden.TreeFromList(D));
+                ComponentSupport.SetTree(access, 1, Garden.TreeFromList(IS));
+                ComponentSupport.SetTree(access, 2, Garden.TreeFromList(RT));
             }
-            else if (I == interface_selection.Pach_Numeric_TimeDomain && Pachyderm_Acoustic.UI.PachTDNumericControl.Instance.FDTD != null && Pachyderm_Acoustic.UI.PachTDNumericControl.Instance.FDTD.Mic != null)
+            else if (I == interface_selection.Pach_Numeric_TimeDomain && Pachyderm_Acoustic.UI.PachTDNumericControl.Instance != null && Pachyderm_Acoustic.UI.PachTDNumericControl.Instance.FDTD != null && Pachyderm_Acoustic.UI.PachTDNumericControl.Instance.FDTD.Mic != null)
             {
                 double[][] Rec = Pachyderm_Acoustic.UI.PachTDNumericControl.Instance.FDTD.Mic.Recordings_Current();
                 if (Rec == null || Rec.Length < 1) throw new Exception("Recordings not found. Are you sure you have receivers, and that you have run your FDTD simulation?");
                 double FS = Pachyderm_Acoustic.UI.PachTDNumericControl.Instance.FDTD.SampleFrequency;
                 System.Collections.Generic.List<Audio_Signal> AS = new System.Collections.Generic.List<Audio_Signal>();
                 for (int i = 0; i < Rec.Length; i++) AS.Add(new Audio_Signal(Rec[i], (int)FS));
-                access.SetTree(0, Garden.TreeFromList(AS));
+                ComponentSupport.SetTree(access, 3, Garden.TreeFromList(AS));
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -41,9 +42,10 @@ namespace PachydermGH
                 "Computes Sound Pressure Level (A) from Energy Time Curve",
                 "Acoustics", "Analysis"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public SPLAETC(IReader reader) : base(reader) { }
+        public SPLAETC(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -67,67 +69,40 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void Process(IDataAccess access)
         {
-            Tree<object> etcTree;
-            if (!access.GetTree(0, out etcTree)) return; // if no input, just return.
-            List<double> SPLA = new List<double>();
-
-            object[][] AS; 
-            etcTree.ToArrays(out AS);  
-
-            foreach (object[] a in AS)
-            {
-                List<Audio_Signal> signals = new List<Audio_Signal>();
-                List<double> Oct_SPL = new List<double>();
-                Audio_Signal signal = a[0] as Audio_Signal;
-                    if (signal != null)
-                    {
-                        for(int i = 0; i < a.Length; i++) signals.Add(a[i] as Audio_Signal);
-                    }
-                    else if (a[0] is double && a.Length == 8)
-                    {
-                        for (int i = 0; i < a.Length; i++) Oct_SPL.Add((double)a[i]);
-                    }
-       
-                if (signals.Count > 0)
-                {
-                    foreach (var sig in signals)
-                    {
-                        Oct_SPL.Clear();
-                        for (int i = 0; i < sig.Value.Length; i++)
-                        {       
-                            double sum = 0;
-                            for (int j = 0; j < sig.Value[i].Length; j++)
-                                sum += sig.Value[i][j];
-                            Oct_SPL.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.SPL_Intensity(sum));
-                        }
-                        SPLA.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Sound_Pressure_Level_A(Oct_SPL.ToArray()));
+            if(!access.GetTree<object>(0,out var tree) || tree==null) return;
+            tree.ToArrays(out object[][] branches);
+            var rows=new List<double[]>();
+            foreach(var branch in branches) {
+                var values=new List<double>();
+                if(branch.Length==0) { rows.Add(Array.Empty<double>()); continue; }
+                if(branch.All(x=>x is double)) {
+                    if(branch.Length!=8) throw new ArgumentException("Provide eight octave-band levels per branch.");
+                    values.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Sound_Pressure_Level_A(branch.Cast<double>().ToArray()));
+                } else {
+                    foreach(var item in branch) {
+                        if(!(item is Audio_Signal signal) || signal.ChannelCount!=8) throw new ArgumentException("Provide an eight-band energy signal or eight numeric octave levels.");
+                        var levels=signal.Value.Select(channel=>Pachyderm_Acoustic.Utilities.AcousticalMath.SPL_Intensity(channel.Sum())).ToArray();
+                        values.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Sound_Pressure_Level_A(levels));
                     }
                 }
-                else if (Oct_SPL.Count > 0)
-                {
-                    for (int i = 0; i < Oct_SPL.Count; i += 8)
-                        SPLA.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Sound_Pressure_Level_A(Oct_SPL.GetRange(i, 8).ToArray()));
-                }
+                rows.Add(values.ToArray());
             }
-
-            access.SetTree(0, Garden.TreeFromList(SPLA));
-            return;
+            ComponentSupport.SetTree(access, 0,Garden.TreeFromArrays(tree.Paths,rows.ToArray()));
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.SPL.png";
+                var resourceName = "PachydermGH2.Resources.SPL.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

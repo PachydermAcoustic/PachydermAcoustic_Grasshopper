@@ -1,4 +1,6 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using Grasshopper2.Data;
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -40,9 +42,10 @@ namespace PachydermGH
                 "Unbraids woven signal to discrete signals by channel",
                 "Acoustics", "Audio"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public Unweave_Signal(IReader reader) : base(reader) { }
+        public Unweave_Signal(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -60,7 +63,7 @@ namespace PachydermGH
         /// </summary>
         protected override void AddOutputs(OutputAdder outputs)
         {
-            outputs.AddGeneric("Unwoven Signal", "Signals", "The resulting unwoven signal", Access.Tree);
+            outputs.AddGeneric("Unwoven Signal", "Signals", "The resulting unwoven signal", Access.Item);
         }
 
         /// <summary>
@@ -71,18 +74,19 @@ namespace PachydermGH
         {
             int channel = 0;
             Audio_Signal Buffer = new Audio_Signal();
-            access.GetItem<Audio_Signal>(0, out Buffer);
+            Buffer = ComponentSupport.Signal(access, 0);
             access.GetItem<int>(1, out channel);
             Interval ival = new Interval();
             if (!access.GetItem<Interval>(2, out ival)) ival = new Interval(0, Buffer.Count);
             
+            if (channel < 0 || channel >= Buffer.ChannelCount || ival.T0 < 0 || ival.T1 > Buffer.Count || ival.T1 <= ival.T0) throw new ArgumentException("Invalid channel or sample interval.");
             float[] signals = new float[(int)ival.Length];
             for (int i = 0; i < signals.Length; i++)
             {
                 signals[i] = (float)Buffer[channel][(int)ival.T0 + i];
             }
 
-            access.SetItem(0, new Audio_Signal(signals, Buffer.SampleFrequency));
+            access.SetItem(0, new Audio_Signal(signals, Buffer.SampleFrequency, Math.Max(0, Buffer.Direct_Sample[channel] - (int)ival.T0)));
         }
 
         protected override IIcon IconInternal
@@ -90,16 +94,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Unweave_Signal.png";
+                var resourceName = "PachydermGH2.Resources.Unweave Signal.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

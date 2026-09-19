@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -42,16 +43,18 @@ namespace PachydermGH
                 "Computes reverberation time from Energy Time Curve",
                 "Acoustics", "Analysis"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
-        public RT_X_ETC(IReader reader) : base(reader) { }
+        public RT_X_ETC(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; Noise_Compensation=reader.TryRead<bool>("Noise_Compensation",false);}
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
+        public override void Store(IWriter writer) { base.Store(writer); writer.Boolean("Noise_Compensation",Noise_Compensation); }
         protected override void AddInputs(InputAdder inputs)
         {
             inputs.AddGeneric("Energy Time Curve", "ETC", "Energy Time Curve", Access.Item);
-            inputs.AddInteger("Decay Index", "t_X", "A linear regression will be performed on the schroeder integral from -5 dB of decay to -X-5 dB of decay", Access.Item);
+            inputs.AddInteger("Decay Index", "t_X", "A linear regression will be performed on the schroeder integral from -5 dB of decay to -X-5 dB of decay", Access.Item).Set(30);
 
             //Grasshopper.Kernel.Parameters.Param_Integer param = (inputs[1] as Grasshopper.Kernel.Parameters.Param_Integer);
             //if (param != null) param.SetPersistentData(30);
@@ -68,7 +71,7 @@ namespace PachydermGH
         public void Comp_click(bool set)
         {
             Noise_Compensation = set;
-            Document.Solution.ReleaseExpirationBlock();
+            // Expire schedules a fresh solution after changing a setting.
             this.Expire();
             Document.Solution.Start();
         }
@@ -88,7 +91,7 @@ namespace PachydermGH
         protected override void Process(IDataAccess access)
         {
             Audio_Signal ETC = null;
-            access.GetItem<Audio_Signal>(0, out ETC);
+            ETC = ComponentSupport.Signal(access, 0);
             int tx = 30;
             access.GetItem<int>(1, out tx);
 
@@ -105,23 +108,22 @@ namespace PachydermGH
                 }
                 RT.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.T_X(si, tx, ETC.SampleFrequency));
             }
-            access.SetTree(0, Garden.TreeFromList(RT));
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(RT));
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.RT.png";
+                var resourceName = "PachydermGH2.Resources.RT.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

@@ -1,4 +1,4 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -48,9 +48,10 @@ namespace PachydermGH
                 "Performs a comprehensive Finite Volume Method Simulation.",
                 "Acoustics", "Computation"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public Sim_FVM13(IReader reader) : base(reader) { }
+        public Sim_FVM13(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -80,26 +81,6 @@ namespace PachydermGH
         /// to store data in output parameters.</param>
         protected override void Process(IDataAccess access)
         {
-            System.Diagnostics.Process P = System.Diagnostics.Process.GetCurrentProcess();
-            switch (PachydermAc_PlugIn.Instance.TaskPriority)
-            {
-                case 0:
-                    {
-                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
-                        break;
-                    }
-                case 1:
-                    {
-                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.AboveNormal;
-                        break;
-                    }
-                case 2:
-                    {
-                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.Normal;
-                        break;
-                    }
-            }
-
             Polygon_Scene S = null;
             access.GetItem<Polygon_Scene>(0, out S);
             Tree<Source> Src;
@@ -115,33 +96,33 @@ namespace PachydermGH
             access.GetItem<Box>(5, out BB);
             Pachyderm_Acoustic.Numeric.TimeDomain.Signal_Driver_Compact Sig = new Pachyderm_Acoustic.Numeric.TimeDomain.Signal_Driver_Compact(Pachyderm_Acoustic.Numeric.TimeDomain.Signal_Driver_Compact.Signal_Type.Sine_Pulse, freq, 1, Src.AllItems.ToArray());
 
+            var signals = new List<Audio_Signal>();
             for (int i = 0; i < Rec.ItemCount; i++)
             {
                 Microphone_Compact Mic = new Microphone_Compact(Rec.Items[i].Origins());
                 Acoustic_Compact_FDTD FVM = new Acoustic_Compact_FDTD(S, ref Sig, ref Mic, freq, tmaxms * 2, Acoustic_Compact_FDTD.GridType.TransparencyLab, Pachyderm_Acoustic.Utilities.RCPachTools.RPttoHPt(BB.Center), BB.X.Length, BB.Y.Length, BB.Z.Length, false);
                 FVM.RuntoCompletion();
-                Mic.reset();
+                // Read recordings before resetting the microphone.
                 Sig.reset(freq, Signal_Driver_Compact.Signal_Type.Sine_Pulse);
-                Audio_Signal AS = new Audio_Signal(Mic.Recordings()[0], (int)FVM.SampleFrequency);
-                access.SetItem(0, AS);
+                foreach (var recording in Mic.Recordings()) signals.Add(new Audio_Signal(recording, (int)FVM.SampleFrequency));
             }
-            P.PriorityClass = System.Diagnostics.ProcessPriorityClass.Normal;
+            ComponentSupport.SetTree(access, 0,Garden.TreeFromList(signals));
+            
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Direct_Sound.png";
+                var resourceName = "PachydermGH2.Resources.Direct Sound.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

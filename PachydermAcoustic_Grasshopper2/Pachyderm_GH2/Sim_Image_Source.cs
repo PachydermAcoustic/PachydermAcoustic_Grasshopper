@@ -1,4 +1,4 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -46,9 +46,10 @@ namespace PachydermGH
                 "Performs Snell's Law calculations on a model, including time delays",
                 "Acoustics", "Computation"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public Image_Source(IReader reader) : base(reader) { }
+        public Image_Source(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -80,26 +81,6 @@ namespace PachydermGH
         /// to store data in output parameters.</param>
         protected override void Process(IDataAccess access)
         {
-            System.Diagnostics.Process P = System.Diagnostics.Process.GetCurrentProcess();
-            switch (Pachyderm_Acoustic.UI.PachydermAc_PlugIn.Instance.TaskPriority)
-            {
-                case 0:
-                    {
-                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
-                        break;
-                    }
-                case 1:
-                    {
-                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.AboveNormal;
-                        break;
-                    }
-                case 2:
-                    {
-                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.Normal;
-                        break;
-                    }
-            }
-
             Pachyderm_Acoustic.Environment.Polygon_Scene S = null;
             access.GetItem<Pachyderm_Acoustic.Environment.Polygon_Scene>(0, out S);
             int order = 0;
@@ -111,7 +92,7 @@ namespace PachydermGH
             Boolean Edges = false;
             access.GetItem<Boolean>(4, out Edges);
 
-            if (Edges) S.Register_Edges(Src.AllItems, Rec.Items[0]);
+            if (Edges) { if (Rec.ItemCount==0) throw new ArgumentException("Provide receiver banks."); S.Register_Edges(Src.AllItems, Rec.Items[0]); }
 
             int ct = 0;
             int s_id = 0;
@@ -122,11 +103,13 @@ namespace PachydermGH
 
             foreach (Pachyderm_Acoustic.Environment.Source Pt in Src.AllItems)
             {
-                Pachyderm_Acoustic.Direct_Sound DS = new Pachyderm_Acoustic.Direct_Sound(Pt, Rec.Items[0], S, new int[] { 0, 1, 2, 3, 4, 5, 6, 7 });
+                var receiverBank = ComponentSupport.Bank(System.Linq.Enumerable.ToArray(Rec.AllItems), Pt, S, s_id, Src.ItemCount);
+                Pachyderm_Acoustic.Direct_Sound DS = new Pachyderm_Acoustic.Direct_Sound(Pt, receiverBank, S, new int[] { 0, 1, 2, 3, 4, 5, 6, 7 });
+                DS.Delay_ms = ComponentSupport.GetDelay(Pt);
                 DS.Begin();
                 do { System.Threading.Thread.Sleep(100); } while (DS.ThreadState() == System.Threading.ThreadState.Running);
                 DS.Combine_ThreadLocal_Results();
-                Pachyderm_Acoustic.ImageSourceData IS = new Pachyderm_Acoustic.ImageSourceData(Pt, Rec.Items[0], DS, S, order, Edges, s_id);
+                Pachyderm_Acoustic.ImageSourceData IS = new Pachyderm_Acoustic.ImageSourceData(Pt, receiverBank, DS, S, order, Edges, s_id);
                 IS.Begin();
                 do { System.Threading.Thread.Sleep(100); } while (IS.ThreadState() == System.Threading.ThreadState.Running);
                 IS.Combine_ThreadLocal_Results();
@@ -137,11 +120,11 @@ namespace PachydermGH
                 
                 if (IS.Paths.Length > 0)
                 {
-                    for (int i = 0; i < Rec.Items[0].Count; i++)
+                    for (int i = 0; i < receiverBank.Count; i++)
                     {
                         for (int h = 0; h < IS.Paths[i].Count; h++)
                         {
-                            Polyline[] path = new Polyline[(int)Math.Floor((double)(IS.Paths[i][h].Path.Length/100))];//IS.Paths[i][h].Path.Length];
+                            Polyline[] path = new Polyline[(int)Math.Ceiling(IS.Paths[i][h].Path.Length / 100.0)];//IS.Paths[i][h].Path.Length];
 
                             int step = 100;// (int)Math.Ceiling((double)(IS.Paths[i][h].Path.Length / 50))-1;
                             for (int j = 0; j < path.Length; j++)
@@ -161,27 +144,26 @@ namespace PachydermGH
                     }
                 }
             }
-            access.SetTree(0, Garden.TreeFromList(ISS));
-            access.SetTree(1, Garden.TreeFromList(txt));
-            access.SetTree(2, Garden.TreeFromList(cvs));
-            access.SetTree(3, Garden.TreeFromList(I));
-            P.PriorityClass = System.Diagnostics.ProcessPriorityClass.Normal;
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(ISS));
+            ComponentSupport.SetTree(access, 1, Garden.TreeFromList(txt));
+            ComponentSupport.SetTree(access, 2, Garden.TreeFromList(cvs));
+            ComponentSupport.SetTree(access, 3, Garden.TreeFromList(I));
+            
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Image_Source.png";
+                var resourceName = "PachydermGH2.Resources.Image Source.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

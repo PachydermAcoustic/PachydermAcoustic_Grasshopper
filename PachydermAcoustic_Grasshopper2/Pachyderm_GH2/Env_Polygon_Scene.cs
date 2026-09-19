@@ -1,3 +1,5 @@
+using Grasshopper2.Data;
+using System.Linq;
 using Grasshopper2.Components;
 using Grasshopper2.Parameters;
 using Grasshopper2.UI;
@@ -21,9 +23,10 @@ namespace Pachyderm_GH
             "Acoustics",
             "Model"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.UiSingleThreaded;
         }
 
-        public Polygon_Scene_Component(IReader reader) : base(reader) { }
+        public Polygon_Scene_Component(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.UiSingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -31,7 +34,7 @@ namespace Pachyderm_GH
         protected override void AddInputs(InputAdder inputs)
         {
             inputs.AddBoolean("Rhino Geometry", "RG", "Does the component obtain the geometry from the Rhinoceros Model?");
-            inputs.AddSurface("Grasshopper Geometry", "GG", "Add any grasshopper geometry here", Access.Tree, Requirement.MayBeNull).Requirement = Requirement.MayBeMissing;
+            inputs.AddGeneric("Grasshopper Geometry", "GG", "Add any grasshopper geometry here", Access.Tree, Requirement.MayBeNull).Requirement = Requirement.MayBeMissing;
             inputs.AddInteger("Grasshopper Layers", "GL", "For each Geometry in GG, indicate what layer (by integer id) to copy acoustical properties from.", Access.Tree).Requirement = Requirement.MayBeMissing;
             inputs.AddInteger("Voxel Grid Depth", "VG", "Number of voxels in each dimentions. (0 for no optimisation)").Set(7);
             inputs.AddGeneric("Medium Properties", "MP", "Atmospheric properties (see 'Medium Propeties') according to atmospheric pressure, termperature, and relative humidity.").Set(new Uniform_Medium(0, 1000, 293.15, 50, false));
@@ -76,7 +79,7 @@ namespace Pachyderm_GH
             settings.LockedObjects = true;
             settings.NormalObjects = true;
             settings.VisibleFilter = true;
-            settings.ObjectTypeFilter = Rhino.DocObjects.ObjectType.Brep & Rhino.DocObjects.ObjectType.Surface & Rhino.DocObjects.ObjectType.Extrusion;
+            settings.ObjectTypeFilter = Rhino.DocObjects.ObjectType.Brep | Rhino.DocObjects.ObjectType.Surface | Rhino.DocObjects.ObjectType.Extrusion;
             List<Rhino.DocObjects.RhinoObject> RC_List = new List<Rhino.DocObjects.RhinoObject>();
 
             if (RG)
@@ -94,19 +97,19 @@ namespace Pachyderm_GH
                 return;
             }
 
-            if (RC_List.Count == 0 && GG.LeafCount == 0) throw new Exception("Scene could not be constructed because there is no geometry...");
-            if (GG.LeafCount != GL.LeafCount) throw new Exception("Number of Grasshopper Objects(GG) and number of Rhino Layer(GL) indices must match (one layer per object)");
+            if (RC_List.Count == 0 && ggItems.Count == 0) throw new Exception("Scene could not be constructed because there is no geometry...");
+            if (ggItems.Count != glItems.Count) throw new Exception("Number of Grasshopper Objects(GG) and number of Rhino Layer(GL) indices must match (one layer per object)");
 
             List<Brep> RhG = new List<Brep>();
-            foreach (Rhino.Geometry.GeometryBase G in GG.AllItems)
+            foreach (Rhino.Geometry.GeometryBase G in ggItems)
             {
-                Brep B = G as Brep;
+                Brep B = G as Brep ?? (G as Surface)?.ToBrep() ?? (G as Extrusion)?.ToBrep();
                 if (B == null) throw new Exception("at least one entry in GG is not a Brep...");
                 RhG.Add(B);
             }
 
             //Can we register edges later?
-            Pachyderm_Acoustic.Environment.RhCommon_PolygonScene PS = new Pachyderm_Acoustic.Environment.RhCommon_PolygonScene(RC_List, RhG, new List<int>(GL.AllItems).ToArray(), false, MP.Tk - 273.15, MP.hr, MP.Pa, 0, false, true);
+            Pachyderm_Acoustic.Environment.RhCommon_PolygonScene PS = new Pachyderm_Acoustic.Environment.RhCommon_PolygonScene(RC_List, RhG, new List<int>(glItems).ToArray(), false, MP.Tk - 273.15, MP.hr, MP.Pa, 0, false, true);
             PS.partition(VG, 4);
 
             if (PS.hasnulllayers)
@@ -123,16 +126,15 @@ namespace Pachyderm_GH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Polygon_Scene.png";
+                var resourceName = "PachydermGH2.Resources.Polygon Scene.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

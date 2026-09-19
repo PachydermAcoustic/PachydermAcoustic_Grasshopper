@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -41,13 +42,15 @@ namespace PachydermGH
                 "Creates the Stereo Impulse Response from simulation results. Note that this version of the impulse response has a flat power spectrum, and can be used for auralizations, but should not be used for sound pressure level predictions.",
                 "Acoustics", "Utility"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public Stereo_ImpulseResponse(IReader reader) : base(reader) { }
+        public Stereo_ImpulseResponse(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; Combine=reader.TryRead<bool>("Combine",true);}
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
+        public override void Store(IWriter writer) { base.Store(writer); writer.Boolean("Combine",Combine); }
         protected override void AddInputs(InputAdder inputs)
         {
             inputs.AddGeneric("Direct Sound", "D", "Plug the Direct Sound in here.", Access.Tree);
@@ -55,8 +58,9 @@ namespace PachydermGH
             inputs.AddGeneric("Ray Tracing", "Tr", "Plug the Receiver from Ray Tracing in here.", Access.Tree);
             inputs.AddNumber("Altitude", "Alt", "Euler altitude angle.", Access.Item);
             inputs.AddNumber("Azimuth", "Azi", "Euler azimuth angle.", Access.Item);
-            inputs.AddInterval("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", Access.Item);
+            inputs.AddInterval("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", Access.Item).Set(new Rhino.Geometry.Interval(0,7));
 
+            inputs[0].Requirement = Requirement.MayBeMissing;
             inputs[1].Requirement = Requirement.MayBeMissing;
             inputs[2].Requirement = Requirement.MayBeMissing;
             inputs[3].Requirement = Requirement.MayBeMissing;
@@ -79,6 +83,13 @@ namespace PachydermGH
         //    return base.AppendMenuItems(menu);
         //}
 
+        public override void AppendToInputPanel(Grasshopper2.UI.InputPanel.InputPanel panel)
+        {
+            base.AppendToInputPanel(panel);
+            panel.AddCheck("Combine sources at each receiver",Combine,value => {
+                Combine=value; Expire(); Document?.Solution.Start();
+            });
+        }
         bool Combine = true;
 
         //private void Combine_Click(Object sender, EventArgs e)
@@ -93,119 +104,42 @@ namespace PachydermGH
         /// <param name="access">The access object is used to retrieve from inputs and store in outputs.</param>
         protected override void Process(IDataAccess access)
         {
-            Tree<Pachyderm_Acoustic.Direct_Sound> D_T;
-            access.GetTree<Pachyderm_Acoustic.Direct_Sound>(0, out D_T);
-            Tree<Pachyderm_Acoustic.ImageSourceData> IS_T;
-            access.GetTree<Pachyderm_Acoustic.ImageSourceData>(1, out IS_T);
-            Tree<Pachyderm_Acoustic.Environment.Receiver_Bank> Rec_T;
-            access.GetTree<Pachyderm_Acoustic.Environment.Receiver_Bank>(2, out Rec_T);
-            double alt = 0;
-            double azi = 0;
-
-            bool ealt, eazi;
-            ealt = access.GetItem<double>(3, out alt);
-            eazi = access.GetItem<double>(4, out azi);
-            
-            if ( (!ealt | !eazi) )
-            {
-                if (ealt && eazi)
-                {
-                    throw new Exception("In order to specify an angle, both azimuth and altitude must be specified. Are you missing a parameter?");
-                }
-                else
-                {
-
+            var simulations = new ComponentSupport.Simulations(access);
+            var octaves = new Interval(0,7);
+            if (!access.GetItem<Interval>(5, out octaves)) octaves = new Interval(0,7);
+            ComponentSupport.Octaves(octaves, out int first, out int last);
+            double[] altitude = new double[] { 0 }, azimuth = new double[] { 0 };
+            int degree = 0, standard = 0;
+            access.GetItem<double>(3, out double inputAlt); access.GetItem<double>(4, out double inputAzi);
+            altitude[0]=inputAlt; azimuth[0]=inputAzi;
+            var result = new List<Audio_Signal>();
+            var paths = new List<Grasshopper2.Data.Path>();
+            for(int source=0; source<simulations.Count; source++) {
+                int receivers=simulations.ReceiverCount(source);
+                if(Combine && source>0 && result.Count!=receivers) throw new ArgumentException("Combined sources must share receiver counts and ordering.");
+                for(int receiver=0; receiver<receivers; receiver++) {
+                    double alt=ComponentSupport.Angle(altitude,receiver,receivers), azi=ComponentSupport.Angle(azimuth,receiver,receivers);
+                    var signal=ComponentSupport.Response(simulations,source,receiver,"Stereo",first,last,alt,azi,degree,standard);
+                    if(Combine && source>0) result[receiver]=ComponentSupport.Sum(result[receiver],signal);
+                    else { result.Add(signal); paths.Add(Combine ? new Grasshopper2.Data.Path(receiver) : new Grasshopper2.Data.Path(source,receiver)); }
                 }
             }
-            Interval Oct = new Interval(0, 7);
-            access.GetItem<Interval>(5, out Oct);
-
-            List<Pachyderm_Acoustic.Direct_Sound> D = new List<Pachyderm_Acoustic.Direct_Sound>();
-            List<ImageSourceData> IS = new List<ImageSourceData>();
-            List<Receiver_Bank> Rec = new List<Receiver_Bank>();
-
-            int max = Math.Max(D.Count, Rec_T.ItemCount);
-            if (D_T.ItemCount == 0) for (int i = 0; i < max; i++) D.Add(null);
-            if (IS_T.ItemCount == 0) for (int i = 0; i < max; i++) IS.Add(null);
-            if (Rec_T.ItemCount == 0) for (int i = 0; i < max; i++) Rec.Add(null);
-
-            List<Audio_Signal> AS_final = new List<Audio_Signal>();
-            List<Audio_Signal> AS_comb = new List<Audio_Signal>();
-
-            for (int s = 0; s < max; s++)
-            {
-                //Need to create filters?
-                if (!Rec[s].HasFilter()) Rec[s].Create_Filter(null);
-                while (!Rec[s].HasFilter()) System.Threading.Thread.Sleep(500);
-
-                List<Audio_Signal> AS = new List<Audio_Signal>();
-                for (int r = 0; r < Rec[s].Rec_List.Length; r++)
-                {
-                    //ProgressBox VB = new ProgressBox("Creating Impulse Responses...");
-                    //VB.Show();
-                    D_T.Items[s].Get_Filter(r, 44100);
-
-                    double[][] Response = new double[2][];
-                    int[] DT = new int[2];
-                    for (int i = 0; i < 2; i++)
-                    {
-                        double Alt = -(double)alt + 180 * Math.Asin(0) / Math.PI;
-                        double Azi = (double)alt + 180 * Math.Atan2(Math.Pow(-1, i+2) * 1 / Math.Sqrt(2), -1 / Math.Sqrt(2)) / Math.PI;
-                        if (alt > 90) alt -= 180;
-                        if (alt < -90) alt += 180;
-                        if (azi > 360) azi -= 360;
-                        if (azi < 0) azi += 360;
-                        Response[i] = Pachyderm_Acoustic.Utilities.IR_Construction.AurFilter_Directional(D, IS, Rec, Rec[s].CO_Time, 44100, 8, r, new List<int> { s }, false, Alt, Azi, true, true);//, VB);
-                        DT[i] = (int)Math.Round(D_T.Items[s].Time(r) * Rec[s].SampleRate);
-                    }
-
-                    //double[] AFTC = Pachyderm_Acoustic.Utilities.IR_Construction.Auralization_Filter(D.ToArray(), IS.ToArray(), Rec.ToArray(), Rec[s].CutOffTime, Rec[s].SampleRate, r, new List<int> { s }, false, true, VB);
-                    //VB.Close();
-                    AS.Add(new Audio_Signal(Response, Rec[0].SampleRate, DT));
-                }
-
-                if (s == 0)
-                {
-                    if (Combine)
-                    {
-                        AS_comb = AS;
-                        AS_final = AS;
-                    }
-                    else
-                    {
-                        AS_final = AS;
-                    }
-                }
-                else if (Combine)
-                {
-                    for (int r = 0; r < Rec[s].Rec_List.Length; r++)
-                    {
-                        AS_comb[r] += AS[r];
-                    }
-                    AS_final = AS;
-                }
-                else
-                {
-                    AS_final.AddRange(AS);
-                }
-            }
-            access.SetTree(0, Garden.TreeFromList(AS_final));
+            ComponentSupport.SetTree(access, 0,Garden.TreeFromArrays(new Grasshopper2.Data.Paths(paths),result.Select(signal=>new[]{signal}).ToArray()));
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Energy_Time_Curve.png";
+                var resourceName = "PachydermGH2.Resources.Energy Time Curve.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

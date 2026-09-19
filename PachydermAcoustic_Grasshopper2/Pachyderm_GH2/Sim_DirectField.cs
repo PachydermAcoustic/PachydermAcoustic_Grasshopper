@@ -1,4 +1,4 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -42,9 +42,10 @@ namespace PachydermGH
                 "Maps direct sound to a mesh, including phase and air attenuation.",
                 "Acoustics", "Computation"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public QuickDirect(IReader reader) : base(reader) { }
+        public QuickDirect(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -55,7 +56,7 @@ namespace PachydermGH
             inputs.AddGeneric("Medium Properties", "P", "The Pachyderm medium properties object", Access.Item);
             inputs.AddMesh("Receivers", "R", "The points or mesh to use for mapping", Access.Item);
             inputs.AddNumber("Delays in ms", "D", "The number of milliseconds each source is delayed. Input one integer (ms) per source object.", Access.Tree);
-            inputs.AddInterval("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", Access.Item);
+            inputs.AddInterval("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", Access.Item).Set(new Rhino.Geometry.Interval(0,7));
 
             //Grasshopper.Kernel.Parameters.Param_GenericObject param = (inputs[1] as Grasshopper.Kernel.Parameters.Param_GenericObject);
             //if (param != null) param.SetPersistentdata(new Pachyderm_Acoustic.Environment.Uniform_Medium(0, 100000, 20+273.15, 50, false));
@@ -80,15 +81,17 @@ namespace PachydermGH
         {
             Tree<Pachyderm_Acoustic.Environment.Source> Src;
             Mesh M = new Mesh();
-            Tree<int> delays;
+            Tree<double> delays;
             Interval F = new Interval();
             Pachyderm_Acoustic.Environment.Uniform_Medium MP = new Pachyderm_Acoustic.Environment.Uniform_Medium(0, 101325, 293.15, 50, false);
             access.GetTree<Pachyderm_Acoustic.Environment.Source>(0, out Src);
             access.GetItem<Pachyderm_Acoustic.Environment.Uniform_Medium>(1, out MP);
             access.GetItem<Mesh>(2, out M);
-            access.GetTree<int>(3, out delays);
+            access.GetTree<double>(3, out delays);
             access.GetItem<Interval>(4, out F);
 
+            ComponentSupport.Octaves(F, out _, out _);
+            if (M.Vertices.Count == 0 || delays.ItemCount != Src.ItemCount) throw new ArgumentException("Provide a nonempty mesh and one delay per source.");
             int No_of_octaves = (int)F.Max - (int)F.Min + 1;
             if (No_of_octaves < 0) return;
 
@@ -99,7 +102,7 @@ namespace PachydermGH
 
             double c = MP.Sound_Speed(new Hare.Geometry.Point(Pts[0].X, Pts[0].Y, Pts[0].Z));
 
-            double[] lambaccess2pi = new double[8]{ 2 * Math.PI * 62.5 / c, 2 / Math.PI * 125 / c, 2 / Math.PI * 250 / c, 2 * Math.PI * 500 / c, 2 * Math.PI * 1000 / c, 2 * Math.PI * 2000 / c, 2 * Math.PI * 4000 / c, 2 * Math.PI * 8000 / c };
+            double[] lambaccess2pi = new double[8]{ 2 * Math.PI * 62.5 / c, 2 * Math.PI * 125 / c, 2 * Math.PI * 250 / c, 2 * Math.PI * 500 / c, 2 * Math.PI * 1000 / c, 2 * Math.PI * 2000 / c, 2 * Math.PI * 4000 / c, 2 * Math.PI * 8000 / c };
 
             System.Threading.Tasks.Parallel.For(0, Pts.Length, i =>
             {
@@ -108,9 +111,10 @@ namespace PachydermGH
                 {
                     Vector3d V = Pts[i] - new Point3d(Src.Items[S_id].Origin.x, Src.Items[S_id].Origin.y, Src.Items[S_id].Origin.z);
                     double Length = V.Length;
+                    if (Length <= 0) throw new ArgumentException("A receiver coincides with a source.");
                     int id;
-                    id = Rnd.Next();
-                    double delay = delays.Items[S_id] * c;
+                    id = i;
+                    double delay = delays.Items[S_id] * 0.001 * c;
                     V.Unitize();
                     double[] Power = Src.Items[S_id].DirPower(0, id, new Hare.Geometry.Vector(V.X, V.Y, V.Z));
                     for (int oct = 0; oct < No_of_octaves; oct++)
@@ -133,23 +137,22 @@ namespace PachydermGH
                 P_Sum[i] = Math.Sqrt(P_Sum[i]);
             });
 
-            access.SetTree(0, Garden.TreeFromList<double>(P_Sum));
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList<double>(P_Sum));
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Patch_Direct.png";
+                var resourceName = "PachydermGH2.Resources.Patch-Direct.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

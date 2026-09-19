@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -56,22 +57,34 @@ namespace PachydermGH
                 "Common Loudspeaker Format",
                 "Acoustics", "Model"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.UiSingleThreaded;
         }
 
-        public Loudspeaker_Component(IReader reader) : base(reader) { }
+        public Loudspeaker_Component(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.UiSingleThreaded; if(reader.HasItem("CLF")) CLF_Contents=reader.StringArray("CLF"); }
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
+        public override void AppendToInputPanel(Grasshopper2.UI.InputPanel.InputPanel panel)
+        {
+            panel.AddCheck("Select or replace CLF loudspeaker", false, choose => {
+                if (!choose) return;
+                var contents=CLF_Read.SecureAccess.ReadAny(Rhino.UI.RhinoEtoApp.MainWindow);
+                if(contents==null || contents.Length<13) return;
+                CLF_Contents=contents; Expire(); Document?.Solution.Start();
+            });
+            base.AppendToInputPanel(panel);
+        }
+        public override void Store(IWriter writer) { base.Store(writer); if(CLF_Contents!=null) writer.StringArray("CLF",CLF_Contents); }
         protected override void AddInputs(InputAdder inputs)
         {
             List<double> SWL_Default = new List<double> { 120, 120, 120, 120, 120, 120, 120, 120 };
 
             inputs.AddPoint("Origin", "Or", "Acoustic Center of the Speaker", Access.Item);
             inputs.AddVector("Direction", "D", "Aiming direction for the loudspeaker", Access.Item, Requirement.MustExist);
-            inputs.AddNumber("Rotation", "R", "Rotation of Speaker in degrees", Access.Item, 0);
-            inputs.AddNumber("Power", "P", "0 for Sensitivity, 1 for Max, anything else for Flat spectrum.", Access.Tree, 0);
-            inputs.AddNumber("Delay", "D", "Signal delay", Access.Item);
+            inputs.AddNumber("Rotation", "R", "Rotation of Speaker in degrees", Access.Item, 0).Set(0.0);
+            inputs.AddNumber("Power", "P", "0 for Sensitivity, 1 for Max, anything else for Flat spectrum.", Access.Tree, 0).Set(new double[] { 0.0 });
+            inputs.AddNumber("Delay", "D", "Signal delay", Access.Item).Set(0.0);
             
             //Grasshopper.Kernel.Parameters.Param_Number param = (inputs[1] as Grasshopper.Kernel.Parameters.Param_Number);
             //if (param != null) param.SetPersistentData(new List<GH_Number> { new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120), new GH_Number(120) });
@@ -109,7 +122,7 @@ namespace PachydermGH
             access.GetTree<double>(3, out Level_T);
             access.GetItem<double>(4, out delay);
 
-            if (V == null || V.Length == 0) throw new Exception("Provide a vector indicating the direction of the speaker.");
+            if (V.Length == 0) throw new Exception("Provide a vector indicating the direction of the speaker.");
             List<double> Level = new List<double>(Level_T.AllItems);
 
             //if (!CurrentD.Equals(V) || !CurrentO.Equals(Origin) || CurrentR != rot)
@@ -118,9 +131,11 @@ namespace PachydermGH
                 CurrentO = Origin;
                 CurrentR = rot;
 
-                if (S == null)
+                if (CLF_Contents == null)
                 {
-                    CLF_Contents = CLF_Read.SecureAccess.ReadAny(Rhino.UI.RhinoEtoApp.MainWindow);
+                    throw new ArgumentException("Select a CLF loudspeaker using the component input panel.");
+                }
+                {
                     //this.Description = CLF_Contents[0];
                     Sensitivity = CLF_Contents[2];
                     Max = CLF_Contents[3];
@@ -166,6 +181,7 @@ namespace PachydermGH
                 M.Flip(true, true, true);
             //}
 
+            ComponentSupport.SetDelay(S, delay);
             access.SetItem(0, S);
         }
 
@@ -179,16 +195,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Loudspeaker.png";
+                var resourceName = "PachydermGH2.Resources.LoudSpeaker.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

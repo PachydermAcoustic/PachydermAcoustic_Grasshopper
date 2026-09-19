@@ -1,4 +1,4 @@
-﻿////'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+////'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 ////' 
 ////'This file is part of Pachyderm-Acoustic. 
 ////' 
@@ -106,7 +106,7 @@
 //            string message = "Signal to Noise Ratio \n" + "Freq  63    125   250   500   1000  2000  4000  8000";
 //            for (int i = 0; i < NC; i++) message += "\nch." + i + "   " + Math.Round(test.SNR[i][0], 1) + "   " + Math.Round(test.SNR[i][1], 1) + "   " + Math.Round(test.SNR[i][2], 1) + "   " + Math.Round(test.SNR[i][3], 1) + "   " + Math.Round(test.SNR[i][4], 1) + "   " + Math.Round(test.SNR[i][5], 1) + "   " + Math.Round(test.SNR[i][6], 1) + "   " + Math.Round(test.SNR[i][7], 1);
 //            this.Message = message;
-//            access.SetTree(0, AS_final);
+//            ComponentSupport.SetTree(access, 0, AS_final);
 //        }
 
 //        /// <summary>

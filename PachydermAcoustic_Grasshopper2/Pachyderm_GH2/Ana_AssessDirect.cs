@@ -1,4 +1,7 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Collections.Generic;
+using System.Linq;
+using System;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -38,9 +41,10 @@ namespace PachydermGH
                 "Takes an impulse response, finds the direct sound, and adds the direct time to the signal object for use in analysis.",
                 "Acoustics", "Analysis"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public Assess_Direct(IReader reader) : base(reader) { }
+        public Assess_Direct(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -68,30 +72,17 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void Process(IDataAccess access)
         {
-            Audio_Signal ETC = null;
-            access.GetItem<Audio_Signal>(0, out ETC);
-            int tx = 0;
-            access.GetItem<int>(1, out tx);
-
-            ETC.Direct_Sample = new int[ETC.ChannelCount];
-
-            double deltaEMax = 0;
-            int D_Sound = 0;
-            for (int c = 0; c < ETC.ChannelCount; c++)
-            { 
-                for (int i = 1; i < ETC.Count; i++)
-                {
-                    double deltaE = ETC[c][i] * ETC[c][i] - ETC[c][i - 1] * ETC[c][i - 1];
-                    if (deltaE > deltaEMax)
-                    {
-                        deltaEMax = deltaE;
-                        D_Sound = i;
-                    }
+            var signal = ComponentSupport.Signal(access, 0).Duplicate();
+            access.GetItem<int>(1, out var milliseconds);
+            for (int c = 0; c < signal.ChannelCount; c++) {
+                double maximum = 0; int sample = 0;
+                for (int i = 1; i < signal.Count; i++) {
+                    double delta = signal[c][i]*signal[c][i] - signal[c][i-1]*signal[c][i-1];
+                    if (delta > maximum) { maximum = delta; sample = i; }
                 }
-                ETC.Direct_Sample[c] = D_Sound + (int)(tx * ETC.SampleFrequency);
+                signal.Direct_Sample[c] = Math.Max(0, Math.Min(signal.Count - 1, sample + (int)Math.Round(milliseconds * signal.SampleFrequency / 1000.0)));
             }
-
-            access.SetTree(0, Garden.TreeFromList(ETC));
+            access.SetItem(0, signal);
         }
 
         protected override IIcon IconInternal
@@ -99,16 +90,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.RT.png";
+                var resourceName = "PachydermGH2.Resources.RT.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

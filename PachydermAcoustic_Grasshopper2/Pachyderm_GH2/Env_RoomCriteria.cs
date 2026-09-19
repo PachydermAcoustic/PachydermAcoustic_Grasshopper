@@ -1,4 +1,6 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using Grasshopper2.Data;
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -40,9 +42,10 @@ namespace PachydermGH
                 "Background noise curve specified in Room Criteria",
                 "Acoustics", "Model"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public RoomCriteria(IReader reader) : base(reader) { }
+        public RoomCriteria(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -71,7 +74,7 @@ namespace PachydermGH
 
             double[] RC_Curve = Pachyderm_Acoustic.Utilities.AcousticalMath.Room_Criteria(NS);
 
-            access.SetItem(0, RC_Curve);
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(RC_Curve));
         }
     }
 }

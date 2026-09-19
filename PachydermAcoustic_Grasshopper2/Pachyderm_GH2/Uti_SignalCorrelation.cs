@@ -1,4 +1,4 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -43,9 +43,10 @@ namespace PachydermGH
                 "Calculates the correlation between two audio signals.",
                 "Acoustics", "Utility"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public Signal_Correlation(IReader reader) : base(reader) { }
+        public Signal_Correlation(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -54,7 +55,7 @@ namespace PachydermGH
         {
             inputs.AddGeneric("Impulse Response 1", "IR1", "Plug the audio signal impulse response in here.", Access.Item);
             inputs.AddGeneric("Impulse Response 2", "IR2", "Plug the audio signal impulse response in here.", Access.Item);
-            inputs.AddNumber("Delay", "D", "Enter an offset in samples to help match the two integrals. A positive number will take samples off the front of IR1. A negative numuber will take sampels off the front of IR2.", Access.Item);
+            inputs.AddNumber("Delay", "D", "Enter an offset in samples to help match the two integrals. A positive number will take samples off the front of IR1. A negative numuber will take sampels off the front of IR2.", Access.Item).Set(0.0);
         }
 
         /// <summary>
@@ -62,7 +63,7 @@ namespace PachydermGH
         /// </summary>
         protected override void AddOutputs(OutputAdder outputs)
         {
-            outputs.AddNumber("Correlation R", "R_c", "Correlation R value for the two IRs Schroeder Integrals.", Access.Item);
+            outputs.AddNumber("Correlation R", "R_c", "Correlation R value for the two IRs Schroeder Integrals.", Access.Tree);
         }
 
         /// <summary>
@@ -71,62 +72,35 @@ namespace PachydermGH
         /// <param name="access">The access object is used to retrieve from inputs and store in outputs.</param>
         protected override void Process(IDataAccess access)
         {
-            Audio_Signal IR1 = new Audio_Signal();
-            access.GetItem<Audio_Signal>(0, out IR1);
-            Audio_Signal IR2 = new Audio_Signal();
-            access.GetItem<Audio_Signal>(1, out IR2);
-            double delay = 0;
-            access.GetItem<double>(2, out delay);
-
-            double[][] signal1 = new double[8][];
-            for (int i = 0; i < IR1.ChannelCount; i++) signal1[i] = new double[IR1.Count];
-            double[][] signal2 = new double[8][];
-            for (int i = 0; i < IR2.ChannelCount; i++) signal2[i] = new double[IR2.Count];
-
-            List<double> R = new List<double>();
-            
-            for (int j = 0; j < IR1.ChannelCount; j++)
-            {
-                double[] L10_1 = new double[IR1.Value[j].Length];
-                double[] L10_2 = new double[IR2.Value[j].Length];
-
-                for(int i = 0; i < IR1.Value[j].Length; i++)
-                {
-                    L10_1[i] = AcousticalMath.Pressure_SPL(Math.Abs(IR1.Value[j][i]));
-                }
-
-                for (int i = 0; i < IR2.Value[j].Length; i++)
-                {
-                    L10_2[i] = AcousticalMath.Pressure_SPL(Math.Abs(IR2.Value[j][i]));
-                }
-
-                if (delay > 0) { L10_1.Reverse(); Array.Resize(ref L10_1, L10_1.Length - (int)delay); L10_1.Reverse(); }
-                if (delay < 0) { L10_2.Reverse(); Array.Resize(ref L10_2, L10_2.Length + (int)delay); L10_2.Reverse(); }
-
-                if (L10_1.Length < L10_2.Length) Array.Resize(ref L10_1, L10_2.Length);
-                if (L10_2.Length < L10_1.Length) Array.Resize(ref L10_2, L10_1.Length);
-
-                R.Add(MathNet.Numerics.Statistics.Correlation.Spearman(L10_1, L10_2));
-                //R.Add(MathNet.Numerics.Statistics.Correlation.Spearman(IR1.Value[j], IR2.Value[j]));
+            var a = ComponentSupport.Signal(access, 0); var b = ComponentSupport.Signal(access, 1);
+            access.GetItem<double>(2, out var delayValue);
+            if (a.ChannelCount != b.ChannelCount || a.SampleFrequency != b.SampleFrequency) throw new ArgumentException("Signals must have equal channel counts and sample rates.");
+            int delay = checked((int)Math.Round(delayValue));
+            int startA = Math.Max(0, delay), startB = Math.Max(0, -delay);
+            int length = Math.Min(a.Count-startA, b.Count-startB);
+            if (length < 2) throw new ArgumentException("Delay leaves fewer than two overlapping samples.");
+            var results = new List<double>();
+            for (int c = 0; c < a.ChannelCount; c++) {
+                var x = new double[length]; var y = new double[length];
+                Array.Copy(a[c], startA, x, 0, length); Array.Copy(b[c], startB, y, 0, length);
+                results.Add(MathNet.Numerics.Statistics.Correlation.Spearman(x, y));
             }
-
-            access.SetTree(0, Garden.TreeFromList(R));
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(results));
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Energy_Time_Curve.png";
+                var resourceName = "PachydermGH2.Resources.Energy Time Curve.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

@@ -1,4 +1,4 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -43,9 +43,10 @@ namespace PachydermGH
                 "Converts real pressure values to Sound Pressure Level",
                 "Acoustics", "Utility"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public RealPaToSPL(IReader reader) : base(reader) { }
+        public RealPaToSPL(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -69,30 +70,30 @@ namespace PachydermGH
         /// <param name="access">The access object is used to retrieve from inputs and store in outputs.</param>
         protected override void Process(IDataAccess access)
         {
-            Tree<double> Pa;
-            access.GetTree<double>(0, out Pa);
-            List<double> SPL_List = new List<double>();
-            for (int i = 0; i < Pa.LeafCount; i++)
-            {
-                SPL_List.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.SPL_Pressure(Pa.Items[i]));
-            }
-            access.SetTree(0, Garden.TreeFromList(SPL_List));
+            if(!access.GetTree<double>(0,out var tree) || tree==null) return;
+            // Convert each numeric leaf while retaining paths, metadata and null leaves.
+            tree.ToArrays(out double[][] values, out Grasshopper2.Data.Meta.MetaData[][] metadata, out bool[][] nulls);
+            values = values.Select(row => (double[])row.Clone()).ToArray();
+            for(int branch=0;branch<values.Length;branch++)
+                for(int item=0;item<values[branch].Length;item++)
+                    if(nulls == null || nulls[branch] == null || !nulls[branch][item])
+                        values[branch][item]=Pachyderm_Acoustic.Utilities.AcousticalMath.SPL_Pressure(values[branch][item]);
+            ComponentSupport.SetTree(access, 0,Garden.TreeFromArrays(tree.Paths,values,metadata,nulls));
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Real_Pressure_to_SPL.png";
+                var resourceName = "PachydermGH2.Resources.Real Pressure to SPL.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

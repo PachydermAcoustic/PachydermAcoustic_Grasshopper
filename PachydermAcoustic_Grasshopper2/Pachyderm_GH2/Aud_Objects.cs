@@ -1,4 +1,4 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -33,7 +33,7 @@ using System.Linq;
 
 namespace PachydermGH
 {
-    public class Audio_Signal: IEnumerable<double[][]>
+    public class Audio_Signal: IEnumerable<double[]>
     {
         int SamplingFrequency;
         int[] Sample_of_Direct = new int[1] { 0 };
@@ -55,7 +55,7 @@ namespace PachydermGH
         {
             SamplingFrequency = Fs;
             Value = new double[1][];
-            Value[0] = Aud_in;
+            Value[0] = (double[])Aud_in.Clone();
             Sample_of_Direct = new int[1] { Direct_Sample };
         }
 
@@ -77,13 +77,13 @@ namespace PachydermGH
                     Sample_of_Direct[i] = 0;
                 }
             }
-            else { Sample_of_Direct = Direct_Sample; }
+            else { Sample_of_Direct = (int[])Direct_Sample.Clone(); }
         }
 
         public Audio_Signal(double[][] Aud_in, int Fs, int[] Direct_Sample = null)
         {
             SamplingFrequency = Fs;
-            Value = Aud_in;
+            Value = Aud_in.Select(channel => (double[])channel.Clone()).ToArray();
             //no jagged arrays allowed. Pad with zeros where necessary.
             int length = 0;
             foreach (double[] signal in Aud_in) if (signal.Length > length) length = signal.Length;
@@ -96,7 +96,7 @@ namespace PachydermGH
                     Sample_of_Direct[i] = 0;
                 }
             }
-            else { Sample_of_Direct = Direct_Sample; }
+            else { Sample_of_Direct = (int[])Direct_Sample.Clone(); }
         }
 
         public double[] this[int channel]
@@ -161,7 +161,7 @@ namespace PachydermGH
                 dup[i] = new double[Value[i].Length];
                 for (int j = 0; j < Value[i].Length; j++) dup[i][j] = Value[i][j];
             }
-            return new Audio_Signal(dup, SampleFrequency);
+            return new Audio_Signal(dup, SampleFrequency, (int[])Sample_of_Direct.Clone());
         }
 
         public override string ToString()
@@ -169,9 +169,9 @@ namespace PachydermGH
             return string.Format("Audio: {0} channels, {1} samples, {2} Hz.", ChannelCount, this.Value[0].Length, SampleFrequency);
         }
 
-        public IEnumerator<double[][]> GetEnumerator()
+        public IEnumerator<double[]> GetEnumerator()
         {
-            return ((IEnumerable<double[][]>)Value.ToList()).GetEnumerator();
+            return ((IEnumerable<double[]>)Value.ToList()).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -181,7 +181,7 @@ namespace PachydermGH
 
         public static Audio_Signal operator +(Audio_Signal AS1, Audio_Signal AS2)
         {
-            if (AS1.Count != AS2.Count && AS1.ChannelCount != AS2.ChannelCount) throw new Exception("Audio Signals do not have the same number of channels or samples...");
+            if (AS1.Count != AS2.Count || AS1.ChannelCount != AS2.ChannelCount || AS1.SampleFrequency != AS2.SampleFrequency) throw new Exception("Audio Signals do not have the same number of channels or samples...");
             Audio_Signal AS_new = AS1.Duplicate() as Audio_Signal;
             for (int c = 0; c < AS1.ChannelCount; c++)
             {
@@ -194,7 +194,7 @@ namespace PachydermGH
         }
     }
 
-    public class Frequency_Spectrum: IEnumerable<Complex[]>
+    public class Frequency_Spectrum: IEnumerable<Complex>
     {
         public float[] Magnitude;
         public float[] Frequency;
@@ -215,9 +215,9 @@ namespace PachydermGH
             return string.Format("Spectrum: {0} samples, {1} Hz. Max", Magnitude.Length, Frequency[Frequency.Length - 1]);
         }
 
-        public IEnumerator<Complex[]> GetEnumerator()
+        public IEnumerator<Complex> GetEnumerator()
         {
-            return ((IEnumerable<Complex[]>)Value).GetEnumerator();
+            return ((IEnumerable<Complex>)Value).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

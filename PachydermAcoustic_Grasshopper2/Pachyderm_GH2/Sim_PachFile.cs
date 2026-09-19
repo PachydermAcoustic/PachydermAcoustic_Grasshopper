@@ -1,4 +1,6 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Collections.Generic;
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -40,9 +42,10 @@ namespace PachydermGH
                 "Obtains result from saved Pachyderm file.",
                 "Acoustics", "Computation"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public Sim_PachFile(IReader reader) : base(reader) { }
+        public Sim_PachFile(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -82,20 +85,20 @@ namespace PachydermGH
 
                 for (int i = 0; i < RT.Length; i++) RT[i].HasFilter();
                 
-                access.SetTree(0, Garden.TreeFromList(D));
-                access.SetTree(1, Garden.TreeFromList(IS));
-                access.SetTree(2, Garden.TreeFromList(RT));
+                ComponentSupport.SetTree(access, 0, Garden.TreeFromList(D));
+                ComponentSupport.SetTree(access, 1, Garden.TreeFromList(IS));
+                ComponentSupport.SetTree(access, 2, Garden.TreeFromList(RT));
             }
             else if (extension.ToLower() == ".pachm")
             {
                 Pachyderm_Acoustic.PachMapReceiver[] PMR = new Pachyderm_Acoustic.PachMapReceiver[0];
                 Pachyderm_Acoustic.Utilities.FileIO.Read_pachm(p, ref PMR);
-                access.SetTree(0, null);
-                access.SetTree(1, null);
+                ComponentSupport.SetTree(access, 0, Garden.TreeFromList(Array.Empty<Pachyderm_Acoustic.Direct_Sound>()));
+                ComponentSupport.SetTree(access, 1, Garden.TreeFromList(Array.Empty<Pachyderm_Acoustic.ImageSourceData>()));
 
                 for (int i = 0; i < PMR.Length; i++) PMR[i].HasFilter();
 
-                access.SetTree(2, Garden.TreeFromList(PMR));
+                ComponentSupport.SetTree(access, 2, Garden.TreeFromList(PMR));
             }
             else
             {

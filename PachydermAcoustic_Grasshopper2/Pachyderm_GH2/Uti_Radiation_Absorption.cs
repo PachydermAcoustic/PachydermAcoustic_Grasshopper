@@ -1,4 +1,4 @@
-﻿////'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+////'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 ////' 
 ////'This file is part of Pachyderm-Acoustic. 
 ////' 
@@ -73,7 +73,7 @@
 
 //            double[] alpha = Pachyderm_Acoustic.AbsorptionModels.Operations.Absorption_Coef(Pachyderm_Acoustic.AbsorptionModels.Operations.Reflection_Coef(Z, 1.2 * 343));
 
-//            access.SetTree(0, alpha);
+//            ComponentSupport.SetTree(access, 0, alpha);
 
 //        }
 

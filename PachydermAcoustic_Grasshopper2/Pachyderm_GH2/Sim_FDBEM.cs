@@ -1,4 +1,4 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -47,9 +47,10 @@ namespace PachydermGH
                 "Performs the Frequency Domain Bounaccessry Element Method on a model",
                 "Acoustics", "Computation"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public FDBEM(IReader reader) : base(reader) { }
+        public FDBEM(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -77,26 +78,6 @@ namespace PachydermGH
         /// to store data in output parameters.</param>
         protected override void Process(IDataAccess access)
         {
-            System.Diagnostics.Process P = System.Diagnostics.Process.GetCurrentProcess();
-            switch (Pachyderm_Acoustic.UI.PachydermAc_PlugIn.Instance.TaskPriority)
-            {
-                case 0:
-                    {
-                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
-                        break;
-                    }
-                case 1:
-                    {
-                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.AboveNormal;
-                        break;
-                    }
-                case 2:
-                    {
-                        P.PriorityClass = System.Diagnostics.ProcessPriorityClass.Normal;
-                        break;
-                    }
-            }
-
             Pachyderm_Acoustic.Environment.Polygon_Scene S = null;
             access.GetItem<Pachyderm_Acoustic.Environment.Polygon_Scene>(0, out S);
             Tree<Pachyderm_Acoustic.Environment.Source> Src;
@@ -107,45 +88,49 @@ namespace PachydermGH
             access.GetTree<double>(3,out frequencies);
             
             int s_id = 0;
-            List<System.Numerics.Complex> results = new List<System.Numerics.Complex>();
+            var results = new List<System.Numerics.Complex[]>();
+            var paths = new List<Grasshopper2.Data.Path>();
             
             foreach (Pachyderm_Acoustic.Environment.Source Pt in Src.AllItems)
             {
-                BoundaryElementSimulation_FreqDom BEM = new BoundaryElementSimulation_FreqDom(S, Pt, Rec.Items[0], frequencies.AllItems.ToArray());
+                var receiverBank = ComponentSupport.Bank(System.Linq.Enumerable.ToArray(Rec.AllItems), Pt, S, s_id, Src.ItemCount);
+                BoundaryElementSimulation_FreqDom BEM = new BoundaryElementSimulation_FreqDom(S, Pt, receiverBank, frequencies.AllItems.ToArray());
                 BEM.Begin();
                 do { System.Threading.Thread.Sleep(100); } while (BEM.ThreadState() != System.Threading.ThreadState.Stopped);
                 BEM.Combine_ThreadLocal_Results();
-                s_id++;
+
                 
                 if (BEM.Results.Length > 0 && BEM.Results[0].Length > 0)
                 {
-                    for (int i = 0; i < Rec.Items[0].Count; i++)
+                    for (int i = 0; i < receiverBank.Count; i++)
                     {
+                        var row = new System.Numerics.Complex[frequencies.ItemCount];
                         for (int f = 0; f < frequencies.ItemCount; f++)
                         {
-                            results.Add(new System.Numerics.Complex(BEM.Results[f][i].Real, BEM.Results[f][i].Imaginary));
+                            row[f] = new System.Numerics.Complex(BEM.Results[f][i].Real, BEM.Results[f][i].Imaginary);
                         }
+                        results.Add(row); paths.Add(new Grasshopper2.Data.Path(s_id,i));
                     }
                 }
+                s_id++;
             }
-            access.SetTree(0, Garden.TreeFromList(results));
-            P.PriorityClass = System.Diagnostics.ProcessPriorityClass.Normal;
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromArrays(new Grasshopper2.Data.Paths(paths),results.ToArray()));
+            
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Image_Source.png";
+                var resourceName = "PachydermGH2.Resources.Image Source.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

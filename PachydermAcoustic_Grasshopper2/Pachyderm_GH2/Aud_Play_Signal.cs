@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -41,9 +42,10 @@ namespace PachydermGH
                 "Plays an audio signal out loud.",
                 "Acoustics", "Audio"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public Play_Signal(IReader reader) : base(reader) { }
+        public Play_Signal(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -51,6 +53,7 @@ namespace PachydermGH
         protected override void AddInputs(InputAdder inputs)
         {
             inputs.AddText("Signal Path", "SP", "The path to the signal.", Access.Item);
+            inputs.AddBoolean("Play", "Play", "Enable play for this solution.", Access.Item).Set(false);
         }
 
         /// <summary>
@@ -66,27 +69,25 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void Process(IDataAccess access)
         {
-            string Signal = "";
-            access.GetItem<string>(0, out Signal);
-
-            System.Media.SoundPlayer Player = new System.Media.SoundPlayer(Signal);
-            //Player.Play();
+            if(!access.GetItem<bool>(1,out var enabled) || !enabled) return;
+            if (!access.GetItem<string>(0, out var path)) return;
+            if (!OperatingSystem.IsWindows()) throw new PlatformNotSupportedException("Playback requires Windows.");
+            using (var player = new System.Media.SoundPlayer(path)) { player.Load(); player.PlaySync(); }
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Auralization.png";
+                var resourceName = "PachydermGH2.Resources.Auralization.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

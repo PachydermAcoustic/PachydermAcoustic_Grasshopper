@@ -1,4 +1,4 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -43,9 +43,10 @@ namespace PachydermGH
                 "Assign Properties of materials by Layer.",
                 "Acoustics", "Model"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.UiSingleThreaded;
         }
 
-        public AssignLayerProperties(IReader reader) : base(reader) { }
+        public AssignLayerProperties(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.UiSingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -104,9 +105,12 @@ namespace PachydermGH
                 TRN = Garden.TreeFromList(new System.Collections.Generic.List<int> { 0, 0, 0, 0, 0, 0, 0, 0 });
             }
 
-            for(int i = 0; i < ABS.ItemCount; i++) { ABS.AllItems.ToArray()[i] *= 10; }
+            var absorption = ABS.AllItems.ToArray();
+            if (absorption.Length != 8 || SCT.ItemCount != 8 || TRN.ItemCount != 8) throw new ArgumentException("Provide eight values for each material spectrum.");
+            if (absorption.Any(x => x < 0 || x > 100)) throw new ArgumentException("Absorption percentages must be 0–100.");
+            for (int i=0; i<absorption.Length;i++) absorption[i] *= 10;
 
-            Pachyderm_Acoustic.Utilities.RCPachTools.Material_SetLayer(id, ABS.AllItems.ToArray(), SCT.AllItems.ToArray(), TRN.AllItems.ToArray());
+            Pachyderm_Acoustic.Utilities.RCPachTools.Material_SetLayer(id, absorption, SCT.AllItems.ToArray(), TRN.AllItems.ToArray());
 
             access.SetItem(0, id);
 
@@ -127,16 +131,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Medium_Properties.png";
+                var resourceName = "PachydermGH2.Resources.Medium Properties.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

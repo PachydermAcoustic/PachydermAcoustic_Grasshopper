@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' C:\Users\Arthu\Desktop\DEV\PachydermAcoustic_Grasshopper\Ana_Strength.cs
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -43,6 +44,7 @@ namespace PachydermGH
                 "Iteratively raises level in order to account for the Lombard Effect - the effect of human voice adjusting to background noise. This version gets total absorption out of ",
                 "Acoustics", "Analysis"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
             double[] femaleDBA = new double[5];
             double[] maleDBA = new double[5];
             double[] childrenDBA = new double[5];
@@ -78,7 +80,7 @@ namespace PachydermGH
 
         }
 
-        public Lombard_RT(IReader reader) : base(reader) { }
+        public Lombard_RT(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -118,6 +120,7 @@ namespace PachydermGH
             List<double> Noise = new List<double>(Noise_T.AllItems);
             if (Noise.Count != 8) throw new Exception("Noise should be specified by octave band, 0 for 63 Hz. through 7 for 8000 Hz.");
 
+            if (RT.Count == 0 || RT.Count % 8 != 0 || RT.Exists(x => x <= 0)) throw new ArgumentException("Provide positive RT values in groups of eight octave bands.");
             double ChosenRT = 0;
 
             for(int i = 0; i < RT.Count; i+=8)
@@ -146,8 +149,8 @@ namespace PachydermGH
                 Lna_spectrum[oct] = SWL[oct] + diff - 11;
             }
         
-            access.SetTree(0, Garden.TreeFromList(Lna_spectrum));
-            access.SetItem(1, Garden.TreeFromList(SWL));
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(Lna_spectrum));
+            ComponentSupport.SetTree(access, 1, Garden.TreeFromList(SWL));
         }
 
         protected override IIcon IconInternal
@@ -155,16 +158,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Speech_Transmission_Index_1.png";
+                var resourceName = "PachydermGH2.Resources.Speech Transmission Index 1.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

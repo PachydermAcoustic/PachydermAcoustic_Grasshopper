@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -41,9 +42,10 @@ namespace PachydermGH
                 "Performs the Fourier Transform on your input data",
                 "Acoustics", "Audio"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public Fourier_Transform(IReader reader) : base(reader) { }
+        public Fourier_Transform(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -61,7 +63,7 @@ namespace PachydermGH
         /// </summary>
         protected override void AddOutputs(OutputAdder outputs)
         {
-            outputs.AddGeneric("Spectrum", "F", "Fourier Transform of the signal...", Access.Item);
+            outputs.AddGeneric("Spectrum", "F", "Fourier Transform of the signal...", Access.Tree);
             //inputs.AddNumber("Z Magnitude", "Z", "The Symmetrical Frequency Spectrum of the input signal", Access.Tree);
             //inputs.AddNumber("Z Magnitude Half Spectrum", "Z/2", "The Frequency Specturm of the input signal", Access.Tree);
             //inputs.AddNumber("Frequency Domain", "F", "The frequency domain of the output spectrum", Access.Tree);
@@ -73,98 +75,32 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void Process(IDataAccess access)
         {
-            int SamplingFreq = 0;
-            Audio_Signal buffer = new Audio_Signal();
-            access.GetItem<Audio_Signal>(0, out buffer);
-            SamplingFreq = buffer.SampleFrequency;
-            //access.GetItem<Grasshopper.Kernel.Types.GH_Number>(1, out buffer);
-
-            //Grasshopper2.Data.Tree<float> signal_2 = new Grasshopper2.Data.Tree<float>();//[Signal_FD.Length / 4];
-            //Grasshopper2.Data.Tree<float> f_domain = new Grasshopper2.Data.Tree<float>();//new float[Signal_FD.Length / 4];
-            //Grasshopper2.Data.Tree<float> signal_whole = new Grasshopper2.Data.Tree<float>();//[Signal_FD.Length / 4];
-            
-            //for (int b = 0; b < buffer.Branches.Count; b++)
-            //{
-            float[][] Channels = new float[buffer.ChannelCount][];
-            float[][] freq = new float[buffer.ChannelCount][];
-            for (int c = 0; c < buffer.ChannelCount; c++)
-            {
-                System.Numerics.Complex[] signal_C = Pachyderm_Acoustic.Audio.Pach_SP.FFT_General(buffer[c], 0);
-
-                //int s_ct = buffer.Branches[b].Count;
-                //int W = 1;
-                //do { W *= 2; } while (W < buffer.Count);
-
-                //double[] SignalBuffer = buffer.(c);
-
-
-                //for (int i = 0; i < buffer.Count; i++) SignalBuffer[i] = buffer[i];
-
-                //Real Declarations
-                //Array.Resize(out SignalBuffer, W);
-                //GCHandle S_in = GCHandle.Alloc(SignalBuffer, GCHandleType.Pinned);
-
-                ////Complex Declarations
-                //double[] Signal_FD = new double[2 * W];
-                //GCHandle S_out = GCHandle.Alloc(Signal_FD, GCHandleType.Pinned);
-
-                //int W2 = W / 2;
-
-                ///// Straight Frequency Domain Convolution
-                //IntPtr Signal_in = fftw.malloc(W * 8);
-                //Marshal.Copy(SignalBuffer, 0, Signal_in, W);
-
-                //IntPtr Signal_out = fftw.malloc(2 * W * 8);
-                //Marshal.Copy(Signal_FD, 0, Signal_out, 2 * W);
-
-                //IntPtr S_Plan = fftw.dft_r2c_1d(W, Signal_in, Signal_out, fftw_flags.Estimate);
-                //fftw.execute(S_Plan);
-
-                //Marshal.Copy(Signal_out, Signal_FD, 0, 2 * W);
-
-                float[] signal_2 = new float[signal_C.Length / 2];
-                float[] f_domain = new float[signal_C.Length / 2];
-                //float[] signal_whole = new float[Signal_FD.Length / 4];
-                //System.Numerics.Complex[] signal_C = new System.Numerics.Complex[Signal_FD.Length / 4];
-
-                float df = (float)SamplingFreq / signal_C.Length;
-                ////signal_2.Add((float)Signal_FD[Signal_FD.Length / 2], new Grasshopper2.Data.Path(b));
-                ////f_domain.Add(df / 2, new Grasshopper2.Data.Path(b));
-                signal_2[0] = (float)Math.Sqrt(signal_C[0].Real * signal_C[0].Real + signal_C[0].Imaginary * signal_C[0].Imaginary);
-                f_domain[0] = df / 2;
-
-                for (int i = 1; i < signal_C.Length/2; i++)
-                {
-                    //signal_2[i] = (float)Math.Sqrt(((double)Signal_FD[i] * (double)Signal_FD[i]) + ((double)Signal_FD[i + Signal_FD.Length / 4] * (double)Signal_FD[i + Signal_FD.Length / 4]));
-                    signal_2[i] = (float)Math.Sqrt(signal_C[i].Real * signal_C[i].Real + signal_C[i].Imaginary * signal_C[i].Imaginary);
-                    f_domain[i] = (f_domain[i - 1] + df);
-                }
-
-                Frequency_Spectrum Spec = new Frequency_Spectrum(signal_2, signal_C, f_domain);
-
-                //for (int i = 0; i < Signal_FD.Length; i++) signal_whole((float)Signal_FD[i], new Grasshopper2.Data.Path(b));
-                //}
-                access.SetItem(0, Spec);
+            var signal = ComponentSupport.Signal(access, 0);
+            var spectra = new List<Frequency_Spectrum>();
+            for (int c = 0; c < signal.ChannelCount; c++) {
+                var fft = Pachyderm_Acoustic.Audio.Pach_SP.FFT_General(signal[c], 0);
+                int count = fft.Length / 2 + 1;
+                var values = new System.Numerics.Complex[count];
+                var magnitude = new float[count]; var frequency = new float[count];
+                for (int k = 0; k < count; k++) { values[k] = fft[k]; magnitude[k] = (float)fft[k].Magnitude; frequency[k] = (float)((double)k * signal.SampleFrequency / fft.Length); }
+                spectra.Add(new Frequency_Spectrum(magnitude, values, frequency));
             }
-            //access.SetItemTree(0, signal_whole);
-            //access.SetItemTree(1, signal_2);
-            //access.SetItemTree(2, f_domain);
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(spectra));
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.FFT.png";
+                var resourceName = "PachydermGH2.Resources.FFT.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

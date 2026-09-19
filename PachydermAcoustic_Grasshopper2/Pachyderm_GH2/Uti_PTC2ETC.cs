@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -42,13 +43,15 @@ namespace PachydermGH
                 "Creates the Energy-Time Curve from an impulse response, measured or simulated",
                 "Acoustics", "Utility"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public PTC2ETC(IReader reader) : base(reader) { }
+        public PTC2ETC(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; Combine=reader.TryRead<bool>("Combine",true);}
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
+        public override void Store(IWriter writer) { base.Store(writer); writer.Boolean("Combine",Combine); }
         protected override void AddInputs(InputAdder inputs)
         {
             inputs.AddGeneric("Impulse Response", "IR", "Plug the audio signal impulse response in here.", Access.Item);
@@ -59,7 +62,7 @@ namespace PachydermGH
         /// </summary>
         protected override void AddOutputs(OutputAdder outputs)
         {
-            outputs.AddGeneric("Energy-Time Curve", "ETC", "The energy-time-curve result of conversion...", Access.Item);
+            outputs.AddGeneric("Energy-Time Curve", "ETC", "The energy-time-curve result of conversion...", Access.Tree);
         }
 
         public override void AppendToInputPanel(InputPanel panel)
@@ -73,7 +76,7 @@ namespace PachydermGH
         private void Combine_Click(bool set)
         {
             Combine = set;
-            Document.Solution.ReleaseExpirationBlock();
+            // Expire schedules a fresh solution after changing a setting.
             this.Expire();
             Document.Solution.Start();
         }
@@ -84,46 +87,35 @@ namespace PachydermGH
         /// <param name="access">The access object is used to retrieve from inputs and store in outputs.</param>
         protected override void Process(IDataAccess access)
         {
-            Audio_Signal IR = new Audio_Signal();
-            access.GetItem<Audio_Signal>(0, out IR);
-
-            List<Audio_Signal> AS_final = new List<Audio_Signal>();
-
-            double[][] signal = new double[8][];
-            for (int i = 0; i < IR.ChannelCount; i++) signal[i] = new double[IR.Count];
-
-            for (int j = 0; j < IR.ChannelCount; j++)
-            {
-                for (int oct = 0; oct < 8; oct++)
-                {
-                    double[] IR_oct = Pachyderm_Acoustic.Audio.Pach_SP.FIR_Bandpass(IR[j], oct, IR.SampleFrequency, 0);
-                    signal[oct] = new double[IR_oct.Length];
-                    for (int i = 0; i < IR_oct.Length; i++)
-                    {
-                        signal[oct][i] = IR_oct[i] * IR_oct[i];
-                    }
+            var input = ComponentSupport.Signal(access, 0);
+            var result = new List<Audio_Signal>();
+            for (int c = 0; c < input.ChannelCount; c++) {
+                var bands = new double[8][]; var direct = new int[8];
+                for (int oct = 0; oct < 8; oct++) {
+                    var band = Pachyderm_Acoustic.Audio.Pach_SP.FIR_Bandpass(input[c], oct, input.SampleFrequency, 0);
+                    bands[oct] = new double[band.Length];
+                    for (int i = 0; i < band.Length; i++) bands[oct][i] = band[i] * band[i];
+                    direct[oct] = input.Direct_Sample[c];
                 }
-
-                AS_final.Add(new Audio_Signal(signal, IR.SampleFrequency, IR.Direct_Sample));
+                result.Add(new Audio_Signal(bands, input.SampleFrequency, direct));
             }
-
-            access.SetTree(0, Garden.TreeFromList(AS_final));
+            if (Combine && result.Count > 1) { var sum = result[0]; for (int c = 1; c < result.Count; c++) sum = ComponentSupport.Sum(sum, result[c]); result = new List<Audio_Signal> { sum }; }
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(result));
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Energy_Time_Curve.png";
+                var resourceName = "PachydermGH2.Resources.Energy Time Curve.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

@@ -1,4 +1,4 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -43,20 +43,23 @@ namespace PachydermGH
                 "Creates the Energy-Time Curve from simulation results",
                 "Acoustics", "Utility"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public EnergyTimeCurve(IReader reader) : base(reader) { }
+        public EnergyTimeCurve(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; Combine=reader.TryRead<bool>("Combine",true);}
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
+        public override void Store(IWriter writer) { base.Store(writer); writer.Boolean("Combine",Combine); }
         protected override void AddInputs(InputAdder inputs)
         {
             inputs.AddGeneric("Direct Sound", "D", "Plug the Direct Sound in here.", Access.Tree);
             inputs.AddGeneric("Image Source", "IS", "Plug the Image Source in here.", Access.Tree);
             inputs.AddGeneric("Ray Tracing", "Tr", "Plug the Receiver from Ray Tracing in here.", Access.Tree);
-            inputs.AddInterval("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", Access.Item);
+            inputs.AddInterval("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", Access.Item).Set(new Rhino.Geometry.Interval(0,7));
 
+            inputs[0].Requirement = Requirement.MayBeMissing;
             inputs[1].Requirement = Requirement.MayBeMissing;
             inputs[2].Requirement = Requirement.MayBeMissing;
             inputs[3].Requirement = Requirement.MayBeMissing;
@@ -88,7 +91,7 @@ namespace PachydermGH
         private void Combine_Click(bool set)
         {
             Combine = set;
-            Document.Solution.ReleaseExpirationBlock();
+            // Expire schedules a fresh solution after changing a setting.
             this.Expire();
             Document.Solution.Start();
         }
@@ -99,85 +102,40 @@ namespace PachydermGH
         /// <param name="access">The access object is used to retrieve from inputs and store in outputs.</param>
         protected override void Process(IDataAccess access)
         {
-            Tree<Pachyderm_Acoustic.Direct_Sound> D_T;
-            access.GetTree<Pachyderm_Acoustic.Direct_Sound>(0, out D_T);
-            Tree<Pachyderm_Acoustic.ImageSourceData> IS_T;
-            access.GetTree<Pachyderm_Acoustic.ImageSourceData>(1, out IS_T);
-            Tree<Pachyderm_Acoustic.Environment.Receiver_Bank> Rec_T;
-            access.GetTree<Pachyderm_Acoustic.Environment.Receiver_Bank>(2, out Rec_T);
-            Interval Oct = new Interval(0, 7);
-            access.GetItem<Interval>(3, out Oct);
-
-            List<Pachyderm_Acoustic.Direct_Sound> D = new List<Pachyderm_Acoustic.Direct_Sound>();
-            List<ImageSourceData> IS = new List<ImageSourceData>();
-            List<Receiver_Bank> Rec = new List<Receiver_Bank>();
-
-            int max = Math.Max(D.Count, Rec_T.ItemCount);
-            if (D_T.ItemCount == 0) for (int i = 0; i < max; i++) D.Add(null);
-            else { D = D_T.AllItems.ToList(); }
-            if (IS_T.ItemCount == 0) for (int i = 0; i < max; i++) IS.Add(null);
-            else { IS = IS_T.AllItems.ToList(); }
-            if (Rec_T.ItemCount == 0) for (int i = 0; i < max; i++) Rec.Add(null);
-            else { Rec = Rec_T.AllItems.ToList(); }
-
-            List<Audio_Signal> AS_final = new List<Audio_Signal>();
-            List<Audio_Signal> AS_comb = new List<Audio_Signal>();
-
-            for (int s = 0; s < max; s++)
-            {
-                List<Audio_Signal> AS = new List<Audio_Signal>();
-                for (int r = 0; r < Rec[s].Rec_List.Length; r++)
-                {
-                    double[][] S = new double[(int)Math.Abs(Oct.T1 - Oct.T0 + 1)][];
-                    int[] direct = new int[(int)Oct.T1 - (int)Oct.T0 + 1];
-                    for (int o = (int)Oct.T0; o <= Oct.T1; o++)
-                    {
-                        double[] ETC = Pachyderm_Acoustic.Utilities.IR_Construction.ETCurve(D[s], IS[s], Rec[s], Rec[s].CutOffTime, Rec[s].SampleRate, o, r, false);
-                        S[(int)(o - Oct.T0)] = ETC;
-                        direct[(int)(o - Oct.T0)] = (int)Math.Round(D[s].Time(r) * Rec[s].SampleRate);
-                    }
-                    AS.Add(new Audio_Signal(S, Rec[0].SampleRate, direct));
-                }
-
-
-                if (s == 0)
-                {
-                    if (Combine)
-                    {
-                        AS_comb = AS;
-                    }
-                }
-                
-                if (Combine)
-                {
-                    for (int r = 0; r < Rec[s].Rec_List.Length; r++)
-                    {
-                        AS_comb[r] += AS[r];
-                    }
-                    AS_final = AS;
-                }
-                else
-                {
-                    AS_final.AddRange(AS);
+            var simulations = new ComponentSupport.Simulations(access);
+            var octaves = new Interval(0,7);
+            if (!access.GetItem<Interval>(3, out octaves)) octaves = new Interval(0,7);
+            ComponentSupport.Octaves(octaves, out int first, out int last);
+            double[] altitude = new double[] { 0 }, azimuth = new double[] { 0 };
+            int degree = 0, standard = 0;
+            var result = new List<Audio_Signal>();
+            var paths = new List<Grasshopper2.Data.Path>();
+            for(int source=0; source<simulations.Count; source++) {
+                int receivers=simulations.ReceiverCount(source);
+                if(Combine && source>0 && result.Count!=receivers) throw new ArgumentException("Combined sources must share receiver counts and ordering.");
+                for(int receiver=0; receiver<receivers; receiver++) {
+                    double alt=ComponentSupport.Angle(altitude,receiver,receivers), azi=ComponentSupport.Angle(azimuth,receiver,receivers);
+                    var signal=ComponentSupport.Response(simulations,source,receiver,"Energy",first,last,alt,azi,degree,standard);
+                    if(Combine && source>0) result[receiver]=ComponentSupport.Sum(result[receiver],signal);
+                    else { result.Add(signal); paths.Add(Combine ? new Grasshopper2.Data.Path(receiver) : new Grasshopper2.Data.Path(source,receiver)); }
                 }
             }
-            access.SetTree(0, Garden.TreeFromList(AS_final));
+            ComponentSupport.SetTree(access, 0,Garden.TreeFromArrays(new Grasshopper2.Data.Paths(paths),result.Select(signal=>new[]{signal}).ToArray()));
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Energy_Time_Curve.png";
+                var resourceName = "PachydermGH2.Resources.Energy Time Curve.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

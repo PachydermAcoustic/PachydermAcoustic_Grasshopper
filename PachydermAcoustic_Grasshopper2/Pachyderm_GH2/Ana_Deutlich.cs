@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -42,9 +43,10 @@ namespace PachydermGH
                 "Computes Energy Ratio (Definition style) from Energy Time Curve",
                 "Acoustics", "Analysis"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
         
-        public D_X_ETC(IReader reader) : base(reader) { }
+        public D_X_ETC(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -69,12 +71,13 @@ namespace PachydermGH
         protected override void Process(IDataAccess access)
         {
             Audio_Signal ETC = null;
-            access.GetItem<Audio_Signal>(0, out ETC);
+            ETC = ComponentSupport.Signal(access, 0);
             int Dx = 50;
 
             List<double> D = new List<double>();
-            foreach (double[] f in ETC.Value)
+            for (int channel = 0; channel < ETC.ChannelCount; channel++)
             {
+                double[] f = ETC[channel];
                 double[] s = new double[f.Length];
                 int start = 0;
                 if (ETC.Direct_Sample == null)
@@ -84,11 +87,11 @@ namespace PachydermGH
                         if (start == 0) if (f[i] != 0) start = i;
                     }
                 }
-                else start = ETC.Direct_Sample[0];
-                D.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Definition(s, ETC.SampleFrequency, Dx/1000.0, (double)start/(double)ETC.SampleFrequency, false));
+                else start = ETC.Direct_Sample[channel];
+                D.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.Definition(f, ETC.SampleFrequency, Dx/1000.0, (double)start/(double)ETC.SampleFrequency, false));
             }
 
-            access.SetTree(0, Garden.TreeFromList(D));
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(D));
         }
 
         protected override IIcon IconInternal
@@ -96,16 +99,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Definition.png";
+                var resourceName = "PachydermGH2.Resources.Definition.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

@@ -1,4 +1,6 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using Grasshopper2.Data;
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -40,18 +42,19 @@ namespace PachydermGH
                 "Acoustically significant properties of the vibrating medium.",
                 "Acoustics", "Model"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public Atmospheric_Properties(IReader reader) : base(reader) { }
+        public Atmospheric_Properties(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
         /// </summary>
         protected override void AddInputs(InputAdder inputs)
         {
-            inputs.AddNumber("Atmospheric Pressure", "AP", "Pressure of the medium in kPa (not Pa). Default of 101.325 kPa (air)", Access.Item);
-            inputs.AddNumber("Temperature", "TC", "Temperature of the medium. Default of 20 degrees C (air)", Access.Item);
-            inputs.AddNumber("Relative Humidity", "H", "Humidity of the medium in percent. Default of 50% (air)", Access.Item);
+            inputs.AddNumber("Atmospheric Pressure", "AP", "Pressure of the medium in kPa (not Pa). Default of 101.325 kPa (air)", Access.Item).Set(101.325);
+            inputs.AddNumber("Temperature", "TC", "Temperature of the medium. Default of 20 degrees C (air)", Access.Item).Set(20.0);
+            inputs.AddNumber("Relative Humidity", "H", "Humidity of the medium in percent. Default of 50% (air)", Access.Item).Set(50.0);
         }
 
         /// <summary>
@@ -81,16 +84,15 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Medium_Properties.png";
+                var resourceName = "PachydermGH2.Resources.Medium Properties.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }

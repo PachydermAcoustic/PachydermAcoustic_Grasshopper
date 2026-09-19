@@ -1,4 +1,5 @@
-﻿//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
+using System.Linq;
+//'Pachyderm-Acoustic: Geometrical Acoustics for Rhinoceros (GPL)   
 //' 
 //'This file is part of Pachyderm-Acoustic. 
 //' 
@@ -45,9 +46,10 @@ namespace PachydermGH
                 "Casts specular rays on the geometry specified, and returns the ray paths as polylines.",
                 "Acoustics", "Visualization"))
         {
+            Threading = Grasshopper2.Components.ThreadingState.SingleThreaded;
         }
 
-        public VisualizeRays(IReader reader) : base(reader) { }
+        public VisualizeRays(IReader reader) : base(reader) { Threading = Grasshopper2.Components.ThreadingState.SingleThreaded; }
 
         /// <summary>
         /// Registers all the input parameters for this component.
@@ -88,6 +90,7 @@ namespace PachydermGH
             access.GetTree<Vector3d>(2, out Dir);
             Tree<Brep> terminus;
             access.GetTree<Brep>(3, out terminus);
+            terminus = terminus ?? Garden.TreeFromList(Array.Empty<Brep>());
             int bounces = 0;
             access.GetItem<int>(4, out bounces);
 
@@ -134,7 +137,8 @@ namespace PachydermGH
                             ray.dy -= N.dy * dot2;
                             ray.dz -= N.dz * dot2;
                             ray.Surf_ID = poly_id;
-                            poly.Add(ray.x, ray.y, ray.z);
+                            RPT = new Point3d(ray.x, ray.y, ray.z);
+                            poly.Add(RPT);
                             foreach (Brep br in terminus.AllItems)
                             {
                                 ComponentIndex c;
@@ -155,7 +159,7 @@ namespace PachydermGH
 
                         if (terminate) break;
                     }
-                    if (poly.Count > 0)
+                    if (poly.Count > 1)
                     {
                         rays.Add(poly);
                         Ends.Add(RPT);
@@ -174,27 +178,26 @@ namespace PachydermGH
                     }
                 }
 
-                access.SetTree(0, Garden.TreeFromList(rays));
-                access.SetTree(1, Garden.TreeFromList(Ends));
-                access.SetTree(2, Garden.TreeFromList(times));
-                access.SetTree(3, Garden.TreeFromArrays(power.ToArray()));
             }
+                ComponentSupport.SetTree(access, 0, Garden.TreeFromList(rays));
+                ComponentSupport.SetTree(access, 1, Garden.TreeFromList(Ends));
+                ComponentSupport.SetTree(access, 2, Garden.TreeFromList(times));
+                ComponentSupport.SetTree(access, 3, Garden.TreeFromArrays(power.ToArray()));
         }
         protected override IIcon IconInternal
         {
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "Pachyderm_GH.Icons.Ray_Tracing.png";
+                var resourceName = "PachydermGH2.Resources.Ray Tracing.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {
                     if (stream == null) return null;
 
-                    var ms = new System.IO.MemoryStream();
-                    stream.CopyTo(ms);
-                    ms.Position = 0;
-                    return Grasshopper2.UI.Icon.PixelIcon.FromStream(ms);
+                    // FromStream reads serialized .ghicon data, not PNG/BMP images.
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
                 }
             }
         }
