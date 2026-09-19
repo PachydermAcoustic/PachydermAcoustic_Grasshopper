@@ -160,16 +160,17 @@ namespace PachydermGH
 
                     double[][] Response = new double[0][];
                     if (order == 0) Response = new double[][] { Pachyderm_Acoustic.Utilities.IR_Construction.Auralization_Filter(D.ToArray(), IS.ToArray(), Rec.ToArray(), Rec[s].CO_Time, 44100, r, new List<int> { s }, false, true) };
-                    else if (order == 1) Response = Pachyderm_Acoustic.Utilities.IR_Construction.PTC_Fig8_3Axis(D, IS, Rec, Rec[s].CO_Time, 44100, r, new List<int> { s }, false, Alt, Azi, true, true);//, VB);
-                    else if (order == 2) Response = Pachyderm_Acoustic.Utilities.IR_Construction.AurFilter_Ambisonics2(D, IS, Rec, Rec[s].CO_Time, 44100, r, new List<int> { s }, false, Alt, Azi, true, true);//, VB);
-                    else if (order == 3) Response = Pachyderm_Acoustic.Utilities.IR_Construction.AurFilter_Ambisonics3(D, IS, Rec, Rec[s].CO_Time, 44100, r, new List<int> { s }, false, Alt, Azi, true, true);
+                    else if (order == 1) Response = Pachyderm_Acoustic.Utilities.IR_Construction.AurFilter_Fig8_3Axis(D, IS, Rec, Rec[s].CO_Time, 44100, r, new List<int> { s }, false, Alt, Azi, true, true, Pachyderm_Acoustic.Utilities.IR_Construction.Ambisonics_Component_Order.ACN);
+                    else if (order == 2) Response = Pachyderm_Acoustic.Utilities.IR_Construction.AurFilter_Ambisonics2(D, IS, Rec, Rec[s].CO_Time, 44100, r, new List<int> { s }, false, Alt, Azi, true, true, Pachyderm_Acoustic.Utilities.IR_Construction.Ambisonics_Component_Order.ACN);
+                    else if (order == 3) Response = Pachyderm_Acoustic.Utilities.IR_Construction.AurFilter_Ambisonics3(D, IS, Rec, Rec[s].CO_Time, 44100, r, new List<int> { s }, false, Alt, Azi, true, true, Pachyderm_Acoustic.Utilities.IR_Construction.Ambisonics_Component_Order.ACN);
+                    else if (order == 4) Response = Pachyderm_Acoustic.Utilities.IR_Construction.AurFilter_Ambisonics4(D, IS, Rec, Rec[s].CO_Time, 44100, r, new List<int> { s }, false, Alt, Azi, true, true, Pachyderm_Acoustic.Utilities.IR_Construction.Ambisonics_Component_Order.ACN);
+                    else if (order == 5) Response = Pachyderm_Acoustic.Utilities.IR_Construction.AurFilter_Ambisonics5(D, IS, Rec, Rec[s].CO_Time, 44100, r, new List<int> { s }, false, Alt, Azi, true, true, Pachyderm_Acoustic.Utilities.IR_Construction.Ambisonics_Component_Order.ACN);
+                    else if (order == 6) Response = Pachyderm_Acoustic.Utilities.IR_Construction.AurFilter_Ambisonics6(D, IS, Rec, Rec[s].CO_Time, 44100, r, new List<int> { s }, false, Alt, Azi, true, true, Pachyderm_Acoustic.Utilities.IR_Construction.Ambisonics_Component_Order.ACN);
+                    else if (order == 7) Response = Pachyderm_Acoustic.Utilities.IR_Construction.AurFilter_Ambisonics7(D, IS, Rec, Rec[s].CO_Time, 44100, r, new List<int> { s }, false, Alt, Azi, true, true, Pachyderm_Acoustic.Utilities.IR_Construction.Ambisonics_Component_Order.ACN);
 
                     DT = new int[Response.Length];
 
                     for(int i = 0; i < DT.Length; i++) DT[i] = (int)Math.Round(D[s].Time(r) * Rec[s].SampleRate);
-
-                    //double[] AFTC = Pachyderm_Acoustic.Utilities.IR_Construction.Auralization_Filter(D.ToArray(), IS.ToArray(), Rec.ToArray(), Rec[s].CutOffTime, Rec[s].SampleRate, r, new List<int> { s }, false, true, VB);
-                    //VB.Close();
                     AS.Add(new Audio_Signal(Response, Rec[0].SampleRate, DT));
                 }
 

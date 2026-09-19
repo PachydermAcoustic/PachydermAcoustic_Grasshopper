@@ -8,6 +8,8 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <TargetExt>.gha</TargetExt>
+    <RhinoSystemDirectory Condition="'$(RhinoSystemDirectory)' == ''">$(ProgramW6432)\Rhino 8\System</RhinoSystemDirectory>
+    <GrasshopperDirectory Condition="'$(GrasshopperDirectory)' == ''">$(ProgramW6432)\Rhino 8\Plug-ins\Grasshopper</GrasshopperDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,34 +42,34 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CLF_Read">
-      <HintPath>..\CLF_Read_v2.n7\CLF_Read\bin\Release\net48\CLF_Read.dll</HintPath>
+      <HintPath>..\..\CLF_Read_v2.n7\CLF_Read\bin\Release\net48\CLF_Read.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Eto">
-      <HintPath>..\..\..\..\..\..\Program Files\Rhino 8\System\Eto.dll</HintPath>
+      <HintPath>$(RhinoSystemDirectory)\Eto.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="GH_IO">
-      <HintPath>..\..\..\..\..\..\Program Files\Rhino 8\Plug-ins\Grasshopper\GH_IO.dll</HintPath>
+      <HintPath>$(GrasshopperDirectory)\GH_IO.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Grasshopper">
-      <HintPath>..\..\..\..\..\..\Program Files\Rhino 8\Plug-ins\Grasshopper\Grasshopper.dll</HintPath>
+      <HintPath>$(GrasshopperDirectory)\Grasshopper.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Rhino.UI">
-      <HintPath>..\..\..\..\..\..\Program Files\Rhino 8\System\Rhino.UI.dll</HintPath>
+      <HintPath>$(RhinoSystemDirectory)\Rhino.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RhinoCommon">
-      <HintPath>..\..\..\..\..\..\Program Files\Rhino 8\System\RhinoCommon.dll</HintPath>
+      <HintPath>$(RhinoSystemDirectory)\RhinoCommon.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Hare\Hare.csproj" />
-    <ProjectReference Include="..\PachydermAcoustic_Core\Pachyderm_Acoustic_Universal\Pachyderm_Acoustic_Universal\Pachyderm_Acoustic_Universal.csproj" />
-    <ProjectReference Include="..\PachydermAcoustic_Rhinoceros\Pachyderm_Acoustic.csproj" />
+    <ProjectReference Include="..\..\Hare\Hare.csproj" />
+    <ProjectReference Include="..\..\PachydermAcoustic_Core\Pachyderm_Acoustic_Universal\Pachyderm_Acoustic_Universal\Pachyderm_Acoustic_Universal.csproj" />
+    <ProjectReference Include="..\..\PachydermAcoustic_Rhinoceros\Pachyderm_Acoustic.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="ComplexPaToSPL.cs" />
@@ -115,7 +117,17 @@ Copy /y "$(TargetDir)$(ProjectName).gha" "%25appdata%25\Grasshopper\6\Libraries\
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net48|AnyCPU'">
     <DebugType>embedded</DebugType>
   </PropertyGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(SkipPluginDeployment)' != 'true'">
     <Exec Command="Copy /y &quot;$(TargetDir)$(ProjectName).gha&quot; &quot;%25appdata%25\Grasshopper\Libraries\$(ProjectName).gha&quot;" />
   </Target>
+  <ItemGroup>
+    <EmbeddedResource Include="..\Properties\Resources.resx">
+      <Link>Properties\Resources.resx</Link>
+      <LogicalName>PachydermGH.Properties.Resources.resources</LogicalName>
+    </EmbeddedResource>
+
+    <Compile Include="..\Properties\Resources.Designer.cs">
+      <Link>Properties\Resources.Designer.cs</Link>
+    </Compile>
+  </ItemGroup>
 </Project>
