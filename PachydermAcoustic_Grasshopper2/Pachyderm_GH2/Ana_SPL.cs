@@ -52,7 +52,7 @@ namespace PachydermGH
         /// </summary>
         protected override void AddInputs(InputAdder inputs)
         {
-            inputs.AddGeneric("Energy Time Curve", "ETC", "Energy Time Curve", Access.Item);
+            inputs.AddGeneric("Energy Time Curve", "ETC", "Energy signals or numeric intensities. Signals yield one SPL per channel; numbers are converted individually. Input branches are preserved.", Access.Tree);
         }
 
         /// <summary>
@@ -69,17 +69,41 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void Process(IDataAccess access)
         {
-            Audio_Signal ETC = new Audio_Signal();
-            ETC = ComponentSupport.Signal(access, 0);
-            List<double> SPL = new List<double>();
-
-            for (int i = 0; i < ETC.Value.Length; i++)
+            if (!access.GetTree<object>(0, out var tree) || tree == null) return;
+            tree.ToArrays(out object[][] branches);
+            var rows = new double[branches.Length][];
+            for (int b = 0; b < branches.Length; b++)
             {
-                double s = 0;
-                for (int j = 0; j < ETC.Value[i].Length; j++) s += (double)ETC.Value[i][j];
-                SPL.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.SPL_Intensity(s));
+                var levels = new List<double>();
+                for (int i = 0; i < branches[b].Length; i++)
+                {
+                    var item = branches[b][i];
+                    if (item is Audio_Signal signal)
+                    {
+                        if (signal.Value == null || signal.Value.Length == 0)
+                            throw new ArgumentException("Provide a nonempty energy signal.");
+                        foreach (var channel in signal.Value)
+                        {
+                            if (channel == null || channel.Length == 0)
+                                throw new ArgumentException("Energy signal channels must not be empty.");
+                            double sum = 0;
+                            foreach (double sample in channel) sum += sample;
+                            levels.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.SPL_Intensity(sum));
+                        }
+                    }
+                    else if (item is double || item is float || item is decimal || item is int || item is long || item is short || item is byte || item is uint || item is ulong || item is ushort || item is sbyte)
+                    {
+                        double intensity = Convert.ToDouble(item);
+                        if (double.IsNaN(intensity) || double.IsInfinity(intensity) || intensity < 0)
+                            throw new ArgumentException($"Intensity at branch {tree.Paths[b]}, item {i} must be finite and nonnegative.");
+                        levels.Add(Pachyderm_Acoustic.Utilities.AcousticalMath.SPL_Intensity(intensity));
+                    }
+                    else
+                        throw new ArgumentException($"Expected an energy signal or numeric intensity at branch {tree.Paths[b]}, item {i}.");
+                }
+                rows[b] = levels.ToArray();
             }
-            ComponentSupport.SetTree(access, 0, Garden.TreeFromList(SPL));
+            ComponentSupport.SetTree(access, 0, Garden.TreeFromArrays(tree.Paths, rows));
         }
 
         protected override IIcon IconInternal
