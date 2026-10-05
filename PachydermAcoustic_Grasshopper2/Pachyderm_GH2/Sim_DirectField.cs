@@ -95,12 +95,13 @@ namespace PachydermGH
             int No_of_octaves = (int)F.Max - (int)F.Min + 1;
             if (No_of_octaves < 0) return;
 
-            Point3d[] Pts = M.Vertices.ToPoint3dArray();
+            double scale = Pachyderm_Acoustic.Utilities.RCPachTools.ModelToMetersScale;
+            Hare.Geometry.Point[] Pts = Array.ConvertAll(M.Vertices.ToPoint3dArray(), p => new Hare.Geometry.Point(p.X * scale, p.Y * scale, p.Z * scale));
             double[] P_Sum = new double[Pts.Length];
 
             Random Rnd = new Pachyderm_Acoustic.Utilities.PachTools.RandomNumberGenerator();
 
-            double c = MP.Sound_Speed(new Hare.Geometry.Point(Pts[0].X, Pts[0].Y, Pts[0].Z));
+            double c = MP.Sound_Speed(Pts[0]);
 
             double[] lambaccess2pi = new double[8]{ 2 * Math.PI * 62.5 / c, 2 * Math.PI * 125 / c, 2 * Math.PI * 250 / c, 2 * Math.PI * 500 / c, 2 * Math.PI * 1000 / c, 2 * Math.PI * 2000 / c, 2 * Math.PI * 4000 / c, 2 * Math.PI * 8000 / c };
 
@@ -109,20 +110,20 @@ namespace PachydermGH
                 double[] P_Real = new double[No_of_octaves], P_Imag = new double[No_of_octaves];
                 for (int S_id = 0; S_id < Src.ItemCount; S_id++)
                 {
-                    Vector3d V = Pts[i] - new Point3d(Src.Items[S_id].Origin.x, Src.Items[S_id].Origin.y, Src.Items[S_id].Origin.z);
-                    double Length = V.Length;
+                    Hare.Geometry.Vector V = Pts[i] - Src.Items[S_id].Origin;
+                    double Length = V.Length();
                     if (Length <= 0) throw new ArgumentException("A receiver coincides with a source.");
                     int id;
                     id = i;
                     double delay = delays.Items[S_id] * 0.001 * c;
-                    V.Unitize();
-                    double[] Power = Src.Items[S_id].DirPower(0, id, new Hare.Geometry.Vector(V.X, V.Y, V.Z));
+                    V.Normalize();
+                    double[] Power = Src.Items[S_id].DirPower(0, id, V);
                     for (int oct = 0; oct < No_of_octaves; oct++)
                     {
                         double I = Power[oct+(int)F.Min] * Math.Pow(10, -MP.Attenuation_Coef(0)[oct+(int)F.Min] * Length) / (4 * Math.PI * Length * Length);
                         double real, imag;
                         Pachyderm_Acoustic.Utilities.Numerics.ExpComplex(0, lambaccess2pi[oct+(int)F.Min] * (Length + delay), out real, out imag);
-                        Hare.Geometry.Point pt = new Hare.Geometry.Point(Pts[i].X, Pts[i].Y, Pts[i].Z);
+                        Hare.Geometry.Point pt = Pts[i];
                         P_Real[oct] += Math.Sqrt(I * MP.Rho_C(pt)) * real;
                         P_Imag[oct] += Math.Sqrt(I * MP.Rho_C(pt)) * imag;
                     }

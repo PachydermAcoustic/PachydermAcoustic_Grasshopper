@@ -84,7 +84,7 @@ namespace PachydermGH
             access.GetItem<double>(2, out delay);
 
             if (Level_T.ItemCount != 8 && Level_T.ItemCount != 24) throw new ArgumentException("Provide eight octave or 24 third-octave source levels.");
-            Pachyderm_Acoustic.Environment.GeodesicSource S = new Pachyderm_Acoustic.Environment.GeodesicSource(Level_T.AllItems.ToArray(), new Hare.Geometry.Point(Origin.X, Origin.Y, Origin.Z), 0, Level_T.ItemCount > 8);
+            Pachyderm_Acoustic.Environment.GeodesicSource S = new Pachyderm_Acoustic.Environment.GeodesicSource(Level_T.AllItems.ToArray(), Pachyderm_Acoustic.Utilities.RCPachTools.ModelPointToHare(Origin), 0, Level_T.ItemCount > 8);
             ComponentSupport.SetDelay(S, delay);
             access.SetItem(0, S);
         }

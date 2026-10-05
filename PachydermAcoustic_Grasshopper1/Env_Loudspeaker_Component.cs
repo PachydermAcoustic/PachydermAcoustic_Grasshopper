@@ -143,14 +143,14 @@ namespace PachydermGH
                     throw new Exception("Power Levels are coded incorrectly. Use 0 for Sensitivity, 1 for Max level, any number for a flat level, or specify by octave band.");
                 }
 
-                Balloon.Update_Position(new Hare.Geometry.Point(Origin.X, Origin.Y, Origin.Z));
+                Balloon.Update_Position(Pachyderm_Acoustic.Utilities.RCPachTools.ModelPointToHare(Origin));
                 Balloon.CurrentAlt = (float)(Math.Asin(V.Z / Math.Sqrt(V.X * V.X + V.Y * V.Y + V.Z * V.Z)) * 180 / Math.PI);
                 Balloon.CurrentAzi = (float)(-Math.Atan2(V.X, V.Y) * 180 / Math.PI);
                 Balloon.CurrentAxi = (float)rot;
                 Balloon.Update_Aim();
 
-                S = new Pachyderm_Acoustic.Environment.DirectionalSource(Balloon, SWL, new Hare.Geometry.Point(Origin.X, Origin.Y, Origin.Z), new int[] { 0, 7 }, 0, false);
-                M = Pachyderm_Acoustic.Utilities.RCPachTools.HaretoRhinoMesh(Balloon.m_DisplayMesh, false);
+                S = new Pachyderm_Acoustic.Environment.DirectionalSource(Balloon, SWL, Pachyderm_Acoustic.Utilities.RCPachTools.ModelPointToHare(Origin), new int[] { 0, 7 }, 0, false);
+                M = Pachyderm_Acoustic.Utilities.RCPachTools.HareMeshToModel(Balloon.m_DisplayMesh, false);
                 M.Flip(true, true, true);
             //}
 

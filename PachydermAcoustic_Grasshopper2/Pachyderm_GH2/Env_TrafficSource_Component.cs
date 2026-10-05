@@ -115,15 +115,15 @@ namespace PachydermGH
             if (el_m <= 0 || speed <= 0 || pavement < 0 || pavement > 3 || auto < 0 || mt < 0 || ht < 0 || b < 0 || m < 0) throw new ArgumentException("Provide positive sampling density and speed, pavement 0–3, and nonnegative traffic counts.");
             double[] SWL = Pachyderm_Acoustic.Utilities.StandardConstructions.FHWA_TNM10_SoundPower(speed, pavement, auto, mt, ht, b, m, throttle);
 
-            Rhino.Geometry.Point3d[] pts = Origin.DivideEquidistant(1d / el_m);
+            Rhino.Geometry.Point3d[] pts = Origin.DivideEquidistant(Pachyderm_Acoustic.Utilities.RCPachTools.MetersToModel(1d / el_m));
             if (pts == null || pts.Length == 0) pts = new Point3d[1] { (Origin as Curve).PointAtNormalizedLength(0.5) };
             Hare.Geometry.Point[] Samples = new Hare.Geometry.Point[pts.Length];
 
             for (int i = 0; i < pts.Length; i++)
             {
-                Samples[i] = Pachyderm_Acoustic.Utilities.RCPachTools.RPttoHPt(pts[i]);
+                Samples[i] = Pachyderm_Acoustic.Utilities.RCPachTools.ModelPointToHare(pts[i]);
             }
-            var S = new Pachyderm_Acoustic.Environment.LineSource(Samples, (Origin as Curve).GetLength(), Pachyderm_Acoustic.Utilities.PachTools.EncodeSourcePower(SWL), el_m, 0, false);
+            var S = new Pachyderm_Acoustic.Environment.LineSource(Samples, Pachyderm_Acoustic.Utilities.RCPachTools.ModelToMeters((Origin as Curve).GetLength()), Pachyderm_Acoustic.Utilities.PachTools.EncodeSourcePower(SWL), el_m, 0, false);
 
             access.SetItem(0, S);
         }

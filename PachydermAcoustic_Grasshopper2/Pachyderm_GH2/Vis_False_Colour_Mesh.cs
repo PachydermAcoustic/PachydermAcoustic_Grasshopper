@@ -77,17 +77,18 @@ namespace PachydermGH
             if (!access.GetItem<object>(0, out var input)) return;
             Mesh mesh;
             if (input is Mesh supplied) mesh=supplied.DuplicateMesh();
-            else if (input is Pachyderm_Acoustic.PachMapReceiver map) mesh=Pachyderm_Acoustic.Utilities.RCPachTools.HaretoRhinoMesh(map.Map_Mesh,false);
+            else if (input is Pachyderm_Acoustic.PachMapReceiver map) mesh=Pachyderm_Acoustic.Utilities.RCPachTools.HareMeshToModel(map.Map_Mesh,false);
             else throw new ArgumentException("Provide a mesh or mapping receiver.");
             var colors=ComponentSupport.Items<System.Drawing.Color>(access,1);
             if(colors.Length==mesh.Vertices.Count) {
                 mesh.VertexColors.Clear(); foreach(var color in colors) mesh.VertexColors.Add(color);
             } else if(colors.Length==mesh.Faces.Count) {
                 var faces=new Mesh();
+                faces.Vertices.UseDoublePrecisionVertices=true;
                 for(int i=0;i<mesh.Faces.Count;i++) {
                     var face=mesh.Faces[i]; int offset=faces.Vertices.Count;
-                    faces.Vertices.Add(mesh.Vertices[face.A]); faces.Vertices.Add(mesh.Vertices[face.B]); faces.Vertices.Add(mesh.Vertices[face.C]);
-                    if(face.IsQuad) { faces.Vertices.Add(mesh.Vertices[face.D]); faces.Faces.AddFace(offset,offset+1,offset+2,offset+3); }
+                    faces.Vertices.Add(mesh.Vertices.Point3dAt(face.A)); faces.Vertices.Add(mesh.Vertices.Point3dAt(face.B)); faces.Vertices.Add(mesh.Vertices.Point3dAt(face.C));
+                    if(face.IsQuad) { faces.Vertices.Add(mesh.Vertices.Point3dAt(face.D)); faces.Faces.AddFace(offset,offset+1,offset+2,offset+3); }
                     else faces.Faces.AddFace(offset,offset+1,offset+2);
                     for(int j=0;j<(face.IsQuad?4:3);j++) faces.VertexColors.Add(colors[i]);
                 }

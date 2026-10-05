@@ -76,7 +76,7 @@ namespace PachydermGH
             Tree<Point3d> Origin;
             List<Hare.Geometry.Point> H_Origin = new List<Hare.Geometry.Point>();
             access.GetTree<Point3d>(0, out Origin);
-            foreach (Point3d p in Origin.AllItems) H_Origin.Add(new Hare.Geometry.Point(p.X, p.Y, p.Z));
+            foreach (Point3d p in Origin.AllItems) H_Origin.Add(Pachyderm_Acoustic.Utilities.RCPachTools.ModelPointToHare(p));
             Tree<Pachyderm_Acoustic.Environment.Source> Srcs;
             access.GetTree<Pachyderm_Acoustic.Environment.Source>(1, out Srcs);
             Pachyderm_Acoustic.Environment.Polygon_Scene S = null;

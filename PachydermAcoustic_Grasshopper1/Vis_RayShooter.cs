@@ -98,7 +98,7 @@ namespace PachydermGH
                 foreach (Vector3d vector in Dir)
                 {
                     Hare.Geometry.Point Startpt = Pt.Origin;
-                    Point3d RPT = new Point3d(Startpt.x, Startpt.y, Startpt.z);
+                    Point3d RPT = Pachyderm_Acoustic.Utilities.RCPachTools.HarePointToModel(Startpt);
                     Hare.Geometry.Vector vct = new Hare.Geometry.Vector(vector.X, vector.Y, vector.Z);
                     vct.Normalize();
                     Polyline poly = new Polyline();
@@ -126,7 +126,7 @@ namespace PachydermGH
                             ray.dy -= N.dy * dot2;
                             ray.dz -= N.dz * dot2;
                             ray.Surf_ID = poly_id;
-                            poly.Add(ray.x, ray.y, ray.z);
+                            poly.Add(Pachyderm_Acoustic.Utilities.RCPachTools.HarePointToModel(X[0]));
                             foreach (Brep br in terminus)
                             {
                                 ComponentIndex c;

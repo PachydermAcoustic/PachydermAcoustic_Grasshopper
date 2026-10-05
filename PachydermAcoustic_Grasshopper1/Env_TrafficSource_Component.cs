@@ -107,15 +107,15 @@ namespace PachydermGH
 
             double[] SWL = Pachyderm_Acoustic.Utilities.StandardConstructions.Vehicle_Noise.FHWA_TNM10_SoundPower(speed, pavement, auto, mt, ht, b, m, throttle);
 
-            Rhino.Geometry.Point3d[] pts = Origin.Value.DivideEquidistant(1d / el_m);
+            Rhino.Geometry.Point3d[] pts = Origin.Value.DivideEquidistant(Pachyderm_Acoustic.Utilities.RCPachTools.MetersToModel(1d / el_m));
             if (pts == null || pts.Length == 0) pts = new Point3d[1] { (Origin.Value as Curve).PointAtNormalizedLength(0.5) };
             Hare.Geometry.Point[] Samples = new Hare.Geometry.Point[pts.Length];
 
             for (int i = 0; i < pts.Length; i++)
             {
-                Samples[i] = Pachyderm_Acoustic.Utilities.RCPachTools.RPttoHPt(pts[i]);
+                Samples[i] = Pachyderm_Acoustic.Utilities.RCPachTools.ModelPointToHare(pts[i]);
             }
-            S = new Pachyderm_Acoustic.Environment.LineSource(Samples, (Origin.Value as Curve).GetLength(), Pachyderm_Acoustic.Utilities.PachTools.EncodeSourcePower(SWL), el_m, 0, false);
+            S = new Pachyderm_Acoustic.Environment.LineSource(Samples, Pachyderm_Acoustic.Utilities.RCPachTools.ModelToMeters((Origin.Value as Curve).GetLength()), Pachyderm_Acoustic.Utilities.PachTools.EncodeSourcePower(SWL), el_m, 0, false);
 
             DA.SetData("Source", S);
         }
