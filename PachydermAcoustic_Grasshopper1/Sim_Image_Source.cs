@@ -19,6 +19,7 @@
 using Grasshopper.Kernel;
 using Rhino.Geometry;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace PachydermGH
@@ -111,7 +112,7 @@ namespace PachydermGH
 
             foreach (Pachyderm_Acoustic.Environment.Source Pt in Src)
             {
-                Pachyderm_Acoustic.Direct_Sound DS = new Pachyderm_Acoustic.Direct_Sound(Pt, Rec[0], S, new int[] { 0, 1, 2, 3, 4, 5, 6, 7 });
+                Pachyderm_Acoustic.Direct_Sound DS = new Pachyderm_Acoustic.Direct_Sound(Pt, Rec[0], S, Enumerable.Range(0, Rec[0].Third_Oct ? 24 : 8).ToArray());
                 DS.Begin();
                 do { System.Threading.Thread.Sleep(100); } while (DS.ThreadState() == System.Threading.ThreadState.Running);
                 DS.Combine_ThreadLocal_Results();

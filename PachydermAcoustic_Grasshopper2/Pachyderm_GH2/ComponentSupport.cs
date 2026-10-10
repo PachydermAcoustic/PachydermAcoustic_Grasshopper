@@ -56,8 +56,12 @@ namespace PachydermGH
         }
         public static void Octaves(Rhino.Geometry.Interval interval, out int first, out int last)
         {
+            Octaves(interval, out first, out last, 8);
+        }
+        public static void Octaves(Rhino.Geometry.Interval interval, out int first, out int last, int bandCount)
+        {
             first = (int)interval.T0; last = (int)interval.T1;
-            if (first < 0 || last > 7 || first > last || first != interval.T0 || last != interval.T1) throw new ArgumentException("Frequency scope must contain integer octave indices from 0 through 7.");
+            if (first < 0 || last >= bandCount || first > last || first != interval.T0 || last != interval.T1) throw new ArgumentException("Frequency scope must contain integer band indices from 0 through " + (bandCount - 1) + ".");
         }
         public static double Angle(double[] values,int receiver,int count) {
             if(values.Length==1) return values[0];

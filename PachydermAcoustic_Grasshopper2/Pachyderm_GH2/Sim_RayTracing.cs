@@ -66,7 +66,7 @@ namespace PachydermGH
             inputs.AddInteger("Image Source Order", "IS_Order", "Ray tracing will ignore specular reflections up to this order... in order to combine results with deterministic image source results.", Access.Item);
             inputs.AddGeneric("Source", "Src", "Sound Source Objects...", Access.Tree);
             inputs.AddGeneric("Receiver", "Rec", "Listening Object (Receiver_Bank)...", Access.Tree);
-            inputs.AddInterval("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", Access.Item).Set(new Rhino.Geometry.Interval(0,7));
+            inputs.AddInterval("Frequency Scope", "Oct", "Inclusive first and last band indices in the simulation resolution: octave 0–7 (62.5 Hz–8 kHz), third octave 0–23 (50 Hz–10 kHz).", Access.Item).Set(new Rhino.Geometry.Interval(0,7));
             
             //Grasshopper.Kernel.Parameters.Param_Interval param_I = (inputs[6] as Grasshopper.Kernel.Parameters.Param_Interval);
             //if (param_I != null) param_I.SetPersistentdata(new Grasshopper.Kernel.Types.GH_Interval(new Interval(0,7)));
@@ -87,7 +87,7 @@ namespace PachydermGH
             access.GetItem<int>(1,out int rays); access.GetItem<double>(2,out double cutoff); access.GetItem<int>(3,out int order);
             var sources=ComponentSupport.Items<Pachyderm_Acoustic.Environment.Source>(access,4);
             var banks=ComponentSupport.Items<Receiver_Bank>(access,5);
-            access.GetItem<Interval>(6,out var interval); ComponentSupport.Octaves(interval,out int first,out int last);
+            access.GetItem<Interval>(6,out var interval);
             if(sources.Length==0 || banks.Length==0 || cutoff<=0 || order<0) throw new ArgumentException("Provide sources, receivers, positive cutoff and nonnegative image order.");
             var result=new List<Receiver_Bank>();
             using(var cancellation=CancellationTokenSource.CreateLinkedTokenSource(access.Solution.Token)) {
@@ -99,6 +99,7 @@ namespace PachydermGH
                     for(int s=0;s<sources.Length;s++) {
                         cancellation.Token.ThrowIfCancellationRequested();
                         var bank=ComponentSupport.Bank(banks,sources[s],scene,s,sources.Length);
+                        ComponentSupport.Octaves(interval,out int first,out int last,bank.Third_Oct ? 24 : 8);
                         var tracer=new Pachyderm_Acoustic.SplitRayTracer(sources[s],bank,scene,cutoff,new[]{first,last},order,rays<0?-1:rays,progress);
                         var task=Pachyderm_Acoustic.Utilities.RCPachTools.RunSimulation(tracer,false);
                         // The core owns its worker threads; do not dispose its progress UI until it exits.

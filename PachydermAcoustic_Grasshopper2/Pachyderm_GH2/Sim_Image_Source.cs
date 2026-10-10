@@ -104,7 +104,7 @@ namespace PachydermGH
             foreach (Pachyderm_Acoustic.Environment.Source Pt in Src.AllItems)
             {
                 var receiverBank = ComponentSupport.Bank(System.Linq.Enumerable.ToArray(Rec.AllItems), Pt, S, s_id, Src.ItemCount);
-                Pachyderm_Acoustic.Direct_Sound DS = new Pachyderm_Acoustic.Direct_Sound(Pt, receiverBank, S, new int[] { 0, 1, 2, 3, 4, 5, 6, 7 });
+                Pachyderm_Acoustic.Direct_Sound DS = new Pachyderm_Acoustic.Direct_Sound(Pt, receiverBank, S, Enumerable.Range(0, receiverBank.Third_Oct ? 24 : 8).ToArray());
                 DS.Delay_ms = ComponentSupport.GetDelay(Pt);
                 DS.Begin();
                 do { System.Threading.Thread.Sleep(100); } while (DS.ThreadState() == System.Threading.ThreadState.Running);

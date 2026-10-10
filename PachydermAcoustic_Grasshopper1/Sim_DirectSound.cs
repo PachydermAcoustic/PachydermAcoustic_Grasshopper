@@ -17,6 +17,7 @@
 //'Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Grasshopper.Kernel;
 
@@ -98,7 +99,7 @@ namespace PachydermGH
             int s_id = 0;
             foreach (Pachyderm_Acoustic.Environment.Source Pt in Src)
             {
-                Pachyderm_Acoustic.Direct_Sound DS = new Pachyderm_Acoustic.Direct_Sound(Pt, Rec[ct], S, new int[] { 0, 1, 2, 3, 4, 5, 6, 7 }, screen);
+                Pachyderm_Acoustic.Direct_Sound DS = new Pachyderm_Acoustic.Direct_Sound(Pt, Rec[ct], S, Enumerable.Range(0, Rec[ct].Third_Oct ? 24 : 8).ToArray(), screen);
                 DS.Begin();
                 do { System.Threading.Thread.Sleep(100); } while (DS.ThreadState() == System.Threading.ThreadState.Running);
                 DS.Combine_ThreadLocal_Results();

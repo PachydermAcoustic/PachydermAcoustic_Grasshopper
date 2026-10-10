@@ -55,7 +55,7 @@ namespace PachydermGH
             pManager.AddIntegerParameter("Image Source Order", "IS_Order", "Ray tracing will ignore specular reflections up to this order... in order to combine results with deterministic image source results.", GH_ParamAccess.item);
             pManager.AddGenericParameter("Source", "Src", "Sound Source Objects...", GH_ParamAccess.list);
             pManager.AddGenericParameter("Receiver", "Rec", "Listening Object (Receiver_Bank)...", GH_ParamAccess.list);
-            pManager.AddIntervalParameter("Frequency Scope", "Oct", "An interval of the first and last octave to calculate (0 = 62.5 Hz, 1 = 125 HZ., ..., 7 = 8000 Hz.", GH_ParamAccess.item);
+            pManager.AddIntervalParameter("Frequency Scope", "Oct", "Inclusive first and last band indices in the simulation resolution: octave 0–7 (62.5 Hz–8 kHz), third octave 0–23 (50 Hz–10 kHz).", GH_ParamAccess.item);
             
             Grasshopper.Kernel.Parameters.Param_Interval param_I = (pManager[6] as Grasshopper.Kernel.Parameters.Param_Interval);
             if (param_I != null) param_I.SetPersistentData(new Grasshopper.Kernel.Types.GH_Interval(new Interval(0,7)));
@@ -145,6 +145,10 @@ namespace PachydermGH
                 }
 
                 DA.SetDataTree(0,RTS);
+            }
+            catch (ArgumentException error)
+            {
+                this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, error.Message);
             }
             catch
             (System.IndexOutOfRangeException)
