@@ -113,7 +113,7 @@ namespace PachydermGH
             access.GetItem<double>(9, out el_m);
 
             if (el_m <= 0 || speed <= 0 || pavement < 0 || pavement > 3 || auto < 0 || mt < 0 || ht < 0 || b < 0 || m < 0) throw new ArgumentException("Provide positive sampling density and speed, pavement 0–3, and nonnegative traffic counts.");
-            double[] SWL = Pachyderm_Acoustic.Utilities.StandardConstructions.FHWA_TNM10_SoundPower(speed, pavement, auto, mt, ht, b, m, throttle);
+            double[] SWL = Pachyderm_Acoustic.Utilities.StandardConstructions.Vehicle_Noise.FHWA_TNM10_SoundPower(speed, pavement, auto, mt, ht, b, m, throttle);
 
             Rhino.Geometry.Point3d[] pts = Origin.DivideEquidistant(Pachyderm_Acoustic.Utilities.RCPachTools.MetersToModel(1d / el_m));
             if (pts == null || pts.Length == 0) pts = new Point3d[1] { (Origin as Curve).PointAtNormalizedLength(0.5) };
