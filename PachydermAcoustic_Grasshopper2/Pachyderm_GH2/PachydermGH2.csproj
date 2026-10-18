@@ -14,6 +14,7 @@
  </ItemGroup>
  <ItemGroup>
    <ProjectReference Include="..\..\..\PachydermAcoustic_Rhinoceros\Pachyderm_Acoustic.csproj" />
+   <ProjectReference Include="..\..\..\PachydermAcoustic_Core\Pachyderm_Acoustic_Universal\Pachyderm_Acoustic_Universal\Pachyderm_Acoustic_Universal.csproj" />
  </ItemGroup>
  <ItemGroup>
 <Reference Include="Grasshopper2"><HintPath>lib/Grasshopper2.dll</HintPath><Private>false</Private></Reference>
@@ -22,7 +23,6 @@
 <Reference Include="Rhino.UI"><HintPath>lib/Rhino.UI.dll</HintPath><Private>false</Private></Reference>
 <Reference Include="Eto"><HintPath>lib/Eto.dll</HintPath><Private>false</Private></Reference>
 <Reference Include="Hare"><HintPath>lib/Hare.dll</HintPath><Private>false</Private></Reference>
-<Reference Include="Pachyderm_Acoustic_Universal"><HintPath>lib/Pachyderm_Acoustic_Universal.dll</HintPath><Private>false</Private></Reference>
 <Reference Include="CLF_Read"><HintPath>lib/CLF_Read.dll</HintPath><Private>false</Private></Reference>
 <Reference Include="MathNet.Numerics"><HintPath>lib/MathNet.Numerics.dll</HintPath><Private>false</Private></Reference>
 <Reference Include="MathNet.Numerics.FSharp"><HintPath>lib/MathNet.Numerics.FSharp.dll</HintPath><Private>false</Private></Reference>

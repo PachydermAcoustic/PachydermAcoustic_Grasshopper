@@ -47,7 +47,7 @@ namespace PachydermGH
         /// </summary>
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
-            pManager.AddGenericParameter("Properties", "P", "Medium properties, including attenuation, sound speed, etc.", GH_ParamAccess.item);
+            pManager.AddGenericParameter("Properties", "P", "Pachyderm airspace layer. Merge layers in exposed-face-to-backing order and connect to TMM.", GH_ParamAccess.item);
         }
 
         /// <summary>
@@ -58,7 +58,12 @@ namespace PachydermGH
         {
             double D = 0;
             if (!DA.GetData<double>(0, ref D)) D = 25;
-            Pachyderm_Acoustic.AbsorptionModels.ABS_Layer AS = Pachyderm_Acoustic.AbsorptionModels.ABS_Layer.Airspace(D);
+            if (!(D > 0) || double.IsInfinity(D))
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Airspace depth must be finite and positive.");
+                return;
+            }
+            Pachyderm_Acoustic.AbsorptionModels.ABS_Layer AS = Pachyderm_Acoustic.AbsorptionModels.ABS_Layer.Airspace(D / 1000);
             DA.SetData(0, AS);
         }
 
