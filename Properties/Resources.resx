@@ -226,4 +226,103 @@
   <data name="Wave_File" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Wave File.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Absorption_Preset" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Absorption Preset.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Airspace_Layer" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Airspace Layer.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Biot_Limp_Layer" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Biot Limp Layer.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Biot_Rigid_Layer" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Biot Rigid Layer.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Boundary_Elements" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Boundary Elements.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Convolution" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Convolution.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ECC_Absorber_Preset" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ECC Absorber Preset.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ECC_Assembly_Preset" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ECC Assembly Preset.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Find_Direct_Sound" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Find Direct Sound.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Finite_Volume" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Finite Volume.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Lateral_Efficiency" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Lateral Efficiency.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Lateral_Fraction" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Lateral Fraction.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Layer_Properties" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Layer Properties.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MLS_Tail" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MLS Tail.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Noise_Criteria" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Noise Criteria.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Noise_Rating" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Noise Rating.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Perforated_Layer" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Perforated Layer.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Porous_Layer" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Porous Layer.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Rhino_Source" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Rhino Source.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Room_Criteria" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Room Criteria.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Schroeder_Correlation" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Schroeder Correlation.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Signal_Correlation" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Signal Correlation.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Slotted_Layer" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Slotted Layer.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Solid_Plate_Layer" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Solid Plate Layer.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Source_Cluster" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Source Cluster.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Traffic_Source" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Traffic Source.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Transfer_Matrix_Material" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Transfer Matrix Material.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Omni_Impulse_Response" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Omni Impulse Response.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Stereo_Impulse_Response" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Stereo Impulse Response.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Ambisonic_Impulse_Response" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Ambisonic Impulse Response.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Pressure_Time_Curve" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Pressure Time Curve.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Energy_Time_Response" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Energy Time Response.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Impulse_Response_to_Energy" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Impulse Response to Energy.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

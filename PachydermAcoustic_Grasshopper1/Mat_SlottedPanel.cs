@@ -76,7 +76,7 @@ namespace PachydermGH
 
         protected override System.Drawing.Bitmap Icon
         {
-            get { return Properties.Resources.Medium_Properties; }
+            get { return Properties.Resources.Slotted_Layer; }
         }
 
         public override Guid ComponentGuid

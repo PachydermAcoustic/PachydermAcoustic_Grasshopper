@@ -207,8 +207,7 @@ namespace PachydermGH
         {
             get
             {
-                //return Properties.Resources.;
-                return null;
+                return Properties.Resources.Pachyderm_for_Rhino_result;
             }
         }
 

@@ -73,7 +73,7 @@ namespace PachydermGH
 
         protected override System.Drawing.Bitmap Icon
         {
-            get { return Properties.Resources.Medium_Properties; }
+            get { return Properties.Resources.Porous_Layer; }
         }
 
         public override Guid ComponentGuid

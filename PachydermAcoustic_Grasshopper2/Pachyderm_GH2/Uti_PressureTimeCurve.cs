@@ -118,7 +118,7 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "PachydermGH2.Resources.Energy Time Curve.png";
+                var resourceName = "PachydermGH2.Resources.Pressure Time Curve.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {

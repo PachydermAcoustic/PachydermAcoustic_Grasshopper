@@ -71,5 +71,22 @@ namespace PachydermGH
             Pachyderm_Acoustic.Environment.Source[] S = Pachyderm_Acoustic.Utilities.RCPachTools.GetSource(0);
             ComponentSupport.SetTree(access, 0,Garden.TreeFromList(S));
         }
+
+        protected override Grasshopper2.UI.Icon.IIcon IconInternal
+        {
+            get
+            {
+                var assembly = typeof(RhinoSource_Component).Assembly;
+                var resourceName = "PachydermGH2.Resources.Rhino Source.png";
+
+                using (var stream = assembly.GetManifestResourceStream(resourceName))
+                {
+                    if (stream == null) return null;
+
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
+                }
+            }
+        }
     }
 }

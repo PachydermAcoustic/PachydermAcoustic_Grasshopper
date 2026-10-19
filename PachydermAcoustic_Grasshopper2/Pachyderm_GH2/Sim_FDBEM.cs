@@ -122,7 +122,7 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "PachydermGH2.Resources.Image Source.png";
+                var resourceName = "PachydermGH2.Resources.Boundary Elements.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {

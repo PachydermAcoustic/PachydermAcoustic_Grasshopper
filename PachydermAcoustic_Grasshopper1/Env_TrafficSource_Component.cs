@@ -133,8 +133,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.LoudSpeaker;
-                b.MakeTransparent(System.Drawing.Color.White);
+                System.Drawing.Bitmap b = Properties.Resources.Traffic_Source;
                 return b;
             }
         }

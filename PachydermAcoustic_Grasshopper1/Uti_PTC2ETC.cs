@@ -105,8 +105,7 @@ namespace PachydermGH
         {
             get
             {
-                System.Drawing.Bitmap b = Properties.Resources.Energy_Time_Curve;
-                b.MakeTransparent(System.Drawing.Color.White);
+                System.Drawing.Bitmap b = Properties.Resources.Impulse_Response_to_Energy;
                 return b;
             }
         }

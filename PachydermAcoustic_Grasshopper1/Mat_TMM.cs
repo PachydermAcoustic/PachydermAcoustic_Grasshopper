@@ -168,7 +168,7 @@ namespace PachydermGH
             DA.SetDataTree(13, third);
         }
 
-        protected override System.Drawing.Bitmap Icon { get { return Properties.Resources.Medium_Properties; } }
+        protected override System.Drawing.Bitmap Icon { get { return Properties.Resources.Transfer_Matrix_Material; } }
         public override Guid ComponentGuid { get { return new Guid("d83ba0b8-5477-48dc-a94d-5d449f130c50"); } }
     }
 }

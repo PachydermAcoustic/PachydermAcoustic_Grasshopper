@@ -81,7 +81,7 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "PachydermGH2.Resources.Signal to List.png";
+                var resourceName = "PachydermGH2.Resources.Spectrum to List.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {

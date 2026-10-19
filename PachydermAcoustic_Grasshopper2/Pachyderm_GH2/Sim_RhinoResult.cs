@@ -201,5 +201,22 @@ namespace PachydermGH
                 ComponentSupport.SetTree(access, 3, Garden.TreeFromList(AS));
             }
         }
+
+        protected override Grasshopper2.UI.Icon.IIcon IconInternal
+        {
+            get
+            {
+                var assembly = typeof(Sim_RhinoResult).Assembly;
+                var resourceName = "PachydermGH2.Resources.Pachyderm for Rhino result.png";
+
+                using (var stream = assembly.GetManifestResourceStream(resourceName))
+                {
+                    if (stream == null) return null;
+
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
+                }
+            }
+        }
     }
 }

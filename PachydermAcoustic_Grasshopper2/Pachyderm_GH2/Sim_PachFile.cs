@@ -105,5 +105,22 @@ namespace PachydermGH
                 throw new Exception("File extension not recognized...");
             }
         }
+
+        protected override Grasshopper2.UI.Icon.IIcon IconInternal
+        {
+            get
+            {
+                var assembly = typeof(Sim_PachFile).Assembly;
+                var resourceName = "PachydermGH2.Resources.Pachyderm file.png";
+
+                using (var stream = assembly.GetManifestResourceStream(resourceName))
+                {
+                    if (stream == null) return null;
+
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
+                }
+            }
+        }
     }
 }

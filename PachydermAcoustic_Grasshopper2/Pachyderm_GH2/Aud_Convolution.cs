@@ -99,7 +99,7 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "PachydermGH2.Resources.Divide Signal.png";
+                var resourceName = "PachydermGH2.Resources.Convolution.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {

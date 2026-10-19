@@ -105,7 +105,7 @@ namespace PachydermGH
         {
             get
             {
-                using (var stream = typeof(Mat_BiotRigid).Assembly.GetManifestResourceStream("PachydermGH2.Resources.Medium Properties.png"))
+                using (var stream = typeof(Mat_BiotRigid).Assembly.GetManifestResourceStream("PachydermGH2.Resources.Biot Rigid Layer.png"))
                     return stream == null ? null : new PixelIcon(new Eto.Drawing.Bitmap(stream));
             }
         }

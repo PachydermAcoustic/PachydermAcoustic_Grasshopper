@@ -114,7 +114,7 @@ namespace PachydermGH
             get
             {
                 var assembly = typeof(SPLETC).Assembly;
-                var resourceName = "PachydermGH2.Resources.Direct Sound.png";
+                var resourceName = "PachydermGH2.Resources.Finite Volume.png";
 
                 using (var stream = assembly.GetManifestResourceStream(resourceName))
                 {

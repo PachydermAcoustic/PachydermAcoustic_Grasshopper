@@ -102,5 +102,22 @@ namespace PachydermGH
             for(int i=0;i<Math.Min(tail.Length,response.Length-start);i++) response[start+i]+=tail[i];
             access.SetItem(0,new Audio_Signal(response,fs,(int)Math.Round(dt*fs)));
         }
+
+        protected override Grasshopper2.UI.Icon.IIcon IconInternal
+        {
+            get
+            {
+                var assembly = typeof(MLS_Tail).Assembly;
+                var resourceName = "PachydermGH2.Resources.MLS Tail.png";
+
+                using (var stream = assembly.GetManifestResourceStream(resourceName))
+                {
+                    if (stream == null) return null;
+
+                    // The PixelIcon retains the bitmap for its cached lifetime.
+                    return new Grasshopper2.UI.Icon.PixelIcon(new Eto.Drawing.Bitmap(stream));
+                }
+            }
+        }
     }
 }

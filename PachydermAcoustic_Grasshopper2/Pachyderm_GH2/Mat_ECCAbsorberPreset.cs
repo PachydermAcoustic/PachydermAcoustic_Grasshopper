@@ -205,7 +205,7 @@ namespace PachydermGH
         {
             get
             {
-                using (var stream = typeof(Mat_ECCAbsorberPreset).Assembly.GetManifestResourceStream("PachydermGH2.Resources.Medium Properties.png"))
+                using (var stream = typeof(Mat_ECCAbsorberPreset).Assembly.GetManifestResourceStream("PachydermGH2.Resources.ECC Absorber Preset.png"))
                     return stream == null ? null : new PixelIcon(new Eto.Drawing.Bitmap(stream));
             }
         }

@@ -62,7 +62,7 @@ namespace PachydermGH
         /// <summary>
         /// Provides an Icon for the component.
         /// </summary>
-        protected override System.Drawing.Bitmap Internal_Icon_24x24 => Properties.Resources.Geodesic_Source;
+        protected override System.Drawing.Bitmap Internal_Icon_24x24 => Properties.Resources.Source_Cluster;
 
         /// <summary>
         /// Gets the unique ID for this component. Do not change this ID after release.
