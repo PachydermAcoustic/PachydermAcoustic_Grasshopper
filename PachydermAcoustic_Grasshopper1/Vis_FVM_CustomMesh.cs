@@ -36,13 +36,11 @@ namespace PachydermGH
                 "Allows you to specify a custom mesh for use with the display conduit of the Finite Volume Method in Pachyderm.",
                 "Acoustics", "Visualization")
         {
-            Sim = Pachyderm_Acoustic.UI.PachTDNumericControl.Instance;
-            if (Sim != null) Sim.Incremented += Sim_Incremented;
         }
 
         private void Sim_Incremented(object sender, EventArgs e)
         {
-            if (Sim.FDTD == null && Sim.FDTD.m_referenceC == null) return;
+            if (Sim?.FDTD == null || Sim.FDTD.m_referenceC == null) return;
             //GH_Document doc = OnPingDocument();
             //if (doc != null)
             //{
@@ -79,8 +77,18 @@ namespace PachydermGH
         /// <param name="DA">The DA object is used to retrieve from inputs and store in outputs.</param>
         protected override void SolveInstance(IGH_DataAccess DA)
         {
-            Pachyderm_Acoustic.UI.PachTDNumericControl Sim = Pachyderm_Acoustic.UI.PachTDNumericControl.Instance;
-            if (Sim.FDTD == null) return;
+            var current = Pachyderm_Acoustic.UI.PachTDNumericControl.Instance;
+            if (Sim != current)
+            {
+                if (Sim != null) Sim.Incremented -= Sim_Incremented;
+                Sim = current;
+                if (Sim != null) Sim.Incremented += Sim_Incremented;
+            }
+            if (Sim?.FDTD == null)
+            {
+                AddRuntimeMessage(GH_RuntimeMessageLevel.Warning, "Open the Pachyderm TimeDomain panel and run a simulation first.");
+                return;
+            }
             this.Message = "dX = " + Math.Round(Sim.FDTD.dx, 3) + ", dY = " + Math.Round(Sim.FDTD.dy, 3) + ", dZ = " + Math.Round(Sim.FDTD.dz, 3);
 
             Grasshopper.Kernel.Data.GH_Structure<Grasshopper.Kernel.Types.IGH_Goo> m;
@@ -100,9 +108,17 @@ namespace PachydermGH
 
             DA.SetData(0, Sim.FDTD.m_templateC);
 
+            if (Sim.FDTD.m_referenceC == null) return;
             double[] p = new double[Sim.FDTD.m_referenceC.Count];
             for (int i = 0; i < p.Length; i++) p[i] = Sim.FDTD.m_referenceC[i].P;
             DA.SetDataList(1, p);
+        }
+
+        public override void RemovedFromDocument(GH_Document document)
+        {
+            if (Sim != null) Sim.Incremented -= Sim_Incremented;
+            Sim = null;
+            base.RemovedFromDocument(document);
         }
 
         /// <summary>
