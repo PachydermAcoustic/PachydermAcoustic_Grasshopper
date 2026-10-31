@@ -41,10 +41,6 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CLF_Read">
-      <HintPath>..\..\CLF_Read_v2.n7\CLF_Read\bin\Release\net48\CLF_Read.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Eto">
       <HintPath>$(RhinoSystemDirectory)\Eto.dll</HintPath>
       <Private>False</Private>
@@ -67,6 +63,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\CLF_Read_v2.n7\CLF_Read\CLF_Read.csproj">
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\Hare\Hare.csproj" />
     <ProjectReference Include="..\..\PachydermAcoustic_Core\Pachyderm_Acoustic_Universal\Pachyderm_Acoustic_Universal\Pachyderm_Acoustic_Universal.csproj" />
     <ProjectReference Include="..\..\PachydermAcoustic_Rhinoceros\Pachyderm_Acoustic.csproj" />
@@ -75,11 +74,6 @@
     <Compile Remove="ComplexPaToSPL.cs" />
     <Compile Remove="pachydermgh.cs" />
     <Compile Remove="PachydermGHInfo.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
-    <PackageReference Include="System.Windows.Extensions">
-      <Version>7.0.0</Version>
-    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />

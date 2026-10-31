@@ -25,11 +25,6 @@
 <Reference Include="Hare"><HintPath>lib/Hare.dll</HintPath><Private>false</Private></Reference>
 <Reference Include="CLF_Read"><HintPath>lib/CLF_Read.dll</HintPath><Private>false</Private></Reference>
 <Reference Include="MathNet.Numerics"><HintPath>lib/MathNet.Numerics.dll</HintPath><Private>false</Private></Reference>
-<Reference Include="MathNet.Numerics.FSharp"><HintPath>lib/MathNet.Numerics.FSharp.dll</HintPath><Private>false</Private></Reference>
-<Reference Include="MathNet.Symbolics"><HintPath>lib/MathNet.Symbolics.dll</HintPath><Private>false</Private></Reference>
-<Reference Include="FSharp.Core"><HintPath>lib/FSharp.Core.dll</HintPath><Private>false</Private></Reference>
-<Reference Include="ScottPlot"><HintPath>lib/ScottPlot.dll</HintPath><Private>false</Private></Reference>
-<Reference Include="ScottPlot.Eto"><HintPath>lib/ScottPlot.Eto.dll</HintPath><Private>false</Private></Reference>
 <Reference Include="System.Drawing.Common"><HintPath>lib/System.Drawing.Common.dll</HintPath><Private>false</Private></Reference>
 <Reference Include="System.Windows.Extensions"><HintPath>lib/System.Windows.Extensions.dll</HintPath><Private>false</Private></Reference>
 </ItemGroup>
