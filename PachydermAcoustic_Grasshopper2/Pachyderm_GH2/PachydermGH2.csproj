@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
  <PropertyGroup><TargetFramework>net7.0</TargetFramework><EnableDynamicLoading>true</EnableDynamicLoading><TargetExt>.rhp</TargetExt><Version>1.0.1</Version><Title>Pachyderm Acoustic Simulation</Title><Company>Open Research in Acoustical Science and Education, Inc.</Company><Description>Repaired GH2 component library</Description><RootNamespace>PachydermGH2</RootNamespace><EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems><NuGetAudit>false</NuGetAudit><CheckEolTargetFramework>false</CheckEolTargetFramework></PropertyGroup>
  <PropertyGroup>
+  <RhinoSystemDirectory Condition="'$(RhinoSystemDirectory)' == ''">C:/Program Files/Rhino 8/System</RhinoSystemDirectory>
+  <EtoAssemblyPath Condition="'$(EtoAssemblyPath)' == ''">$(RhinoSystemDirectory)/Eto.dll</EtoAssemblyPath>
   <PlatformTarget>x64</PlatformTarget>
  </PropertyGroup>
  <ItemGroup><Compile Remove="tests/**/*.cs" /></ItemGroup>
@@ -19,11 +21,9 @@
  <ItemGroup>
 <Reference Include="Grasshopper2"><HintPath>lib/Grasshopper2.dll</HintPath><Private>false</Private></Reference>
 <Reference Include="GrasshopperIO"><HintPath>lib/GrasshopperIO.dll</HintPath><Private>false</Private></Reference>
-<Reference Include="RhinoCommon"><HintPath>lib/RhinoCommon.dll</HintPath><Private>false</Private></Reference>
-<Reference Include="Rhino.UI"><HintPath>lib/Rhino.UI.dll</HintPath><Private>false</Private></Reference>
-<Reference Include="Eto"><HintPath>lib/Eto.dll</HintPath><Private>false</Private></Reference>
-<Reference Include="Hare"><HintPath>lib/Hare.dll</HintPath><Private>false</Private></Reference>
-<Reference Include="CLF_Read"><HintPath>lib/CLF_Read.dll</HintPath><Private>false</Private></Reference>
+<Reference Include="$(RhinoSystemDirectory)/RhinoCommon.dll"><Private>false</Private></Reference>
+<Reference Include="$(RhinoSystemDirectory)/Rhino.UI.dll"><Private>false</Private></Reference>
+<Reference Include="$(EtoAssemblyPath)"><Private>false</Private></Reference>
 <Reference Include="MathNet.Numerics"><HintPath>lib/MathNet.Numerics.dll</HintPath><Private>false</Private></Reference>
 <Reference Include="System.Drawing.Common"><HintPath>lib/System.Drawing.Common.dll</HintPath><Private>false</Private></Reference>
 <Reference Include="System.Windows.Extensions"><HintPath>lib/System.Windows.Extensions.dll</HintPath><Private>false</Private></Reference>

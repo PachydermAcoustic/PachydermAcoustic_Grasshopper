@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <OutputType>Library</OutputType>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <UseWindowsForms>true</UseWindowsForms>
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+    <UseWindowsForms>false</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <TargetExt>.gha</TargetExt>
     <RhinoSystemDirectory Condition="'$(RhinoSystemDirectory)' == ''">$(ProgramW6432)\Rhino 8\System</RhinoSystemDirectory>
@@ -77,6 +78,12 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+    <!-- Compile against Windows Forms; Rhino supplies its implementation on Windows and macOS. -->
+    <PackageReference Include="Microsoft.WindowsDesktop.App.Ref" Version="7.0.0" GeneratePathProperty="true" ExcludeAssets="all" />
+    <Reference Include="System.Windows.Forms" HintPath="$(PkgMicrosoft_WindowsDesktop_App_Ref)\ref\net7.0\System.Windows.Forms.dll" Private="false" />
+    <PackageReference Include="System.Drawing.Common" Version="7.0.0" ExcludeAssets="runtime" />
+    <PackageReference Include="System.Resources.Extensions" Version="7.0.0" />
+    <PackageReference Include="System.Windows.Extensions" Version="7.0.0" ExcludeAssets="runtime" />
   </ItemGroup>
   <!--<PropertyGroup>
     <PostBuildEvent>Copy /y "$(TargetPath)" "$(TargetDir)$(ProjectName).gha"
@@ -102,13 +109,7 @@ Copy /y "$(TargetDir)$(ProjectName).gha" "%25appdata%25\Grasshopper\6\Libraries\
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0|AnyCPU'">
     <DebugType>embedded</DebugType>
   </PropertyGroup> 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net48|AnyCPU'">
-    <DebugType>embedded</DebugType>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net7.0|AnyCPU'">
-    <DebugType>embedded</DebugType>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net48|AnyCPU'">
     <DebugType>embedded</DebugType>
   </PropertyGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(SkipPluginDeployment)' != 'true'">
